@@ -5,292 +5,736 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VOXi — Студия звукозаписи</title>
+
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #111;
+            color: #eee;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            max-width: 850px;
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            border-bottom: 1px solid #444;
+            padding-bottom: 16px;
+            margin-bottom: 24px;
+        }
+
+        h1 {
+            margin: 0;
+            letter-spacing: 3px;
+            font-size: 36px;
+        }
+
+        h2 { margin-top: 0; }
+
+        .muted { color: #aaa; }
+
+        .panel {
+            background: #1b1b1b;
+            border: 1px solid #393939;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 22px;
+        }
+
+        label {
+            display: block;
+            margin: 14px 0 6px;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 11px;
+            background: #292929;
+            color: #fff;
+            border: 1px solid #555;
+            border-radius: 6px;
+            font: inherit;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: 1px solid #aaa;
+        }
+
+        button {
+            padding: 11px 15px;
+            margin-top: 12px;
+            border: 0;
+            border-radius: 6px;
+            cursor: pointer;
+            font: inherit;
+            font-weight: bold;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .primary {
+            background: #eee;
+            color: #111;
+        }
+
+        .secondary {
+            background: #333;
+            color: #fff;
+            border: 1px solid #555;
+        }
+
+        .danger {
+            background: #552727;
+            color: #fff;
+        }
+
+        .full { width: 100%; }
+
+        .price {
+            font-size: 23px;
+            margin: 20px 0 6px;
+        }
+
+        .booking {
+            border: 1px solid #444;
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 14px;
+            overflow-wrap: anywhere;
+        }
+
+        .booking h3 { margin-top: 0; }
+
+        .booking p {
+            line-height: 1.6;
+            color: #ddd;
+        }
+
+        .booking-actions {
+            display: flex;
+            align-items: end;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .booking-actions > div {
+            flex: 1;
+            min-width: 180px;
+        }
+
+        .booking-actions button { margin-bottom: 0; }
+
+        .notice {
+            color: #ccc;
+            line-height: 1.5;
+        }
+
+        .hidden { display: none !important; }
+
+        #message {
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+            margin: 12px 0;
+        }
+
+        .success { color: #9fdbab; }
+        .error { color: #ff9999; }
+
+        @media (max-width: 500px) {
+            body { padding: 12px; }
+            .panel { padding: 15px; }
+            h1 { font-size: 30px; }
+        }
+    </style>
 </head>
+
 <body>
+<div class="container">
 
-    <h1>VOXi</h1>
-    <p>Студия звукозаписи</p>
-    <hr>
+    <header>
+        <div>
+            <h1>VOXi</h1>
+            <div class="muted">Студия звукозаписи</div>
+        </div>
 
-    <h2>Запись на студию</h2>
+        <div id="authControls">
+            <button id="loginButton" class="primary">
+                Войти через Google
+            </button>
 
-    <form id="bookingForm">
-        <label>Имя и фамилия:</label><br>
-        <input type="text" id="name" required><br><br>
+            <button id="logoutButton" class="secondary hidden">
+                Выйти
+            </button>
+        </div>
+    </header>
 
-        <label>Номер телефона:</label><br>
-        <input type="tel" id="phone" required><br><br>
+    <div id="message" role="status" aria-live="polite"></div>
 
-        <label>Дата записи:</label><br>
-        <input type="date" id="date" required><br><br>
+    <section id="signedOut" class="panel">
+        <h2>Добро пожаловать в VOXi</h2>
+        <p class="notice">
+            Войди через Google, чтобы создавать заявки,
+            просматривать записи и сохранять данные в облаке.
+        </p>
+    </section>
 
-        <label>Время записи:</label><br>
-        <input type="time" id="time" required><br><br>
+    <main id="app" class="hidden">
 
-        <label>Количество человек:</label><br>
-        <input type="number" id="people" min="1" value="1" required><br><br>
+        <section class="panel">
+            <h2>Запись на студию</h2>
 
-        <label>Количество песен:</label><br>
-        <input type="number" id="songs" min="1" value="1" required><br><br>
+            <form id="bookingForm">
+                <label for="name">Имя и фамилия</label>
+                <input id="name" type="text" maxlength="150" required>
 
-        <label>Названия песен:</label><br>
-        <textarea id="songNames" rows="3"></textarea><br><br>
+                <label for="phone">Номер телефона</label>
+                <input id="phone" type="tel" maxlength="40" required>
 
-        <h3>Стоимость: <span id="price">5000</span> ₸</h3>
-        <button type="submit">Создать заявку</button>
-    </form>
+                <label for="date">Дата записи</label>
+                <input id="date" type="date" required>
 
-    <hr>
+                <label for="time">Время записи</label>
+                <input id="time" type="time" required>
 
-    <h2>Резервное копирование</h2>
-    <button type="button" id="exportButton">
-        Скачать резервную копию
-    </button>
+                <label for="people">Количество человек</label>
+                <input id="people" type="number" min="1"
+                       max="100" value="1" required>
 
-    <br><br>
+                <label for="songs">Количество песен</label>
+                <input id="songs" type="number" min="1"
+                       max="100" value="1" required>
 
-    <label for="backupFile">Восстановить заявки из файла:</label><br>
-    <input type="file" id="backupFile" accept=".json,application/json">
+                <label for="songNames">Названия песен</label>
+                <textarea id="songNames" rows="3"
+                          maxlength="5000"
+                          placeholder="Введи названия песен"></textarea>
 
-    <hr>
+                <div class="price">
+                    Стоимость: <strong><span id="price">5000</span> ₸</strong>
+                </div>
 
-    <h2>Мои заявки</h2>
-    <div id="bookings"></div>
+                <p class="muted">
+                    Цена рассчитывается автоматически по количеству человек
+                    и песен.
+                </p>
 
-    <script>
-        const people = document.getElementById("people");
-        const songs = document.getElementById("songs");
-        const price = document.getElementById("price");
-        const form = document.getElementById("bookingForm");
-        const bookings = document.getElementById("bookings");
+                <button id="submitButton" class="primary full" type="submit">
+                    Создать заявку
+                </button>
+            </form>
+        </section>
 
-        function calculatePrice() {
-            const count = Number(people.value);
-            const songCount = Number(songs.value);
-            let total = 0;
+        <section class="panel">
+            <h2>Мои заявки</h2>
+            <p class="muted">
+                Заявки сохраняются в Supabase и доступны после входа
+                в твой аккаунт.
+            </p>
+            <div id="bookings">Загрузка...</div>
+        </section>
 
-            if (count === 1) total = 5000;
-            else if (count === 2) total = 6000;
-            else if (count === 3) total = 7000;
-            else if (count >= 4) total = count * 2000;
+        <section class="panel">
+            <h2>Резервное копирование</h2>
 
-            price.textContent = total * songCount;
+            <p class="notice">
+                Скачай файл, чтобы сохранить копию заявок.
+                Восстановление добавит записи из файла к текущему списку.
+            </p>
+
+            <button id="exportButton" class="secondary full" type="button">
+                Скачать резервную копию
+            </button>
+
+            <label for="backupFile">Восстановить заявки из JSON-файла</label>
+            <input id="backupFile" type="file"
+                   accept=".json,application/json">
+
+            <button id="restoreButton" class="secondary full" type="button">
+                Импортировать заявки
+            </button>
+        </section>
+
+    </main>
+
+</div>
+
+<!-- Сначала загружаем библиотеку Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+"use strict";
+
+/* Настройки проекта Supabase */
+const SUPABASE_URL = "https://vnykpjarjvacwhxvkxrk.supabase.co";
+const SUPABASE_KEY = "sb_publishable_Jv-1ip1CSRKe2_cCjcGjmA_B333H-oC";
+
+const supabaseClient = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+);
+
+const $ = id => document.getElementById(id);
+
+let currentUser = null;
+let currentBookings = [];
+let isSaving = false;
+
+const validStatuses = [
+    "Запланировано",
+    "В процессе",
+    "Записано",
+    "Готово",
+    "Отменено"
+];
+
+function showMessage(text, type = "") {
+    $("message").textContent = text;
+    $("message").className = type;
+}
+
+function setSignedIn(user) {
+    currentUser = user;
+
+    $("signedOut").classList.toggle("hidden", Boolean(user));
+    $("app").classList.toggle("hidden", !user);
+    $("loginButton").classList.toggle("hidden", Boolean(user));
+    $("logoutButton").classList.toggle("hidden", !user);
+
+    if (!user) {
+        currentBookings = [];
+        $("bookings").textContent = "Войди в аккаунт, чтобы увидеть заявки.";
+    }
+}
+
+/* Расчёт стоимости */
+function calculatePrice() {
+    const peopleCount = Number($("people").value);
+    const songCount = Number($("songs").value);
+
+    let pricePerSong = 0;
+
+    if (peopleCount === 1) pricePerSong = 5000;
+    else if (peopleCount === 2) pricePerSong = 6000;
+    else if (peopleCount === 3) pricePerSong = 7000;
+    else if (peopleCount >= 4) pricePerSong = peopleCount * 2000;
+
+    const total = pricePerSong * songCount;
+    $("price").textContent = Number.isFinite(total) ? total : 0;
+}
+
+$("people").addEventListener("input", calculatePrice);
+$("songs").addEventListener("input", calculatePrice);
+
+/* Вход через Google */
+$("loginButton").addEventListener("click", async () => {
+    showMessage("Открываю вход через Google...");
+
+    const { error } = await supabaseClient.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+            redirectTo: window.location.origin + window.location.pathname
         }
+    });
 
-        function getSaved() {
-            return JSON.parse(
-                localStorage.getItem("voxiBookings") || "[]"
-            );
-        }
+    if (error) {
+        showMessage("Ошибка входа: " + error.message, "error");
+    }
+});
 
-        function saveAll(data) {
-            localStorage.setItem("voxiBookings", JSON.stringify(data));
-        }
+/* Выход из аккаунта */
+$("logoutButton").addEventListener("click", async () => {
+    const { error } = await supabaseClient.auth.signOut();
 
-        people.addEventListener("input", calculatePrice);
-        songs.addEventListener("input", calculatePrice);
+    if (error) {
+        showMessage("Не удалось выйти: " + error.message, "error");
+    } else {
+        showMessage("Ты вышел из аккаунта.");
+    }
+});
 
-        form.addEventListener("submit", function(event) {
-            event.preventDefault();
+/* Загрузка заявок текущего пользователя */
+async function loadBookings() {
+    if (!currentUser) return;
 
-            const saved = getSaved();
+    $("bookings").textContent = "Загрузка заявок...";
 
-            saved.push({
-                id: Date.now().toString(),
-                name: document.getElementById("name").value,
-                phone: document.getElementById("phone").value,
-                date: document.getElementById("date").value,
-                time: document.getElementById("time").value,
-                people: people.value,
-                songs: songs.value,
-                songNames: document.getElementById("songNames").value,
-                price: price.textContent,
-                status: "Запланировано"
-            });
+    const userId = currentUser.id;
 
-            saveAll(saved);
-            showBookings();
-            form.reset();
-            calculatePrice();
+    const { data, error } = await supabaseClient
+        .from("voxi_bookings")
+        .select("*")
+        .eq("user_id", userId)
+        .order("booking_date", { ascending: true })
+        .order("booking_time", { ascending: true });
 
-            alert("Заявка сохранена!");
+    if (error) {
+        $("bookings").textContent = "Не удалось загрузить заявки.";
+        showMessage(
+            "Ошибка Supabase: " + error.message +
+            "\nПроверь таблицу и политики доступа.",
+            "error"
+        );
+        return;
+    }
+
+    if (!currentUser || currentUser.id !== userId) return;
+
+    currentBookings = data || [];
+    renderBookings();
+}
+
+/* Безопасное создание текстовых элементов */
+function addText(parent, tag, text, className = "") {
+    const element = document.createElement(tag);
+    element.textContent = text ?? "";
+
+    if (className) element.className = className;
+
+    parent.appendChild(element);
+    return element;
+}
+
+/* Отображение заявок */
+function renderBookings() {
+    const container = $("bookings");
+    container.replaceChildren();
+
+    if (currentBookings.length === 0) {
+        container.textContent = "Пока заявок нет.";
+        return;
+    }
+
+    currentBookings.forEach((item, index) => {
+        const card = document.createElement("article");
+        card.className = "booking";
+
+        addText(card, "h3", "Заявка №" + (index + 1));
+
+        addText(card, "p",
+            "Клиент: " + item.client_name +
+            "\nТелефон: " + item.phone +
+            "\nДата: " + item.booking_date +
+            "\nВремя: " + String(item.booking_time).slice(0, 5) +
+            "\nЧеловек: " + item.people_count +
+            "\nПесен: " + item.song_count +
+            "\nНазвания: " + (item.song_titles || "Не указаны") +
+            "\nСтоимость: " + item.price + " ₸"
+        );
+
+        const actions = document.createElement("div");
+        actions.className = "booking-actions";
+
+        const statusWrapper = document.createElement("div");
+        const statusLabel = addText(statusWrapper, "label", "Статус заявки");
+
+        const statusSelect = document.createElement("select");
+        statusSelect.setAttribute("aria-label", "Статус заявки");
+
+        validStatuses.forEach(status => {
+            const option = document.createElement("option");
+            option.value = status;
+            option.textContent = status;
+            statusSelect.appendChild(option);
         });
 
-        function changeStatus(id, status) {
-            const saved = getSaved();
-            const item = saved.find(booking => booking.id === id);
+        statusSelect.value = validStatuses.includes(item.status)
+            ? item.status
+            : "Запланировано";
 
-            if (item) {
-                item.status = status;
-                saveAll(saved);
-                showBookings();
-            }
-        }
+        statusSelect.addEventListener("change", async () => {
+            statusSelect.disabled = true;
 
-        function deleteBooking(id) {
-            if (!confirm("Точно удалить заявку? Это действие нельзя отменить.")) {
+            const { error } = await supabaseClient
+                .from("voxi_bookings")
+                .update({ status: statusSelect.value })
+                .eq("id", item.id)
+                .eq("user_id", currentUser.id);
+
+            statusSelect.disabled = false;
+
+            if (error) {
+                showMessage("Не удалось изменить статус: " + error.message, "error");
+                statusSelect.value = item.status;
                 return;
             }
 
-            const saved = getSaved().filter(booking => booking.id !== id);
-            saveAll(saved);
-            showBookings();
-        }
+            item.status = statusSelect.value;
+            showMessage("Статус заявки обновлён.", "success");
+        });
 
-        function showBookings() {
-            const saved = getSaved();
-            bookings.innerHTML = "";
+        statusLabel.appendChild(statusSelect);
+        actions.appendChild(statusWrapper);
 
-            if (saved.length === 0) {
-                bookings.textContent = "Пока заявок нет.";
+        const deleteButton = document.createElement("button");
+        deleteButton.className = "danger";
+        deleteButton.textContent = "Удалить";
+
+        deleteButton.addEventListener("click", async () => {
+            if (!confirm("Точно удалить эту заявку?")) return;
+
+            deleteButton.disabled = true;
+
+            const { error } = await supabaseClient
+                .from("voxi_bookings")
+                .delete()
+                .eq("id", item.id)
+                .eq("user_id", currentUser.id);
+
+            if (error) {
+                deleteButton.disabled = false;
+                showMessage("Не удалось удалить заявку: " + error.message, "error");
                 return;
             }
 
-            saved.forEach(function(item, index) {
-                const card = document.createElement("div");
-                card.style.border = "1px solid #999";
-                card.style.padding = "12px";
-                card.style.marginBottom = "12px";
-
-                const title = document.createElement("h3");
-                title.textContent = "Заявка №" + (index + 1);
-                card.appendChild(title);
-
-                const details = document.createElement("p");
-                details.textContent =
-                    "Клиент: " + item.name +
-                    " | Телефон: " + item.phone +
-                    " | Дата: " + item.date +
-                    " | Время: " + item.time +
-                    " | Человек: " + item.people +
-                    " | Песен: " + item.songs +
-                    " | Названия: " + item.songNames +
-                    " | Сумма: " + item.price + " ₸";
-                card.appendChild(details);
-
-                const label = document.createElement("label");
-                label.textContent = "Статус заказа: ";
-                card.appendChild(label);
-
-                const select = document.createElement("select");
-
-                [
-                    "Запланировано",
-                    "В процессе",
-                    "Записано",
-                    "Готово",
-                    "Отменено"
-                ].forEach(function(status) {
-                    const option = document.createElement("option");
-                    option.value = status;
-                    option.textContent = status;
-                    select.appendChild(option);
-                });
-
-                select.value = item.status || "Запланировано";
-                select.addEventListener("change", function() {
-                    changeStatus(item.id, select.value);
-                });
-
-                card.appendChild(select);
-
-                const deleteButton = document.createElement("button");
-                deleteButton.textContent = "Удалить заявку";
-                deleteButton.style.marginLeft = "10px";
-                deleteButton.addEventListener("click", function() {
-                    deleteBooking(item.id);
-                });
-
-                card.appendChild(deleteButton);
-                bookings.appendChild(card);
-            });
-        }
-
-        document.getElementById("exportButton").addEventListener("click", function() {
-            const data = getSaved();
-            const file = new Blob(
-                [JSON.stringify(data, null, 2)],
-                { type: "application/json" }
+            currentBookings = currentBookings.filter(
+                booking => booking.id !== item.id
             );
 
-            const url = URL.createObjectURL(file);
-            const link = document.createElement("a");
-            link.href = url;
-            link.download = "VOXi-backup.json";
-            link.click();
-            URL.revokeObjectURL(url);
-
-            alert("Резервная копия подготовлена. Проверь папку «Загрузки».");
+            renderBookings();
+            showMessage("Заявка удалена.", "success");
         });
 
-        document.getElementById("backupFile").addEventListener("change", async function(event) {
-            const file = event.target.files[0];
-            if (!file) return;
+        actions.appendChild(deleteButton);
+        card.appendChild(actions);
+        container.appendChild(card);
+    });
+}
 
-            try {
-                const text = await file.text();
-                const imported = JSON.parse(text);
+/* Создание заявки */
+$("bookingForm").addEventListener("submit", async event => {
+    event.preventDefault();
 
-                if (
-                    !Array.isArray(imported) ||
-                    !imported.every(item =>
-                        item &&
-                        typeof item === "object" &&
-                        !Array.isArray(item) &&
-                        typeof item.name === "string" &&
-                        typeof item.phone === "string" &&
-                        typeof item.date === "string" &&
-                        typeof item.time === "string" &&
-                        Number.isFinite(Number(item.people)) &&
-                        Number.isFinite(Number(item.songs)) &&
-                        Number.isFinite(Number(item.price))
-                    )
-                ) {
-                    throw new Error("Неподходящий формат резервной копии.");
-                }
+    if (!currentUser || isSaving) return;
 
-                if (!confirm(
-                    "Восстановить " + imported.length +
-                    " заявок? Текущий список будет заменён. Сначала скачай копию текущих заявок."
-                )) {
-                    event.target.value = "";
-                    return;
-                }
+    const peopleCount = Number($("people").value);
+    const songCount = Number($("songs").value);
+    const totalPrice = Number($("price").textContent);
 
-                const cleaned = imported.map(item => ({
-                    id: String(item.id || (
-                        Date.now().toString() + Math.random().toString(36).slice(2)
-                    )),
-                    name: item.name,
-                    phone: item.phone,
-                    date: item.date,
-                    time: item.time,
-                    people: String(item.people),
-                    songs: String(item.songs),
-                    songNames: String(item.songNames || ""),
-                    price: String(item.price),
-                    status: [
-                        "Запланировано",
-                        "В процессе",
-                        "Записано",
-                        "Готово",
-                        "Отменено"
-                    ].includes(item.status) ? item.status : "Запланировано"
-                }));
+    if (
+        !Number.isInteger(peopleCount) || peopleCount < 1 ||
+        !Number.isInteger(songCount) || songCount < 1 ||
+        !Number.isSafeInteger(totalPrice) || totalPrice < 1
+    ) {
+        showMessage("Проверь количество людей, песен и стоимость.", "error");
+        return;
+    }
 
-                saveAll(cleaned);
-                showBookings();
-                alert("Заявки восстановлены!");
-            } catch (error) {
-                alert("Не удалось восстановить файл. Выбери резервную копию VOXi в формате JSON.");
+    const booking = {
+        client_name: $("name").value.trim(),
+        phone: $("phone").value.trim(),
+        booking_date: $("date").value,
+        booking_time: $("time").value,
+        people_count: peopleCount,
+        song_count: songCount,
+        song_titles: $("songNames").value.trim(),
+        price: totalPrice,
+        status: "Запланировано",
+        user_id: currentUser.id
+    };
+
+    if (
+        !booking.client_name ||
+        !booking.phone ||
+        !booking.booking_date ||
+        !booking.booking_time
+    ) {
+        showMessage("Заполни все обязательные поля.", "error");
+        return;
+    }
+
+    isSaving = true;
+    $("submitButton").disabled = true;
+    $("submitButton").textContent = "Сохраняю...";
+
+    const { error } = await supabaseClient
+        .from("voxi_bookings")
+        .insert(booking);
+
+    isSaving = false;
+    $("submitButton").disabled = false;
+    $("submitButton").textContent = "Создать заявку";
+
+    if (error) {
+        showMessage(
+            "Не удалось сохранить заявку: " + error.message,
+            "error"
+        );
+        return;
+    }
+
+    $("bookingForm").reset();
+    calculatePrice();
+
+    showMessage("Заявка успешно сохранена!", "success");
+    await loadBookings();
+});
+
+/* Скачать резервную копию */
+$("exportButton").addEventListener("click", () => {
+    if (!currentUser) return;
+
+    const file = new Blob(
+        [JSON.stringify(currentBookings, null, 2)],
+        { type: "application/json;charset=utf-8" }
+    );
+
+    const url = URL.createObjectURL(file);
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download = "VOXi-backup-" +
+        new Date().toISOString().slice(0, 10) + ".json";
+
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+    showMessage("Резервная копия скачана.", "success");
+});
+
+/* Восстановление из JSON.
+   Записи добавляются к текущим, а не удаляют существующие. */
+$("restoreButton").addEventListener("click", async () => {
+    if (!currentUser) return;
+
+    const file = $("backupFile").files[0];
+
+    if (!file) {
+        showMessage("Сначала выбери JSON-файл резервной копии.", "error");
+        return;
+    }
+
+    let imported;
+
+    try {
+        imported = JSON.parse(await file.text());
+    } catch {
+        showMessage("Файл не удалось прочитать. Проверь формат JSON.", "error");
+        return;
+    }
+
+    if (!Array.isArray(imported)) {
+        showMessage("В файле должен находиться список заявок.", "error");
+        return;
+    }
+
+    const rows = [];
+
+    for (const item of imported) {
+        if (!item || typeof item !== "object" || Array.isArray(item)) {
+            showMessage("Файл содержит некорректную заявку.", "error");
+            return;
+        }
+
+        /* Поддерживаем и старый формат резервной копии */
+        const name = item.client_name ?? item.name;
+        const date = item.booking_date ?? item.date;
+        const time = item.booking_time ?? item.time;
+        const people = Number(item.people_count ?? item.people);
+        const songs = Number(item.song_count ?? item.songs);
+        const titles = item.song_titles ?? item.songNames ?? "";
+        const price = Number(item.price);
+
+        if (
+            typeof name !== "string" || !name.trim() ||
+            typeof item.phone !== "string" || !item.phone.trim() ||
+            typeof date !== "string" ||
+            !/^\d{4}-\d{2}-\d{2}$/.test(date) ||
+            typeof time !== "string" ||
+            !/^\d{2}:\d{2}(:\d{2})?$/.test(time) ||
+            !Number.isInteger(people) || people < 1 ||
+            !Number.isInteger(songs) || songs < 1 ||
+            !Number.isSafeInteger(price) || price < 1 ||
+            typeof titles !== "string"
+        ) {
+            showMessage("В файле есть заявка с неверными данными.", "error");
+            return;
+        }
+
+        rows.push({
+            client_name: name.trim(),
+            phone: item.phone.trim(),
+            booking_date: date,
+            booking_time: time,
+            people_count: people,
+            song_count: songs,
+            song_titles: titles,
+            price: price,
+            status: validStatuses.includes(item.status)
+                ? item.status
+                : "Запланировано",
+            user_id: currentUser.id
+        });
+    }
+
+    if (rows.length === 0) {
+        showMessage("В файле нет заявок для импорта.", "error");
+        return;
+    }
+
+    if (!confirm(
+        "Добавить " + rows.length +
+        " заявок из файла? Существующие заявки останутся на месте."
+    )) return;
+
+    $("restoreButton").disabled = true;
+
+    try {
+        /* Отправляем небольшими партиями */
+        for (let i = 0; i < rows.length; i += 100) {
+            const batch = rows.slice(i, i + 100);
+
+            const { error } = await supabaseClient
+                .from("voxi_bookings")
+                .insert(batch);
+
+            if (error) {
+                showMessage(
+                    "Импорт остановлен: " + error.message +
+                    "\nЧасть заявок могла уже сохраниться. Проверь список перед повторным импортом.",
+                    "error"
+                );
+                await loadBookings();
+                return;
             }
+        }
 
-            event.target.value = "";
-        });
+        $("backupFile").value = "";
+        showMessage("Заявки успешно импортированы.", "success");
+        await loadBookings();
 
-        calculatePrice();
-        showBookings();
-    </script>
+    } finally {
+        $("restoreButton").disabled = false;
+    }
+});
+
+/* Проверяем авторизацию при открытии сайта */
+supabaseClient.auth.onAuthStateChange((event, session) => {
+    setSignedIn(session?.user || null);
+
+    /* Не выполняем запросы Supabase прямо внутри callback авторизации */
+    setTimeout(() => {
+        if (currentUser) loadBookings();
+    }, 0);
+});
+
+calculatePrice();
+</script>
 
 </body>
 </html>
