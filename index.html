@@ -2,876 +2,897 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VOXi — Студия звукозаписи</title>
-
-    <style>
-        * { box-sizing: border-box; }
-
-        body {
-            margin: 0;
-            padding: 20px;
-            background: #111;
-            color: #eee;
-            font-family: Arial, sans-serif;
-        }
-
-        .container {
-            max-width: 850px;
-            margin: 0 auto;
-        }
-
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 12px;
-            border-bottom: 1px solid #444;
-            padding-bottom: 16px;
-            margin-bottom: 24px;
-        }
-
-        h1 {
-            margin: 0;
-            letter-spacing: 3px;
-            font-size: 36px;
-        }
-
-        h2 { margin-top: 0; }
-
-        .muted { color: #aaa; }
-
-        .panel {
-            background: #1b1b1b;
-            border: 1px solid #393939;
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 22px;
-        }
-
-        label {
-            display: block;
-            margin: 14px 0 6px;
-        }
-
-        input, textarea, select {
-            width: 100%;
-            padding: 11px;
-            background: #292929;
-            color: #fff;
-            border: 1px solid #555;
-            border-radius: 6px;
-            font: inherit;
-        }
-
-        input:focus, textarea:focus, select:focus {
-            outline: 1px solid #aaa;
-        }
-
-        button {
-            padding: 11px 15px;
-            margin-top: 12px;
-            border: 0;
-            border-radius: 6px;
-            cursor: pointer;
-            font: inherit;
-            font-weight: bold;
-        }
-
-        button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .primary {
-            background: #eee;
-            color: #111;
-        }
-
-        .secondary {
-            background: #333;
-            color: #fff;
-            border: 1px solid #555;
-        }
-
-        .danger {
-            background: #552727;
-            color: #fff;
-        }
-
-        .full { width: 100%; }
-
-        .price {
-            font-size: 23px;
-            margin: 20px 0 6px;
-        }
-
-        .booking {
-            border: 1px solid #444;
-            border-radius: 8px;
-            padding: 16px;
-            margin-top: 14px;
-            overflow-wrap: anywhere;
-        }
-
-        .booking h3 { margin-top: 0; }
-
-        .booking p {
-            line-height: 1.6;
-            color: #ddd;
-            white-space: pre-wrap;
-        }
-
-        .booking-actions {
-            display: flex;
-            align-items: end;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .booking-actions > div {
-            flex: 1;
-            min-width: 180px;
-        }
-
-        .booking-actions button { margin-bottom: 0; }
-
-        .notice {
-            color: #ccc;
-            line-height: 1.5;
-        }
-
-        .hidden { display: none !important; }
-
-        #message {
-            white-space: pre-wrap;
-            overflow-wrap: anywhere;
-            margin: 12px 0;
-        }
-
-        .success { color: #9fdbab; }
-        .error { color: #ff9999; }
-
-        .role {
-            display: inline-block;
-            padding: 5px 9px;
-            border: 1px solid #777;
-            border-radius: 5px;
-            color: #ddd;
-            font-size: 12px;
-            margin-top: 8px;
-        }
-
-        .status-text {
-            color: #ddd;
-            margin: 10px 0;
-        }
-
-        @media (max-width: 500px) {
-            body { padding: 12px; }
-            .panel { padding: 15px; }
-            h1 { font-size: 30px; }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VOXi — Студия звукозаписи</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;padding:20px;background:#111;color:#eee;font-family:Arial,sans-serif}
+.container{max-width:900px;margin:auto}
+header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;border-bottom:1px solid #444;padding-bottom:16px;margin-bottom:24px}
+h1{margin:0;letter-spacing:3px;font-size:36px}
+h2{margin-top:0}
+.muted{color:#aaa}
+.panel{background:#1b1b1b;border:1px solid #393939;border-radius:12px;padding:20px;margin-bottom:22px}
+label{display:block;margin:14px 0 6px}
+input,textarea,select{width:100%;padding:11px;background:#292929;color:#fff;border:1px solid #555;border-radius:6px;font:inherit}
+input:focus,textarea:focus,select:focus{outline:1px solid #aaa}
+button{padding:11px 15px;margin-top:12px;border:0;border-radius:6px;cursor:pointer;font:inherit;font-weight:bold}
+button:disabled{opacity:.45;cursor:not-allowed}
+.primary{background:#eee;color:#111}
+.secondary{background:#333;color:#fff;border:1px solid #555}
+.danger{background:#552727;color:#fff}
+.full{width:100%}
+.hidden{display:none!important}
+.notice{color:#ccc;line-height:1.5}
+#message{white-space:pre-wrap;overflow-wrap:anywhere;margin:12px 0}
+.success{color:#9fdbab}
+.error{color:#ff9999}
+.role{display:inline-block;padding:5px 9px;border:1px solid #777;border-radius:5px;color:#ddd;font-size:12px;margin-top:8px}
+.price{font-size:23px;margin:20px 0 6px}
+.booking{border:1px solid #444;border-radius:8px;padding:16px;margin-top:14px;overflow-wrap:anywhere}
+.booking h3{margin-top:0}
+.booking p{line-height:1.6;color:#ddd;white-space:pre-wrap}
+.booking-actions{display:flex;align-items:end;gap:10px;flex-wrap:wrap}
+.booking-actions>div{flex:1;min-width:180px}
+.booking-actions button{margin-bottom:0}
+.status-text{color:#ddd;margin:10px 0}
+.slot-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px;margin-top:12px}
+.slot-choice{display:flex;align-items:center;gap:7px;margin:0;padding:10px;background:#292929;border:1px solid #555;border-radius:6px;cursor:pointer}
+.slot-choice input{width:auto;margin:0;accent-color:#eee}
+.slot-choice:has(input:disabled){opacity:.35;cursor:not-allowed}
+.slot-card{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;border:1px solid #444;border-radius:8px;padding:12px;margin-top:10px}
+.slot-card button{margin:0}
+.slot-open{color:#9fdbab}
+.slot-closed{color:#ff9999}
+.small{font-size:13px}
+@media(max-width:500px){body{padding:12px}.panel{padding:15px}h1{font-size:30px}}
+</style>
 </head>
-
 <body>
 <div class="container">
+<header>
+<div>
+<h1>VOXi</h1>
+<div class="muted">Студия звукозаписи</div>
+<div id="roleBadge" class="role hidden"></div>
+</div>
+<div>
+<button id="loginButton" class="primary">Войти через Google</button>
+<button id="logoutButton" class="secondary hidden">Выйти</button>
+</div>
+</header>
 
-    <header>
-        <div>
-            <h1>VOXi</h1>
-            <div class="muted">Студия звукозаписи</div>
-            <div id="roleBadge" class="role hidden"></div>
-        </div>
+<div id="message" role="status" aria-live="polite"></div>
 
-        <div id="authControls">
-            <button id="loginButton" class="primary">
-                Войти через Google
-            </button>
+<section id="signedOut" class="panel">
+<h2>Добро пожаловать в VOXi</h2>
+<p class="notice">Войди через Google, чтобы создавать заявки и просматривать записи.</p>
+</section>
 
-            <button id="logoutButton" class="secondary hidden">
-                Выйти
-            </button>
-        </div>
-    </header>
+<main id="app" class="hidden">
 
-    <div id="message" role="status" aria-live="polite"></div>
+<!-- Расписание доступно только администратору -->
+<section id="schedulePanel" class="panel hidden">
+<h2>Моё расписание</h2>
+<p class="notice">
+Выбери дату и отметь часы, когда готов принимать клиентов.
+Уже занятые активными заявками часы отмечены отдельно.
+Можно открывать расписание на любую будущую дату.
+</p>
 
-    <section id="signedOut" class="panel">
-        <h2>Добро пожаловать в VOXi</h2>
-        <p class="notice">
-            Войди через Google, чтобы создавать заявки,
-            просматривать записи и сохранять данные в облаке.
-        </p>
-    </section>
+<label for="scheduleDate">Дата расписания</label>
+<input id="scheduleDate" type="date">
 
-    <main id="app" class="hidden">
+<div class="booking-actions">
+<div>
+<label for="scheduleStart">Начало диапазона</label>
+<select id="scheduleStart"></select>
+</div>
+<div>
+<label for="scheduleEnd">Конец диапазона</label>
+<select id="scheduleEnd"></select>
+</div>
+</div>
 
-        <section class="panel">
-            <h2>Запись на студию</h2>
+<p class="muted small">
+Выбери диапазон для удобства, затем отметь конкретные часы ниже.
+Шаг времени — 30 минут.
+</p>
 
-            <form id="bookingForm">
-                <label for="name">Имя и фамилия</label>
-                <input id="name" type="text" maxlength="150" required>
+<div id="scheduleChoices" class="slot-grid"></div>
 
-                <label for="phone">Номер телефона</label>
-                <input id="phone" type="tel" maxlength="40" required>
+<button id="openSlotsButton" class="primary full" type="button">
+Открыть выбранные часы
+</button>
 
-                <label for="date">Дата записи</label>
-                <input id="date" type="date" required>
+<h3 style="margin-top:26px">Часы на выбранную дату</h3>
+<div id="scheduleList">Выбери дату.</div>
+</section>
 
-                <label for="time">Время записи</label>
-                <input id="time" type="time" required>
+<section class="panel">
+<h2>Запись на студию</h2>
+<form id="bookingForm">
+<label for="name">Имя и фамилия</label>
+<input id="name" type="text" maxlength="150" required>
 
-                <label for="people">Количество человек</label>
-                <input id="people" type="number" min="1"
-                       max="100" value="1" required>
+<label for="phone">Номер телефона</label>
+<input id="phone" type="tel" maxlength="40" required>
 
-                <label for="songs">Количество песен</label>
-                <input id="songs" type="number" min="1"
-                       max="100" value="1" required>
+<label for="date">Дата записи</label>
+<input id="date" type="date" required>
 
-                <label for="songNames">Названия песен</label>
-                <textarea id="songNames" rows="3"
-                          maxlength="5000"
-                          placeholder="Введи названия песен"></textarea>
+<label for="time">Доступное время</label>
+<select id="time" required disabled>
+<option value="">Сначала выбери дату</option>
+</select>
+<p id="timeHelp" class="muted small">
+Выбери дату, чтобы увидеть доступные часы.
+</p>
 
-                <div class="price">
-                    Стоимость: <strong><span id="price">5000</span> ₸</strong>
-                </div>
+<label for="people">Количество человек</label>
+<input id="people" type="number" min="1" max="100" value="1" required>
 
-                <p class="muted">
-                    Цена рассчитывается автоматически по количеству человек
-                    и песен.
-                </p>
+<label for="songs">Количество песен</label>
+<input id="songs" type="number" min="1" max="100" value="1" required>
 
-                <button id="submitButton" class="primary full" type="submit">
-                    Создать заявку
-                </button>
-            </form>
-        </section>
+<label for="songNames">Названия песен</label>
+<textarea id="songNames" rows="3" maxlength="5000" placeholder="Введи названия песен"></textarea>
 
-        <section class="panel">
-            <h2 id="bookingsTitle">Мои заявки</h2>
-            <p id="bookingsDescription" class="muted">
-                Здесь отображаются твои заявки.
-            </p>
-            <div id="bookings">Загрузка...</div>
-        </section>
+<div class="price">Стоимость: <strong><span id="price">5000</span> ₸</strong></div>
+<p class="muted">Цена рассчитывается автоматически по количеству человек и песен.</p>
 
-        <section class="panel">
-            <h2>Резервное копирование</h2>
+<button id="submitButton" class="primary full" type="submit">Создать заявку</button>
+</form>
+</section>
 
-            <p class="notice">
-                Скачай JSON-файл, чтобы сохранить копию заявок.
-                Восстановление добавит записи из файла к текущему списку.
-            </p>
+<section class="panel">
+<h2 id="bookingsTitle">Мои заявки</h2>
+<p id="bookingsDescription" class="muted">Здесь отображаются твои заявки.</p>
+<div id="bookings">Загрузка...</div>
+</section>
 
-            <button id="exportButton" class="secondary full" type="button">
-                Скачать резервную копию
-            </button>
+<section class="panel">
+<h2>Резервное копирование</h2>
+<p class="notice">Скачай JSON-файл, чтобы сохранить копию заявок. Восстановление добавит записи из файла к текущему списку.</p>
+<button id="exportButton" class="secondary full" type="button">Скачать резервную копию</button>
+<label for="backupFile">Восстановить заявки из JSON-файла</label>
+<input id="backupFile" type="file" accept=".json,application/json">
+<button id="restoreButton" class="secondary full" type="button">Импортировать заявки</button>
+</section>
 
-            <label for="backupFile">Восстановить заявки из JSON-файла</label>
-            <input id="backupFile" type="file"
-                   accept=".json,application/json">
-
-            <button id="restoreButton" class="secondary full" type="button">
-                Импортировать заявки
-            </button>
-        </section>
-
-    </main>
-
+</main>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <script>
 "use strict";
 
-/* Настройки Supabase */
 const SUPABASE_URL = "https://vnykpjarjvacwhxvkxrk.supabase.co";
 const SUPABASE_KEY = "sb_publishable_Jv-1ip1CSRKe2_cCjcGjmA_B333H-oC";
-
-/* Email администратора */
 const ADMIN_EMAIL = "mops850@gmail.com";
 
-const supabaseClient = window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY
-);
-
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const $ = id => document.getElementById(id);
 
 let currentUser = null;
 let currentBookings = [];
+let currentSlots = [];
 let isSaving = false;
 let loadingRequest = 0;
 
 const validStatuses = [
-    "Запланировано",
-    "В процессе",
-    "Записано",
-    "Готово",
-    "Отменено"
+"Запланировано","В процессе","Записано","Готово","Отменено"
 ];
 
-function isAdmin() {
-    return currentUser?.email?.toLowerCase() ===
-        ADMIN_EMAIL.toLowerCase();
+function isAdmin(){
+return currentUser?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
 }
 
-function showMessage(text, type = "") {
-    $("message").textContent = text;
-    $("message").className = type;
+function showMessage(text,type=""){
+$("message").textContent=text;
+$("message").className=type;
 }
 
-function setSignedIn(user) {
-    currentUser = user;
-
-    $("signedOut").classList.toggle("hidden", Boolean(user));
-    $("app").classList.toggle("hidden", !user);
-    $("loginButton").classList.toggle("hidden", Boolean(user));
-    $("logoutButton").classList.toggle("hidden", !user);
-
-    const admin = Boolean(user) && isAdmin();
-
-    $("roleBadge").classList.toggle("hidden", !user);
-    $("roleBadge").textContent = admin
-        ? "Администратор VOXi"
-        : "Клиент VOXi";
-
-    $("bookingsTitle").textContent = admin
-        ? "Все заявки клиентов"
-        : "Мои заявки";
-
-    $("bookingsDescription").textContent = admin
-        ? "Здесь отображаются заявки всех клиентов. Ты можешь менять статусы и удалять заявки."
-        : "Здесь отображаются только твои заявки. Управление статусами доступно администратору.";
-
-    if (!user) {
-        loadingRequest++;
-        currentBookings = [];
-        $("bookings").textContent =
-            "Войди в аккаунт, чтобы увидеть заявки.";
-    }
+function localDateString(){
+const d=new Date();
+const y=d.getFullYear();
+const m=String(d.getMonth()+1).padStart(2,"0");
+const day=String(d.getDate()).padStart(2,"0");
+return `${y}-${m}-${day}`;
 }
 
-/* Расчёт стоимости */
-function calculatePrice() {
-    const peopleCount = Number($("people").value);
-    const songCount = Number($("songs").value);
-
-    let pricePerSong = 0;
-
-    if (peopleCount === 1) pricePerSong = 5000;
-    else if (peopleCount === 2) pricePerSong = 6000;
-    else if (peopleCount === 3) pricePerSong = 7000;
-    else if (peopleCount >= 4) pricePerSong = peopleCount * 2000;
-
-    const total = pricePerSong * songCount;
-    $("price").textContent =
-        Number.isFinite(total) ? total : 0;
+function normalizeTime(value){
+return String(value||"").slice(0,5);
 }
 
-$("people").addEventListener("input", calculatePrice);
-$("songs").addEventListener("input", calculatePrice);
+function isActiveBooking(booking){
+return booking.status !== "Отменено";
+}
 
-/* Вход через Google */
-$("loginButton").addEventListener("click", async () => {
-    showMessage("Открываю вход через Google...");
+function bookingExists(date,time){
+return currentBookings.some(b =>
+b.booking_date===date &&
+normalizeTime(b.booking_time)===normalizeTime(time) &&
+isActiveBooking(b)
+);
+}
 
-    const { error } = await supabaseClient.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-            redirectTo: window.location.origin + window.location.pathname
-        }
-    });
+function setSignedIn(user){
+currentUser=user;
+const signedIn=Boolean(user);
+const admin=signedIn&&isAdmin();
 
-    if (error) {
-        showMessage("Ошибка входа: " + error.message, "error");
-    }
+$("signedOut").classList.toggle("hidden",signedIn);
+$("app").classList.toggle("hidden",!signedIn);
+$("loginButton").classList.toggle("hidden",signedIn);
+$("logoutButton").classList.toggle("hidden",!signedIn);
+$("roleBadge").classList.toggle("hidden",!signedIn);
+$("roleBadge").textContent=admin?"Администратор VOXi":"Клиент VOXi";
+$("schedulePanel").classList.toggle("hidden",!admin);
+
+$("bookingsTitle").textContent=admin?"Все заявки клиентов":"Мои заявки";
+$("bookingsDescription").textContent=admin
+?"Все заявки клиентов. Здесь можно менять статусы и удалять заявки."
+:"Здесь отображаются только твои заявки.";
+
+if(!user){
+loadingRequest++;
+currentBookings=[];
+currentSlots=[];
+$("bookings").textContent="Войди в аккаунт, чтобы увидеть заявки.";
+$("scheduleList").textContent="Войди в аккаунт администратора.";
+resetAvailableTimes("Сначала выбери дату.");
+}
+}
+
+function calculatePrice(){
+const people=Number($("people").value);
+const songs=Number($("songs").value);
+let perSong=0;
+if(people===1)perSong=5000;
+else if(people===2)perSong=6000;
+else if(people===3)perSong=7000;
+else if(people>=4)perSong=people*2000;
+$("price").textContent=Number.isFinite(perSong*songs)?perSong*songs:0;
+}
+
+$("people").addEventListener("input",calculatePrice);
+$("songs").addEventListener("input",calculatePrice);
+
+$("loginButton").addEventListener("click",async()=>{
+showMessage("Открываю вход через Google...");
+const {error}=await supabaseClient.auth.signInWithOAuth({
+provider:"google",
+options:{redirectTo:window.location.origin+window.location.pathname}
+});
+if(error)showMessage("Ошибка входа: "+error.message,"error");
 });
 
-/* Выход из аккаунта */
-$("logoutButton").addEventListener("click", async () => {
-    const { error } = await supabaseClient.auth.signOut();
-
-    if (error) {
-        showMessage("Не удалось выйти: " + error.message, "error");
-    } else {
-        currentBookings = [];
-        showMessage("Ты вышел из аккаунта.");
-    }
+$("logoutButton").addEventListener("click",async()=>{
+const {error}=await supabaseClient.auth.signOut();
+if(error)showMessage("Не удалось выйти: "+error.message,"error");
+else showMessage("Ты вышел из аккаунта.");
 });
 
-/* Загрузка заявок:
-   администратор загружает все заявки,
-   клиент — только собственные. */
-async function loadBookings() {
-    if (!currentUser) return;
-
-    const userId = currentUser.id;
-    const admin = isAdmin();
-    const requestId = ++loadingRequest;
-
-    $("bookings").textContent = "Загрузка заявок...";
-
-    let query = supabaseClient
-        .from("voxi_bookings")
-        .select("*");
-
-    if (!admin) {
-        query = query.eq("user_id", userId);
-    }
-
-    const { data, error } = await query
-        .order("booking_date", { ascending: true })
-        .order("booking_time", { ascending: true });
-
-    if (requestId !== loadingRequest) return;
-
-    if (error) {
-        $("bookings").textContent = "Не удалось загрузить заявки.";
-        showMessage(
-            "Ошибка Supabase: " + error.message +
-            "\nПроверь таблицу и политики доступа.",
-            "error"
-        );
-        return;
-    }
-
-    if (
-        !currentUser ||
-        currentUser.id !== userId ||
-        isAdmin() !== admin
-    ) {
-        return;
-    }
-
-    currentBookings = data || [];
-    renderBookings();
+function addText(parent,tag,text,className=""){
+const el=document.createElement(tag);
+el.textContent=text??"";
+if(className)el.className=className;
+parent.appendChild(el);
+return el;
 }
 
-/* Безопасное создание текстовых элементов */
-function addText(parent, tag, text, className = "") {
-    const element = document.createElement(tag);
-    element.textContent = text ?? "";
+/* Загрузка заявок */
+async function loadBookings(){
+if(!currentUser)return;
+const userId=currentUser.id;
+const admin=isAdmin();
+const requestId=++loadingRequest;
+$("bookings").textContent="Загрузка заявок...";
 
-    if (className) element.className = className;
+let query=supabaseClient.from("voxi_bookings").select("*");
+if(!admin)query=query.eq("user_id",userId);
 
-    parent.appendChild(element);
-    return element;
+const {data,error}=await query
+.order("booking_date",{ascending:true})
+.order("booking_time",{ascending:true});
+
+if(requestId!==loadingRequest)return;
+if(error){
+$("bookings").textContent="Не удалось загрузить заявки.";
+showMessage("Ошибка загрузки: "+error.message,"error");
+return;
+}
+if(!currentUser||currentUser.id!==userId||isAdmin()!==admin)return;
+
+currentBookings=data||[];
+renderBookings();
+
+if($("date").value)await loadAvailableTimes();
+if(admin&&$("scheduleDate").value)await loadScheduleSlots();
 }
 
 /* Отображение заявок */
-function renderBookings() {
-    const container = $("bookings");
-    container.replaceChildren();
+function renderBookings(){
+const container=$("bookings");
+container.replaceChildren();
 
-    if (currentBookings.length === 0) {
-        container.textContent = "Пока заявок нет.";
-        return;
-    }
-
-    const admin = isAdmin();
-
-    currentBookings.forEach((item, index) => {
-        const card = document.createElement("article");
-        card.className = "booking";
-
-        addText(card, "h3", "Заявка №" + (index + 1));
-
-        const details =
-            "Клиент: " + (item.client_name || "Не указано") +
-            "\nТелефон: " + (item.phone || "Не указан") +
-            "\nДата: " + (item.booking_date || "Не указана") +
-            "\nВремя: " + String(item.booking_time || "").slice(0, 5) +
-            "\nЧеловек: " + item.people_count +
-            "\nПесен: " + item.song_count +
-            "\nНазвания: " + (item.song_titles || "Не указаны") +
-            "\nСтоимость: " + item.price + " ₸";
-
-        addText(card, "p", details);
-
-        if (admin) {
-            addText(card, "p", "ID клиента: " + (item.user_id || "Нет данных"), "muted");
-        }
-
-        const status = validStatuses.includes(item.status)
-            ? item.status
-            : "Запланировано";
-
-        if (!admin) {
-            addText(card, "div", "Статус: " + status, "status-text");
-            container.appendChild(card);
-            return;
-        }
-
-        /* Управление статусом доступно только администратору */
-        const actions = document.createElement("div");
-        actions.className = "booking-actions";
-
-        const statusWrapper = document.createElement("div");
-        const statusLabel = addText(
-            statusWrapper,
-            "label",
-            "Статус заявки"
-        );
-
-        const statusSelect = document.createElement("select");
-        statusSelect.setAttribute("aria-label", "Статус заявки");
-
-        validStatuses.forEach(value => {
-            const option = document.createElement("option");
-            option.value = value;
-            option.textContent = value;
-            statusSelect.appendChild(option);
-        });
-
-        statusSelect.value = status;
-        statusLabel.appendChild(statusSelect);
-        actions.appendChild(statusWrapper);
-
-        statusSelect.addEventListener("change", async () => {
-            if (!isAdmin()) {
-                showMessage("Нет прав для изменения статуса.", "error");
-                statusSelect.value = item.status;
-                return;
-            }
-
-            const previousStatus = item.status || "Запланировано";
-            const newStatus = statusSelect.value;
-
-            statusSelect.disabled = true;
-
-            const { error } = await supabaseClient
-                .from("voxi_bookings")
-                .update({ status: newStatus })
-                .eq("id", item.id);
-
-            statusSelect.disabled = false;
-
-            if (error) {
-                showMessage(
-                    "Не удалось изменить статус: " + error.message,
-                    "error"
-                );
-                statusSelect.value = previousStatus;
-                return;
-            }
-
-            item.status = newStatus;
-            statusSelect.value = newStatus;
-            showMessage("Статус заявки обновлён.", "success");
-        });
-
-        /* Удаление доступно только администратору */
-        const deleteButton = document.createElement("button");
-        deleteButton.className = "danger";
-        deleteButton.textContent = "Удалить";
-
-        deleteButton.addEventListener("click", async () => {
-            if (!isAdmin()) {
-                showMessage("Нет прав для удаления заявок.", "error");
-                return;
-            }
-
-            if (!confirm(
-                "Точно удалить заявку клиента " +
-                (item.client_name || "") + "?"
-            )) return;
-
-            deleteButton.disabled = true;
-
-            const { error } = await supabaseClient
-                .from("voxi_bookings")
-                .delete()
-                .eq("id", item.id);
-
-            if (error) {
-                deleteButton.disabled = false;
-                showMessage(
-                    "Не удалось удалить заявку: " + error.message,
-                    "error"
-                );
-                return;
-            }
-
-            currentBookings = currentBookings.filter(
-                booking => booking.id !== item.id
-            );
-
-            renderBookings();
-            showMessage("Заявка удалена.", "success");
-        });
-
-        actions.appendChild(deleteButton);
-        card.appendChild(actions);
-        container.appendChild(card);
-    });
+if(currentBookings.length===0){
+container.textContent="Пока заявок нет.";
+return;
 }
 
+const admin=isAdmin();
+
+currentBookings.forEach((item,index)=>{
+const card=document.createElement("article");
+card.className="booking";
+addText(card,"h3","Заявка №"+(index+1));
+
+const details=
+"Клиент: "+(item.client_name||"Не указано")+
+"\nТелефон: "+(item.phone||"Не указан")+
+"\nДата: "+(item.booking_date||"Не указана")+
+"\nВремя: "+normalizeTime(item.booking_time)+
+"\nЧеловек: "+item.people_count+
+"\nПесен: "+item.song_count+
+"\nНазвания: "+(item.song_titles||"Не указаны")+
+"\nСтоимость: "+item.price+" ₸";
+
+addText(card,"p",details);
+
+if(!admin){
+addText(card,"div","Статус: "+(item.status||"Запланировано"),"status-text");
+container.appendChild(card);
+return;
+}
+
+const actions=document.createElement("div");
+actions.className="booking-actions";
+const wrapper=document.createElement("div");
+addText(wrapper,"label","Статус заявки");
+
+const select=document.createElement("select");
+validStatuses.forEach(s=>{
+const option=document.createElement("option");
+option.value=s;
+option.textContent=s;
+select.appendChild(option);
+});
+select.value=validStatuses.includes(item.status)?item.status:"Запланировано";
+wrapper.appendChild(select);
+actions.appendChild(wrapper);
+
+select.addEventListener("change",async()=>{
+if(!isAdmin())return;
+const previous=item.status||"Запланировано";
+select.disabled=true;
+const {error}=await supabaseClient.from("voxi_bookings")
+.update({status:select.value}).eq("id",item.id);
+select.disabled=false;
+if(error){
+showMessage("Не удалось изменить статус: "+error.message,"error");
+select.value=previous;
+return;
+}
+item.status=select.value;
+showMessage("Статус обновлён.","success");
+await loadBookings();
+});
+
+const del=document.createElement("button");
+del.className="danger";
+del.textContent="Удалить";
+del.addEventListener("click",async()=>{
+if(!isAdmin())return;
+if(!confirm("Точно удалить заявку клиента "+(item.client_name||"")+"?"))return;
+del.disabled=true;
+const {error}=await supabaseClient.from("voxi_bookings").delete().eq("id",item.id);
+if(error){
+del.disabled=false;
+showMessage("Не удалось удалить: "+error.message,"error");
+return;
+}
+showMessage("Заявка удалена.","success");
+await loadBookings();
+});
+actions.appendChild(del);
+card.appendChild(actions);
+container.appendChild(card);
+});
+}
+
+/* Формирование списка времени с шагом 30 минут */
+function makeTimeOptions(){
+const options=[];
+for(let minutes=5*60;minutes<=23*60+30;minutes+=30){
+const h=String(Math.floor(minutes/60)).padStart(2,"0");
+const m=String(minutes%60).padStart(2,"0");
+options.push(`${h}:${m}`);
+}
+return options;
+}
+
+const allTimes=makeTimeOptions();
+
+function fillTimeSelect(select,selectedValue=""){
+select.replaceChildren();
+const placeholder=document.createElement("option");
+placeholder.value="";
+placeholder.textContent="Выбери время";
+select.appendChild(placeholder);
+allTimes.forEach(t=>{
+const o=document.createElement("option");
+o.value=t;
+o.textContent=t;
+select.appendChild(o);
+});
+select.value=selectedValue;
+}
+
+/* Панель администратора: диапазон времени */
+fillTimeSelect($("scheduleStart"),"10:00");
+fillTimeSelect($("scheduleEnd"),"19:00");
+
+function renderScheduleChoices(){
+const container=$("scheduleChoices");
+container.replaceChildren();
+const start=$("scheduleStart").value;
+const end=$("scheduleEnd").value;
+
+allTimes.forEach(time=>{
+if(time<start||time>=end)return;
+
+const label=document.createElement("label");
+label.className="slot-choice";
+const checkbox=document.createElement("input");
+checkbox.type="checkbox";
+checkbox.value=time;
+checkbox.dataset.time=time;
+
+const span=document.createElement("span");
+span.textContent=time;
+
+if($("scheduleDate").value&&bookingExists($("scheduleDate").value,time)){
+checkbox.disabled=true;
+span.textContent=time+" — занято";
+}
+
+label.appendChild(checkbox);
+label.appendChild(span);
+container.appendChild(label);
+});
+}
+
+$("scheduleStart").addEventListener("change",renderScheduleChoices);
+$("scheduleEnd").addEventListener("change",renderScheduleChoices);
+
+/* Клиенту доступны только открытые слоты */
+function resetAvailableTimes(message){
+const select=$("time");
+select.replaceChildren();
+const option=document.createElement("option");
+option.value="";
+option.textContent=message;
+select.appendChild(option);
+select.disabled=true;
+$("timeHelp").textContent=message;
+}
+
+async function loadAvailableTimes(){
+const date=$("date").value;
+if(!currentUser||!date){
+resetAvailableTimes("Сначала выбери дату.");
+return;
+}
+
+resetAvailableTimes("Загружаю доступные часы...");
+
+const {data,error}=await supabaseClient
+.from("voxi_schedule_slots")
+.select("booking_time")
+.eq("booking_date",date)
+.eq("is_open",true)
+.order("booking_time",{ascending:true});
+
+if(error){
+resetAvailableTimes("Не удалось загрузить время.");
+showMessage("Ошибка расписания: "+error.message,"error");
+return;
+}
+
+const available=(data||[])
+.map(s=>normalizeTime(s.booking_time))
+.filter(t=>!bookingExists(date,t));
+
+const select=$("time");
+select.replaceChildren();
+
+const placeholder=document.createElement("option");
+placeholder.value="";
+placeholder.textContent=available.length?"Выбери время":"Свободных часов нет";
+select.appendChild(placeholder);
+
+available.forEach(t=>{
+const option=document.createElement("option");
+option.value=t;
+option.textContent=t;
+select.appendChild(option);
+});
+
+select.disabled=available.length===0;
+$("timeHelp").textContent=available.length
+?"Показываются только часы, открытые администратором и ещё не занятые."
+:"На эту дату пока нет свободных часов. Попробуй другую дату.";
+}
+
+$("date").min=localDateString();
+$("date").addEventListener("change",loadAvailableTimes);
+
+/* Расписание администратора */
+async function loadScheduleSlots(){
+if(!isAdmin())return;
+const date=$("scheduleDate").value;
+const container=$("scheduleList");
+container.replaceChildren();
+
+if(!date){
+container.textContent="Выбери дату.";
+return;
+}
+
+const {data,error}=await supabaseClient
+.from("voxi_schedule_slots")
+.select("*")
+.eq("booking_date",date)
+.order("booking_time",{ascending:true});
+
+if(error){
+container.textContent="Не удалось загрузить расписание.";
+showMessage("Ошибка расписания: "+error.message,"error");
+return;
+}
+
+currentSlots=data||[];
+renderScheduleChoices();
+
+if(currentSlots.length===0){
+container.textContent="На эту дату часы ещё не добавлены.";
+return;
+}
+
+currentSlots.forEach(slot=>{
+const time=normalizeTime(slot.booking_time);
+const booked=bookingExists(date,time);
+const row=document.createElement("div");
+row.className="slot-card";
+
+const info=document.createElement("div");
+addText(info,"strong",time);
+addText(info,"div",booked
+?"Есть активная заявка"
+:slot.is_open?"Открыто для клиентов":"Закрыто",
+booked||slot.is_open?"slot-open":"slot-closed");
+row.appendChild(info);
+
+const actions=document.createElement("div");
+
+const toggle=document.createElement("button");
+toggle.className="secondary";
+toggle.textContent=slot.is_open?"Закрыть":"Открыть";
+toggle.disabled=booked;
+toggle.title=booked?"Сначала отмените или удалите активную заявку":"";
+
+toggle.addEventListener("click",async()=>{
+if(!isAdmin()||bookingExists(date,time))return;
+toggle.disabled=true;
+
+const {error}=await supabaseClient.from("voxi_schedule_slots")
+.update({is_open:!slot.is_open})
+.eq("id",slot.id);
+
+if(error){
+showMessage("Не удалось изменить час: "+error.message,"error");
+toggle.disabled=false;
+return;
+}
+
+showMessage(slot.is_open?"Час закрыт для клиентов.":"Час открыт для клиентов.","success");
+await loadScheduleSlots();
+await loadAvailableTimes();
+});
+
+const del=document.createElement("button");
+del.className="danger";
+del.textContent="Удалить час";
+del.disabled=booked;
+del.title=booked?"Нельзя удалить час с активной заявкой":"";
+
+del.addEventListener("click",async()=>{
+if(!isAdmin()||bookingExists(date,time))return;
+if(!confirm("Удалить "+time+" из расписания на "+date+"?"))return;
+del.disabled=true;
+const {error}=await supabaseClient.from("voxi_schedule_slots")
+.delete().eq("id",slot.id);
+if(error){
+showMessage("Не удалось удалить час: "+error.message,"error");
+del.disabled=false;
+return;
+}
+showMessage("Час удалён из расписания.","success");
+await loadScheduleSlots();
+await loadAvailableTimes();
+});
+
+actions.appendChild(toggle);
+actions.appendChild(del);
+row.appendChild(actions);
+container.appendChild(row);
+});
+}
+
+$("scheduleDate").min=localDateString();
+$("scheduleDate").value=localDateString();
+$("scheduleDate").addEventListener("change",async()=>{
+await loadScheduleSlots();
+});
+
+$("openSlotsButton").addEventListener("click",async()=>{
+if(!isAdmin())return;
+const date=$("scheduleDate").value;
+if(!date){
+showMessage("Сначала выбери дату расписания.","error");
+return;
+}
+
+const selected=[...$("scheduleChoices").querySelectorAll('input[type="checkbox"]:checked')]
+.map(input=>input.value);
+
+if(selected.length===0){
+showMessage("Отметь хотя бы один час.","error");
+return;
+}
+
+const allowed=selected.filter(time=>!bookingExists(date,time));
+if(allowed.length===0){
+showMessage("Выбранные часы заняты активными заявками.","error");
+return;
+}
+
+$("openSlotsButton").disabled=true;
+try{
+const rows=allowed.map(time=>({
+booking_date:date,
+booking_time:time,
+is_open:true
+}));
+
+const {error}=await supabaseClient
+.from("voxi_schedule_slots")
+.upsert(rows,{onConflict:"booking_date,booking_time"});
+
+if(error){
+showMessage("Не удалось сохранить расписание: "+error.message,"error");
+return;
+}
+
+showMessage("Расписание сохранено. Добавлено или открыто часов: "+allowed.length+".","success");
+await loadScheduleSlots();
+await loadAvailableTimes();
+}catch(error){
+showMessage("Ошибка: "+error.message,"error");
+}finally{
+$("openSlotsButton").disabled=false;
+}
+});
+
 /* Создание заявки */
-$("bookingForm").addEventListener("submit", async event => {
-    event.preventDefault();
+$("bookingForm").addEventListener("submit",async event=>{
+event.preventDefault();
+if(!currentUser||isSaving)return;
 
-    if (!currentUser || isSaving) return;
+const people=Number($("people").value);
+const songs=Number($("songs").value);
+const date=$("date").value;
+const time=$("time").value;
 
-    const peopleCount = Number($("people").value);
-    const songCount = Number($("songs").value);
+if(!Number.isInteger(people)||people<1||people>100||
+!Number.isInteger(songs)||songs<1||songs>100){
+showMessage("Количество людей и песен должно быть от 1 до 100.","error");
+return;
+}
 
-    if (
-        !Number.isInteger(peopleCount) ||
-        peopleCount < 1 ||
-        peopleCount > 100 ||
-        !Number.isInteger(songCount) ||
-        songCount < 1 ||
-        songCount > 100
-    ) {
-        showMessage(
-            "Количество людей и песен должно быть от 1 до 100.",
-            "error"
-        );
-        return;
-    }
+if(!date||!time){
+showMessage("Выбери дату и доступное время из списка.","error");
+return;
+}
 
-    /* Пересчитываем цену, не полагаясь только на текст в интерфейсе */
-    let pricePerSong = 0;
+if(bookingExists(date,time)){
+showMessage("Это время уже занято. Выбери другое.","error");
+await loadAvailableTimes();
+return;
+}
 
-    if (peopleCount === 1) pricePerSong = 5000;
-    else if (peopleCount === 2) pricePerSong = 6000;
-    else if (peopleCount === 3) pricePerSong = 7000;
-    else pricePerSong = peopleCount * 2000;
+let perSong=people===1?5000:people===2?6000:people===3?7000:people*2000;
 
-    const totalPrice = pricePerSong * songCount;
+const booking={
+client_name:$("name").value.trim(),
+phone:$("phone").value.trim(),
+booking_date:date,
+booking_time:time,
+people_count:people,
+song_count:songs,
+song_titles:$("songNames").value.trim(),
+price:perSong*songs,
+status:"Запланировано",
+user_id:currentUser.id
+};
 
-    const booking = {
-        client_name: $("name").value.trim(),
-        phone: $("phone").value.trim(),
-        booking_date: $("date").value,
-        booking_time: $("time").value,
-        people_count: peopleCount,
-        song_count: songCount,
-        song_titles: $("songNames").value.trim(),
-        price: totalPrice,
-        status: "Запланировано",
-        user_id: currentUser.id
-    };
+if(!booking.client_name||!booking.phone){
+showMessage("Заполни имя и номер телефона.","error");
+return;
+}
 
-    if (
-        !booking.client_name ||
-        !booking.phone ||
-        !booking.booking_date ||
-        !booking.booking_time
-    ) {
-        showMessage("Заполни все обязательные поля.", "error");
-        return;
-    }
+isSaving=true;
+$("submitButton").disabled=true;
+$("submitButton").textContent="Сохраняю...";
 
-    isSaving = true;
-    $("submitButton").disabled = true;
-    $("submitButton").textContent = "Сохраняю...";
+try{
+const {error}=await supabaseClient.from("voxi_bookings").insert(booking);
 
-    try {
-        const { error } = await supabaseClient
-            .from("voxi_bookings")
-            .insert(booking);
+if(error){
+if(error.code==="23505"){
+showMessage("Это время уже занято. Выбери другое.","error");
+}else if(error.code==="42501"||error.code==="403"){
+showMessage("Это время больше недоступно. Выбери другой час.","error");
+}else{
+showMessage("Не удалось сохранить заявку: "+error.message,"error");
+}
+await loadAvailableTimes();
+return;
+}
 
-        if (error) {
-            showMessage(
-                "Не удалось сохранить заявку: " + error.message,
-                "error"
-            );
-            return;
-        }
-
-        $("bookingForm").reset();
-        calculatePrice();
-
-        showMessage("Заявка успешно сохранена!", "success");
-        await loadBookings();
-
-    } finally {
-        isSaving = false;
-        $("submitButton").disabled = false;
-        $("submitButton").textContent = "Создать заявку";
-    }
+$("bookingForm").reset();
+calculatePrice();
+resetAvailableTimes("Сначала выбери дату.");
+showMessage("Заявка успешно сохранена!","success");
+await loadBookings();
+}catch(error){
+showMessage("Ошибка: "+error.message,"error");
+}finally{
+isSaving=false;
+$("submitButton").disabled=false;
+$("submitButton").textContent="Создать заявку";
+}
 });
 
-/* Скачать резервную копию текущего списка */
-$("exportButton").addEventListener("click", () => {
-    if (!currentUser) return;
-
-    const file = new Blob(
-        [JSON.stringify(currentBookings, null, 2)],
-        { type: "application/json;charset=utf-8" }
-    );
-
-    const url = URL.createObjectURL(file);
-    const link = document.createElement("a");
-
-    link.href = url;
-    link.download = "VOXi-backup-" +
-        new Date().toISOString().slice(0, 10) + ".json";
-
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
-
-    showMessage("Резервная копия скачана.", "success");
+/* Экспорт заявок */
+$("exportButton").addEventListener("click",()=>{
+if(!currentUser)return;
+const file=new Blob([JSON.stringify(currentBookings,null,2)],{
+type:"application/json;charset=utf-8"
+});
+const url=URL.createObjectURL(file);
+const link=document.createElement("a");
+link.href=url;
+link.download="VOXi-backup-"+localDateString()+".json";
+document.body.appendChild(link);
+link.click();
+link.remove();
+setTimeout(()=>URL.revokeObjectURL(url),1000);
+showMessage("Резервная копия скачана.","success");
 });
 
-/* Восстановление заявок из JSON */
-$("restoreButton").addEventListener("click", async () => {
-    if (!currentUser) return;
+/* Импорт заявок */
+$("restoreButton").addEventListener("click",async()=>{
+if(!currentUser)return;
+const file=$("backupFile").files[0];
+if(!file){
+showMessage("Сначала выбери JSON-файл.","error");
+return;
+}
 
-    const file = $("backupFile").files[0];
+let imported;
+try{
+imported=JSON.parse(await file.text());
+}catch{
+showMessage("Файл не удалось прочитать. Проверь формат JSON.","error");
+return;
+}
 
-    if (!file) {
-        showMessage("Сначала выбери JSON-файл резервной копии.", "error");
-        return;
-    }
+if(!Array.isArray(imported)){
+showMessage("В файле должен находиться список заявок.","error");
+return;
+}
 
-    let imported;
+const admin=isAdmin();
+const rows=[];
 
-    try {
-        imported = JSON.parse(await file.text());
-    } catch {
-        showMessage(
-            "Файл не удалось прочитать. Проверь формат JSON.",
-            "error"
-        );
-        return;
-    }
+for(const item of imported){
+if(!item||typeof item!=="object"||Array.isArray(item)){
+showMessage("Файл содержит некорректную заявку.","error");
+return;
+}
 
-    if (!Array.isArray(imported)) {
-        showMessage("В файле должен находиться список заявок.", "error");
-        return;
-    }
+const name=item.client_name??item.name;
+const date=item.booking_date??item.date;
+const time=item.booking_time??item.time;
+const people=Number(item.people_count??item.people);
+const songs=Number(item.song_count??item.songs);
+const titles=item.song_titles??item.songNames??"";
+const price=Number(item.price);
 
-    const admin = isAdmin();
-    const rows = [];
+if(typeof name!=="string"||!name.trim()||
+typeof item.phone!=="string"||!item.phone.trim()||
+typeof date!=="string"||!/^\d{4}-\d{2}-\d{2}$/.test(date)||
+typeof time!=="string"||!/^\d{2}:\d{2}(:\d{2})?$/.test(time)||
+!Number.isInteger(people)||people<1||people>100||
+!Number.isInteger(songs)||songs<1||songs>100||
+!Number.isSafeInteger(price)||price<1||
+typeof titles!=="string"){
+showMessage("В файле есть заявка с неверными данными.","error");
+return;
+}
 
-    for (const item of imported) {
-        if (!item || typeof item !== "object" || Array.isArray(item)) {
-            showMessage("Файл содержит некорректную заявку.", "error");
-            return;
-        }
+let ownerId=currentUser.id;
+const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+if(admin&&typeof item.user_id==="string"&&uuid.test(item.user_id)){
+ownerId=item.user_id;
+}
 
-        const name = item.client_name ?? item.name;
-        const date = item.booking_date ?? item.date;
-        const time = item.booking_time ?? item.time;
-        const people = Number(item.people_count ?? item.people);
-        const songs = Number(item.song_count ?? item.songs);
-        const titles = item.song_titles ?? item.songNames ?? "";
-        const price = Number(item.price);
+rows.push({
+client_name:name.trim(),
+phone:item.phone.trim(),
+booking_date:date,
+booking_time:normalizeTime(time),
+people_count:people,
+song_count:songs,
+song_titles:titles,
+price,
+status:validStatuses.includes(item.status)?item.status:"Запланировано",
+user_id:ownerId
+});
+}
 
-        if (
-            typeof name !== "string" || !name.trim() ||
-            typeof item.phone !== "string" || !item.phone.trim() ||
-            typeof date !== "string" ||
-            !/^\d{4}-\d{2}-\d{2}$/.test(date) ||
-            typeof time !== "string" ||
-            !/^\d{2}:\d{2}(:\d{2})?$/.test(time) ||
-            !Number.isInteger(people) || people < 1 || people > 100 ||
-            !Number.isInteger(songs) || songs < 1 || songs > 100 ||
-            !Number.isSafeInteger(price) || price < 1 ||
-            typeof titles !== "string"
-        ) {
-            showMessage("В файле есть заявка с неверными данными.", "error");
-            return;
-        }
+if(!rows.length){
+showMessage("В файле нет заявок для импорта.","error");
+return;
+}
 
-        /*
-          Администратор восстанавливает исходный user_id из резервной копии.
-          Обычный клиент может импортировать заявки только в свой аккаунт.
-        */
-        let ownerId = currentUser.id;
+if(!confirm("Добавить "+rows.length+" заявок? Часы для каждой заявки должны быть открыты в расписании."))return;
 
-        if (admin && typeof item.user_id === "string") {
-            const uuidPattern =
-                /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-
-            if (uuidPattern.test(item.user_id)) {
-                ownerId = item.user_id;
-            }
-        }
-
-        rows.push({
-            client_name: name.trim(),
-            phone: item.phone.trim(),
-            booking_date: date,
-            booking_time: time,
-            people_count: people,
-            song_count: songs,
-            song_titles: titles,
-            price: price,
-            status: validStatuses.includes(item.status)
-                ? item.status
-                : "Запланировано",
-            user_id: ownerId
-        });
-    }
-
-    if (rows.length === 0) {
-        showMessage("В файле нет заявок для импорта.", "error");
-        return;
-    }
-
-    if (!confirm(
-        "Добавить " + rows.length +
-        " заявок из файла? Существующие заявки останутся на месте."
-    )) return;
-
-    $("restoreButton").disabled = true;
-
-    try {
-        for (let i = 0; i < rows.length; i += 100) {
-            const batch = rows.slice(i, i + 100);
-
-            const { error } = await supabaseClient
-                .from("voxi_bookings")
-                .insert(batch);
-
-            if (error) {
-                showMessage(
-                    "Импорт остановлен: " + error.message +
-                    "\nЧасть заявок могла уже сохраниться. Проверь список перед повторным импортом.",
-                    "error"
-                );
-                await loadBookings();
-                return;
-            }
-        }
-
-        $("backupFile").value = "";
-        showMessage("Заявки успешно импортированы.", "success");
-        await loadBookings();
-
-    } finally {
-        $("restoreButton").disabled = false;
-    }
+$("restoreButton").disabled=true;
+try{
+for(let i=0;i<rows.length;i+=100){
+const {error}=await supabaseClient.from("voxi_bookings").insert(rows.slice(i,i+100));
+if(error){
+showMessage("Импорт остановлен: "+error.message+
+"\nЧасть заявок могла уже сохраниться. Проверь список перед повторным импортом.","error");
+await loadBookings();
+return;
+}
+}
+$("backupFile").value="";
+showMessage("Заявки импортированы.","success");
+await loadBookings();
+}finally{
+$("restoreButton").disabled=false;
+}
 });
 
-/* Проверка авторизации */
-supabaseClient.auth.onAuthStateChange((event, session) => {
-    setSignedIn(session?.user || null);
-
-    setTimeout(() => {
-        if (currentUser) {
-            loadBookings();
-        }
-    }, 0);
+/* Авторизация */
+supabaseClient.auth.onAuthStateChange((event,session)=>{
+setSignedIn(session?.user||null);
+setTimeout(async()=>{
+if(!currentUser)return;
+await loadBookings();
+if(isAdmin())await loadScheduleSlots();
+},0);
 });
 
 calculatePrice();
+renderScheduleChoices();
 </script>
-
 </body>
 </html>
