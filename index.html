@@ -152,7 +152,8 @@ button:disabled{opacity:.45;cursor:not-allowed}
 <div id="bookings">Загрузка...</div>
 </section>
 
-<section class="panel">
+<!-- Резервное копирование доступно только администратору -->
+<section id="backupPanel" class="panel hidden">
 <h2>Резервное копирование</h2>
 <p class="notice">Скачай JSON-файл, чтобы сохранить копию заявок. Восстановление добавит записи из файла к текущему списку.</p>
 <button id="exportButton" class="secondary full" type="button">Скачать резервную копию</button>
@@ -230,6 +231,9 @@ $("logoutButton").classList.toggle("hidden",!signedIn);
 $("roleBadge").classList.toggle("hidden",!signedIn);
 $("roleBadge").textContent=admin?"Администратор VOXi":"Клиент VOXi";
 $("schedulePanel").classList.toggle("hidden",!admin);
+
+/* Резервное копирование и восстановление видны только администратору */
+$("backupPanel").classList.toggle("hidden",!admin);
 
 $("bookingsTitle").textContent=admin?"Все заявки клиентов":"Мои заявки";
 $("bookingsDescription").textContent=admin
@@ -767,9 +771,13 @@ $("submitButton").textContent="Создать заявку";
 }
 });
 
-/* Экспорт заявок */
+/* Экспорт заявок — только для администратора */
 $("exportButton").addEventListener("click",()=>{
-if(!currentUser)return;
+if(!isAdmin()){
+showMessage("Резервное копирование доступно только администратору.","error");
+return;
+}
+
 const file=new Blob([JSON.stringify(currentBookings,null,2)],{
 type:"application/json;charset=utf-8"
 });
@@ -784,9 +792,13 @@ setTimeout(()=>URL.revokeObjectURL(url),1000);
 showMessage("Резервная копия скачана.","success");
 });
 
-/* Импорт заявок */
+/* Импорт заявок — только для администратора */
 $("restoreButton").addEventListener("click",async()=>{
-if(!currentUser)return;
+if(!isAdmin()){
+showMessage("Восстановление заявок доступно только администратору.","error");
+return;
+}
+
 const file=$("backupFile").files[0];
 if(!file){
 showMessage("Сначала выбери JSON-файл.","error");
