@@ -121,6 +121,7 @@
         .booking p {
             line-height: 1.6;
             color: #ddd;
+            white-space: pre-wrap;
         }
 
         .booking-actions {
@@ -153,6 +154,21 @@
         .success { color: #9fdbab; }
         .error { color: #ff9999; }
 
+        .role {
+            display: inline-block;
+            padding: 5px 9px;
+            border: 1px solid #777;
+            border-radius: 5px;
+            color: #ddd;
+            font-size: 12px;
+            margin-top: 8px;
+        }
+
+        .status-text {
+            color: #ddd;
+            margin: 10px 0;
+        }
+
         @media (max-width: 500px) {
             body { padding: 12px; }
             .panel { padding: 15px; }
@@ -168,6 +184,7 @@
         <div>
             <h1>VOXi</h1>
             <div class="muted">Студия звукозаписи</div>
+            <div id="roleBadge" class="role hidden"></div>
         </div>
 
         <div id="authControls">
@@ -238,10 +255,9 @@
         </section>
 
         <section class="panel">
-            <h2>Мои заявки</h2>
-            <p class="muted">
-                Заявки сохраняются в Supabase и доступны после входа
-                в твой аккаунт.
+            <h2 id="bookingsTitle">Мои заявки</h2>
+            <p id="bookingsDescription" class="muted">
+                Здесь отображаются твои заявки.
             </p>
             <div id="bookings">Загрузка...</div>
         </section>
@@ -250,7 +266,7 @@
             <h2>Резервное копирование</h2>
 
             <p class="notice">
-                Скачай файл, чтобы сохранить копию заявок.
+                Скачай JSON-файл, чтобы сохранить копию заявок.
                 Восстановление добавит записи из файла к текущему списку.
             </p>
 
@@ -271,15 +287,17 @@
 
 </div>
 
-<!-- Сначала загружаем библиотеку Supabase -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
 "use strict";
 
-/* Настройки проекта Supabase */
+/* Настройки Supabase */
 const SUPABASE_URL = "https://vnykpjarjvacwhxvkxrk.supabase.co";
 const SUPABASE_KEY = "sb_publishable_Jv-1ip1CSRKe2_cCjcGjmA_B333H-oC";
+
+/* Email администратора */
+const ADMIN_EMAIL = "mops850@gmail.com";
 
 const supabaseClient = window.supabase.createClient(
     SUPABASE_URL,
@@ -291,6 +309,7 @@ const $ = id => document.getElementById(id);
 let currentUser = null;
 let currentBookings = [];
 let isSaving = false;
+let loadingRequest = 0;
 
 const validStatuses = [
     "Запланировано",
@@ -299,6 +318,11 @@ const validStatuses = [
     "Готово",
     "Отменено"
 ];
+
+function isAdmin() {
+    return currentUser?.email?.toLowerCase() ===
+        ADMIN_EMAIL.toLowerCase();
+}
 
 function showMessage(text, type = "") {
     $("message").textContent = text;
@@ -313,9 +337,26 @@ function setSignedIn(user) {
     $("loginButton").classList.toggle("hidden", Boolean(user));
     $("logoutButton").classList.toggle("hidden", !user);
 
+    const admin = Boolean(user) && isAdmin();
+
+    $("roleBadge").classList.toggle("hidden", !user);
+    $("roleBadge").textContent = admin
+        ? "Администратор VOXi"
+        : "Клиент VOXi";
+
+    $("bookingsTitle").textContent = admin
+        ? "Все заявки клиентов"
+        : "Мои заявки";
+
+    $("bookingsDescription").textContent = admin
+        ? "Здесь отображаются заявки всех клиентов. Ты можешь менять статусы и удалять заявки."
+        : "Здесь отображаются только твои заявки. Управление статусами доступно администратору.";
+
     if (!user) {
+        loadingRequest++;
         currentBookings = [];
-        $("bookings").textContent = "Войди в аккаунт, чтобы увидеть заявки.";
+        $("bookings").textContent =
+            "Войди в аккаунт, чтобы увидеть заявки.";
     }
 }
 
@@ -332,7 +373,8 @@ function calculatePrice() {
     else if (peopleCount >= 4) pricePerSong = peopleCount * 2000;
 
     const total = pricePerSong * songCount;
-    $("price").textContent = Number.isFinite(total) ? total : 0;
+    $("price").textContent =
+        Number.isFinite(total) ? total : 0;
 }
 
 $("people").addEventListener("input", calculatePrice);
@@ -361,24 +403,36 @@ $("logoutButton").addEventListener("click", async () => {
     if (error) {
         showMessage("Не удалось выйти: " + error.message, "error");
     } else {
+        currentBookings = [];
         showMessage("Ты вышел из аккаунта.");
     }
 });
 
-/* Загрузка заявок текущего пользователя */
+/* Загрузка заявок:
+   администратор загружает все заявки,
+   клиент — только собственные. */
 async function loadBookings() {
     if (!currentUser) return;
 
+    const userId = currentUser.id;
+    const admin = isAdmin();
+    const requestId = ++loadingRequest;
+
     $("bookings").textContent = "Загрузка заявок...";
 
-    const userId = currentUser.id;
-
-    const { data, error } = await supabaseClient
+    let query = supabaseClient
         .from("voxi_bookings")
-        .select("*")
-        .eq("user_id", userId)
+        .select("*");
+
+    if (!admin) {
+        query = query.eq("user_id", userId);
+    }
+
+    const { data, error } = await query
         .order("booking_date", { ascending: true })
         .order("booking_time", { ascending: true });
+
+    if (requestId !== loadingRequest) return;
 
     if (error) {
         $("bookings").textContent = "Не удалось загрузить заявки.";
@@ -390,7 +444,13 @@ async function loadBookings() {
         return;
     }
 
-    if (!currentUser || currentUser.id !== userId) return;
+    if (
+        !currentUser ||
+        currentUser.id !== userId ||
+        isAdmin() !== admin
+    ) {
+        return;
+    }
 
     currentBookings = data || [];
     renderBookings();
@@ -417,85 +477,127 @@ function renderBookings() {
         return;
     }
 
+    const admin = isAdmin();
+
     currentBookings.forEach((item, index) => {
         const card = document.createElement("article");
         card.className = "booking";
 
         addText(card, "h3", "Заявка №" + (index + 1));
 
-        addText(card, "p",
-            "Клиент: " + item.client_name +
-            "\nТелефон: " + item.phone +
-            "\nДата: " + item.booking_date +
-            "\nВремя: " + String(item.booking_time).slice(0, 5) +
+        const details =
+            "Клиент: " + (item.client_name || "Не указано") +
+            "\nТелефон: " + (item.phone || "Не указан") +
+            "\nДата: " + (item.booking_date || "Не указана") +
+            "\nВремя: " + String(item.booking_time || "").slice(0, 5) +
             "\nЧеловек: " + item.people_count +
             "\nПесен: " + item.song_count +
             "\nНазвания: " + (item.song_titles || "Не указаны") +
-            "\nСтоимость: " + item.price + " ₸"
-        );
+            "\nСтоимость: " + item.price + " ₸";
 
+        addText(card, "p", details);
+
+        if (admin) {
+            addText(card, "p", "ID клиента: " + (item.user_id || "Нет данных"), "muted");
+        }
+
+        const status = validStatuses.includes(item.status)
+            ? item.status
+            : "Запланировано";
+
+        if (!admin) {
+            addText(card, "div", "Статус: " + status, "status-text");
+            container.appendChild(card);
+            return;
+        }
+
+        /* Управление статусом доступно только администратору */
         const actions = document.createElement("div");
         actions.className = "booking-actions";
 
         const statusWrapper = document.createElement("div");
-        const statusLabel = addText(statusWrapper, "label", "Статус заявки");
+        const statusLabel = addText(
+            statusWrapper,
+            "label",
+            "Статус заявки"
+        );
 
         const statusSelect = document.createElement("select");
         statusSelect.setAttribute("aria-label", "Статус заявки");
 
-        validStatuses.forEach(status => {
+        validStatuses.forEach(value => {
             const option = document.createElement("option");
-            option.value = status;
-            option.textContent = status;
+            option.value = value;
+            option.textContent = value;
             statusSelect.appendChild(option);
         });
 
-        statusSelect.value = validStatuses.includes(item.status)
-            ? item.status
-            : "Запланировано";
+        statusSelect.value = status;
+        statusLabel.appendChild(statusSelect);
+        actions.appendChild(statusWrapper);
 
         statusSelect.addEventListener("change", async () => {
-            statusSelect.disabled = true;
-
-            const { error } = await supabaseClient
-                .from("voxi_bookings")
-                .update({ status: statusSelect.value })
-                .eq("id", item.id)
-                .eq("user_id", currentUser.id);
-
-            statusSelect.disabled = false;
-
-            if (error) {
-                showMessage("Не удалось изменить статус: " + error.message, "error");
+            if (!isAdmin()) {
+                showMessage("Нет прав для изменения статуса.", "error");
                 statusSelect.value = item.status;
                 return;
             }
 
-            item.status = statusSelect.value;
+            const previousStatus = item.status || "Запланировано";
+            const newStatus = statusSelect.value;
+
+            statusSelect.disabled = true;
+
+            const { error } = await supabaseClient
+                .from("voxi_bookings")
+                .update({ status: newStatus })
+                .eq("id", item.id);
+
+            statusSelect.disabled = false;
+
+            if (error) {
+                showMessage(
+                    "Не удалось изменить статус: " + error.message,
+                    "error"
+                );
+                statusSelect.value = previousStatus;
+                return;
+            }
+
+            item.status = newStatus;
+            statusSelect.value = newStatus;
             showMessage("Статус заявки обновлён.", "success");
         });
 
-        statusLabel.appendChild(statusSelect);
-        actions.appendChild(statusWrapper);
-
+        /* Удаление доступно только администратору */
         const deleteButton = document.createElement("button");
         deleteButton.className = "danger";
         deleteButton.textContent = "Удалить";
 
         deleteButton.addEventListener("click", async () => {
-            if (!confirm("Точно удалить эту заявку?")) return;
+            if (!isAdmin()) {
+                showMessage("Нет прав для удаления заявок.", "error");
+                return;
+            }
+
+            if (!confirm(
+                "Точно удалить заявку клиента " +
+                (item.client_name || "") + "?"
+            )) return;
 
             deleteButton.disabled = true;
 
             const { error } = await supabaseClient
                 .from("voxi_bookings")
                 .delete()
-                .eq("id", item.id)
-                .eq("user_id", currentUser.id);
+                .eq("id", item.id);
 
             if (error) {
                 deleteButton.disabled = false;
-                showMessage("Не удалось удалить заявку: " + error.message, "error");
+                showMessage(
+                    "Не удалось удалить заявку: " + error.message,
+                    "error"
+                );
                 return;
             }
 
@@ -521,16 +623,31 @@ $("bookingForm").addEventListener("submit", async event => {
 
     const peopleCount = Number($("people").value);
     const songCount = Number($("songs").value);
-    const totalPrice = Number($("price").textContent);
 
     if (
-        !Number.isInteger(peopleCount) || peopleCount < 1 ||
-        !Number.isInteger(songCount) || songCount < 1 ||
-        !Number.isSafeInteger(totalPrice) || totalPrice < 1
+        !Number.isInteger(peopleCount) ||
+        peopleCount < 1 ||
+        peopleCount > 100 ||
+        !Number.isInteger(songCount) ||
+        songCount < 1 ||
+        songCount > 100
     ) {
-        showMessage("Проверь количество людей, песен и стоимость.", "error");
+        showMessage(
+            "Количество людей и песен должно быть от 1 до 100.",
+            "error"
+        );
         return;
     }
+
+    /* Пересчитываем цену, не полагаясь только на текст в интерфейсе */
+    let pricePerSong = 0;
+
+    if (peopleCount === 1) pricePerSong = 5000;
+    else if (peopleCount === 2) pricePerSong = 6000;
+    else if (peopleCount === 3) pricePerSong = 7000;
+    else pricePerSong = peopleCount * 2000;
+
+    const totalPrice = pricePerSong * songCount;
 
     const booking = {
         client_name: $("name").value.trim(),
@@ -559,30 +676,33 @@ $("bookingForm").addEventListener("submit", async event => {
     $("submitButton").disabled = true;
     $("submitButton").textContent = "Сохраняю...";
 
-    const { error } = await supabaseClient
-        .from("voxi_bookings")
-        .insert(booking);
+    try {
+        const { error } = await supabaseClient
+            .from("voxi_bookings")
+            .insert(booking);
 
-    isSaving = false;
-    $("submitButton").disabled = false;
-    $("submitButton").textContent = "Создать заявку";
+        if (error) {
+            showMessage(
+                "Не удалось сохранить заявку: " + error.message,
+                "error"
+            );
+            return;
+        }
 
-    if (error) {
-        showMessage(
-            "Не удалось сохранить заявку: " + error.message,
-            "error"
-        );
-        return;
+        $("bookingForm").reset();
+        calculatePrice();
+
+        showMessage("Заявка успешно сохранена!", "success");
+        await loadBookings();
+
+    } finally {
+        isSaving = false;
+        $("submitButton").disabled = false;
+        $("submitButton").textContent = "Создать заявку";
     }
-
-    $("bookingForm").reset();
-    calculatePrice();
-
-    showMessage("Заявка успешно сохранена!", "success");
-    await loadBookings();
 });
 
-/* Скачать резервную копию */
+/* Скачать резервную копию текущего списка */
 $("exportButton").addEventListener("click", () => {
     if (!currentUser) return;
 
@@ -607,8 +727,7 @@ $("exportButton").addEventListener("click", () => {
     showMessage("Резервная копия скачана.", "success");
 });
 
-/* Восстановление из JSON.
-   Записи добавляются к текущим, а не удаляют существующие. */
+/* Восстановление заявок из JSON */
 $("restoreButton").addEventListener("click", async () => {
     if (!currentUser) return;
 
@@ -624,7 +743,10 @@ $("restoreButton").addEventListener("click", async () => {
     try {
         imported = JSON.parse(await file.text());
     } catch {
-        showMessage("Файл не удалось прочитать. Проверь формат JSON.", "error");
+        showMessage(
+            "Файл не удалось прочитать. Проверь формат JSON.",
+            "error"
+        );
         return;
     }
 
@@ -633,6 +755,7 @@ $("restoreButton").addEventListener("click", async () => {
         return;
     }
 
+    const admin = isAdmin();
     const rows = [];
 
     for (const item of imported) {
@@ -641,7 +764,6 @@ $("restoreButton").addEventListener("click", async () => {
             return;
         }
 
-        /* Поддерживаем и старый формат резервной копии */
         const name = item.client_name ?? item.name;
         const date = item.booking_date ?? item.date;
         const time = item.booking_time ?? item.time;
@@ -657,13 +779,28 @@ $("restoreButton").addEventListener("click", async () => {
             !/^\d{4}-\d{2}-\d{2}$/.test(date) ||
             typeof time !== "string" ||
             !/^\d{2}:\d{2}(:\d{2})?$/.test(time) ||
-            !Number.isInteger(people) || people < 1 ||
-            !Number.isInteger(songs) || songs < 1 ||
+            !Number.isInteger(people) || people < 1 || people > 100 ||
+            !Number.isInteger(songs) || songs < 1 || songs > 100 ||
             !Number.isSafeInteger(price) || price < 1 ||
             typeof titles !== "string"
         ) {
             showMessage("В файле есть заявка с неверными данными.", "error");
             return;
+        }
+
+        /*
+          Администратор восстанавливает исходный user_id из резервной копии.
+          Обычный клиент может импортировать заявки только в свой аккаунт.
+        */
+        let ownerId = currentUser.id;
+
+        if (admin && typeof item.user_id === "string") {
+            const uuidPattern =
+                /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+            if (uuidPattern.test(item.user_id)) {
+                ownerId = item.user_id;
+            }
         }
 
         rows.push({
@@ -678,7 +815,7 @@ $("restoreButton").addEventListener("click", async () => {
             status: validStatuses.includes(item.status)
                 ? item.status
                 : "Запланировано",
-            user_id: currentUser.id
+            user_id: ownerId
         });
     }
 
@@ -695,7 +832,6 @@ $("restoreButton").addEventListener("click", async () => {
     $("restoreButton").disabled = true;
 
     try {
-        /* Отправляем небольшими партиями */
         for (let i = 0; i < rows.length; i += 100) {
             const batch = rows.slice(i, i + 100);
 
@@ -723,13 +859,14 @@ $("restoreButton").addEventListener("click", async () => {
     }
 });
 
-/* Проверяем авторизацию при открытии сайта */
+/* Проверка авторизации */
 supabaseClient.auth.onAuthStateChange((event, session) => {
     setSignedIn(session?.user || null);
 
-    /* Не выполняем запросы Supabase прямо внутри callback авторизации */
     setTimeout(() => {
-        if (currentUser) loadBookings();
+        if (currentUser) {
+            loadBookings();
+        }
     }, 0);
 });
 
