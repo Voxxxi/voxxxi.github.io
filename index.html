@@ -1,1310 +1,214 @@
 
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VOXi — Студия звукозаписи</title>
-<style>
-*{box-sizing:border-box}
-body{margin:0;padding:20px;background:#111;color:#eee;font-family:Arial,sans-serif}
-.container{max-width:900px;margin:auto}
-header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;border-bottom:1px solid #444;padding-bottom:16px;margin-bottom:24px}
-h1{margin:0;letter-spacing:3px;font-size:36px}
-h2{margin-top:0}
-h3{line-height:1.4}
-.muted{color:#aaa}
-.panel{background:#1b1b1b;border:1px solid #393939;border-radius:12px;padding:20px;margin-bottom:22px}
-label{display:block;margin:14px 0 6px}
-input,textarea,select{width:100%;padding:11px;background:#292929;color:#fff;border:1px solid #555;border-radius:6px;font:inherit}
-input:focus,textarea:focus,select:focus{outline:1px solid #aaa}
-button{padding:11px 15px;margin-top:12px;border:0;border-radius:6px;cursor:pointer;font:inherit;font-weight:bold}
-button:disabled{opacity:.45;cursor:not-allowed}
-.primary{background:#eee;color:#111}
-.secondary{background:#333;color:#fff;border:1px solid #555}
-.danger{background:#552727;color:#fff}
-.full{width:100%}
-.hidden{display:none!important}
-.notice{color:#ccc;line-height:1.5}
-#message{white-space:pre-wrap;overflow-wrap:anywhere;margin:12px 0}
-.success{color:#9fdbab}
-.error{color:#ff9999}
-.role{display:inline-block;padding:5px 9px;border:1px solid #777;border-radius:5px;color:#ddd;font-size:12px;margin-top:8px}
-.price{font-size:23px;margin:20px 0 6px}
-.booking{border:1px solid #444;border-radius:8px;padding:16px;margin-top:14px;overflow-wrap:anywhere}
-.booking h3{margin-top:0}
-.booking p{line-height:1.6;color:#ddd;white-space:pre-wrap}
-.booking-actions{display:flex;align-items:end;gap:10px;flex-wrap:wrap}
-.booking-actions>div{flex:1;min-width:180px}
-.booking-actions button{margin-bottom:0}
-.status-text{color:#ddd;margin:10px 0}
-.slot-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px;margin-top:12px}
-.slot-choice{display:flex;align-items:center;gap:7px;margin:0;padding:10px;background:#292929;border:1px solid #555;border-radius:6px;cursor:pointer}
-.slot-choice input{width:auto;margin:0;accent-color:#eee}
-.slot-choice:has(input:disabled){opacity:.35;cursor:not-allowed}
-.slot-card{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;border:1px solid #444;border-radius:8px;padding:12px;margin-top:10px}
-.slot-card button{margin:0}
-.slot-open{color:#9fdbab}
-.slot-closed{color:#ff9999}
-.small{font-size:13px}
-.song-card{border:1px solid #444;background:#222;border-radius:9px;padding:14px;margin-top:14px}
-.song-card h3{margin:0 0 8px}
-.song-card label{margin-top:12px}
-.song-price{font-size:17px;margin-top:12px;color:#ddd}
-.total-box{padding:16px;background:#252525;border:1px solid #555;border-radius:8px;margin-top:20px}
-.total-box .price{margin:0;font-size:25px}
-.song-detail{padding:10px 12px;background:#262626;border-radius:7px;margin:8px 0;line-height:1.6}
-@media(max-width:500px){body{padding:12px}.panel{padding:15px}h1{font-size:30px}}
-</style>
-</head>
-<body>
-<div class="container">
-<header>
-<div>
-<h1>VOXi</h1>
-<div class="muted">Студия звукозаписи</div>
-<div id="roleBadge" class="role hidden"></div>
-</div>
-<div>
-<button id="loginButton" class="primary">Войти через Google</button>
-<button id="logoutButton" class="secondary hidden">Выйти</button>
-</div>
-</header>
-
-<div id="message" role="status" aria-live="polite"></div>
-
-<section id="signedOut" class="panel">
-<h2>Добро пожаловать в VOXi</h2>
-<p class="notice">Войди через Google, чтобы создавать заявки и просматривать записи.</p>
-</section>
-
-<main id="app" class="hidden">
-
-<section id="schedulePanel" class="panel hidden">
-<h2>Моё расписание</h2>
-<p class="notice">
-Выбери дату и отметь часы, когда готов принимать клиентов.
-Уже занятые активными заявками часы отмечены отдельно.
-Можно открывать расписание на любую будущую дату.
-</p>
-
-<label for="scheduleDate">Дата расписания</label>
-<input id="scheduleDate" type="date">
-
-<div class="booking-actions">
-<div>
-<label for="scheduleStart">Начало диапазона</label>
-<select id="scheduleStart"></select>
-</div>
-<div>
-<label for="scheduleEnd">Конец диапазона</label>
-<select id="scheduleEnd"></select>
-</div>
-</div>
-
-<p class="muted small">
-Выбери диапазон, затем отметь конкретные часы. Шаг времени — 30 минут.
-</p>
-
-<div id="scheduleChoices" class="slot-grid"></div>
-
-<button id="openSlotsButton" class="primary full" type="button">
-Открыть выбранные часы
-</button>
-
-<h3 style="margin-top:26px">Часы на выбранную дату</h3>
-<div id="scheduleList">Выбери дату.</div>
-</section>
-
-<section class="panel">
-<h2>Запись на студию</h2>
-<form id="bookingForm">
-
-<label for="name">Имя и фамилия</label>
-<input id="name" type="text" maxlength="150" required>
-
-<label for="phone">Номер телефона</label>
-<input id="phone" type="tel" maxlength="40" required>
-
-<label for="date">Дата записи</label>
-<input id="date" type="date" required>
-
-<label for="time">Доступное время</label>
-<select id="time" required disabled>
-<option value="">Сначала выбери дату</option>
-</select>
-<p id="timeHelp" class="muted small">
-Выбери дату, чтобы увидеть доступные часы.
-</p>
-
-<label for="songs">Количество песен</label>
-<input id="songs" type="number" min="1" max="100" value="1" required>
-
-<p class="notice">
-Для каждой песни укажи название и количество исполнителей.
-Цена рассчитывается отдельно для каждой песни, затем складывается в общую сумму.
-</p>
-
-<div id="songFields"></div>
-
-<div class="total-box">
-<div class="muted">Общая стоимость записи</div>
-<div class="price"><strong><span id="price">5000</span> ₸</strong></div>
-<div id="priceBreakdown" class="muted small">1 песня — 5000 ₸</div>
-</div>
-
-<button id="submitButton" class="primary full" type="submit">Создать заявку</button>
-</form>
-</section>
-
-<section class="panel">
-<h2 id="bookingsTitle">Мои заявки</h2>
-<p id="bookingsDescription" class="muted">Здесь отображаются твои заявки.</p>
-<div id="bookings">Загрузка...</div>
-</section>
-
-<section id="backupPanel" class="panel hidden">
-<h2>Резервное копирование</h2>
-<p class="notice">Скачай JSON-файл, чтобы сохранить копию заявок. Восстановление добавит записи из файла к текущему списку.</p>
-<button id="exportButton" class="secondary full" type="button">Скачать резервную копию</button>
-<label for="backupFile">Восстановить заявки из JSON-файла</label>
-<input id="backupFile" type="file" accept=".json,application/json">
-<button id="restoreButton" class="secondary full" type="button">Импортировать заявки</button>
-</section>
-
-</main>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-"use strict";
-
-const SUPABASE_URL = "https://vnykpjarjvacwhxvkxrk.supabase.co";
-const SUPABASE_KEY = "sb_publishable_Jv-1ip1CSRKe2_cCjcGjmA_B333H-oC";
-const ADMIN_EMAIL = "mops850@gmail.com";
-
-const supabaseClient = window.supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_KEY
-);
-
-const $ = id => document.getElementById(id);
-
-let currentUser = null;
-let currentBookings = [];
-let currentSlots = [];
-let isSaving = false;
-let loadingRequest = 0;
-
-const validStatuses = [
-  "Запланировано",
-  "В процессе",
-  "Записано",
-  "Готово",
-  "Отменено"
-];
-
-function isAdmin() {
-  return currentUser?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
+/* VOXi — обновлённый дизайн */
+:root {
+  --gold: #d6b778;
+  --gold-light: #f0d9a1;
+  --bg: #0b0b0c;
+  --panel: #151516;
+  --border: #34312a;
+  --text: #f4f1e9;
+  --muted: #aaa7a0;
 }
 
-function showMessage(text, type = "") {
-  $("message").textContent = text;
-  $("message").className = type;
+body {
+  background:
+    radial-gradient(ellipse at 50% 0%, #292319 0%, transparent 48%),
+    var(--bg);
+  color: var(--text);
+  font-family: Arial, sans-serif;
 }
 
-function localDateString() {
-  const d = new Date();
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
+.container {
+  max-width: 1080px;
 }
 
-function normalizeTime(value) {
-  return String(value || "").slice(0, 5);
+header {
+  border-bottom-color: var(--border);
+  padding: 20px 0;
+  margin-bottom: 28px;
 }
 
-function isActiveBooking(booking) {
-  return booking.status !== "Отменено";
+header h1 {
+  font-size: 42px;
+  letter-spacing: 5px;
+  color: var(--gold-light);
 }
 
-function bookingExists(date, time) {
-  return currentBookings.some(b =>
-    b.booking_date === date &&
-    normalizeTime(b.booking_time) === normalizeTime(time) &&
-    isActiveBooking(b)
-  );
+.primary {
+  background: linear-gradient(135deg, var(--gold-light), var(--gold));
+  color: #17130b;
 }
 
-/* Тариф за одну песню:
-   1 человек = 5000
-   2 человека = 6000
-   3 человека = 7000
-   4 и более = 2000 за каждого человека
-*/
-function priceForPeople(people) {
-  if (people === 1) return 5000;
-  if (people === 2) return 6000;
-  if (people === 3) return 7000;
-  if (people >= 4) return people * 2000;
-  return 0;
+.primary:hover {
+  filter: brightness(1.08);
 }
 
-function parseSongDetails(item) {
-  const raw = item?.song_titles;
-
-  if (typeof raw === "string" && raw.trim()) {
-    try {
-      const parsed = JSON.parse(raw);
-
-      if (
-        Array.isArray(parsed) &&
-        parsed.every(song =>
-          song &&
-          typeof song === "object" &&
-          typeof song.title === "string"
-        )
-      ) {
-        return parsed.map(song => {
-          const people = Number(song.people);
-          const validPeople =
-            Number.isInteger(people) && people >= 1 && people <= 100;
-
-          return {
-            title: song.title,
-            people: validPeople ? people : Number(item.people_count) || 1,
-            price: Number.isFinite(Number(song.price))
-              ? Number(song.price)
-              : priceForPeople(validPeople ? people : Number(item.people_count) || 1)
-          };
-        });
-      }
-    } catch (_) {
-      /* Старые заявки содержат обычный текст, а не JSON */
-    }
-  }
-
-  const legacyPeople = Math.max(1, Number(item?.people_count) || 1);
-  const legacyCount = Math.max(1, Number(item?.song_count) || 1);
-  const legacyPrice = Number(item?.price) || priceForPeople(legacyPeople) * legacyCount;
-
-  const names = typeof raw === "string"
-    ? raw.split(/\r?\n/).map(s => s.trim()).filter(Boolean)
-    : [];
-
-  const result = [];
-
-  for (let i = 0; i < legacyCount; i++) {
-    result.push({
-      title: names[i] || `Песня ${i + 1}`,
-      people: legacyPeople,
-      price: i === 0
-        ? legacyPrice - priceForPeople(legacyPeople) * (legacyCount - 1)
-        : priceForPeople(legacyPeople)
-    });
-  }
-
-  return result;
+.secondary {
+  background: #242321;
+  border-color: #504b40;
 }
 
-function setSignedIn(user) {
-  currentUser = user;
-
-  const signedIn = Boolean(user);
-  const admin = signedIn && isAdmin();
-
-  $("signedOut").classList.toggle("hidden", signedIn);
-  $("app").classList.toggle("hidden", !signedIn);
-  $("loginButton").classList.toggle("hidden", signedIn);
-  $("logoutButton").classList.toggle("hidden", !signedIn);
-  $("roleBadge").classList.toggle("hidden", !signedIn);
-
-  $("roleBadge").textContent = admin
-    ? "Администратор VOXi"
-    : "Клиент VOXi";
-
-  $("schedulePanel").classList.toggle("hidden", !admin);
-  $("backupPanel").classList.toggle("hidden", !admin);
-
-  $("bookingsTitle").textContent = admin
-    ? "Все заявки клиентов"
-    : "Мои заявки";
-
-  $("bookingsDescription").textContent = admin
-    ? "Все заявки клиентов. Здесь можно менять статусы и удалять заявки."
-    : "Здесь отображаются только твои заявки.";
-
-  if (!user) {
-    loadingRequest++;
-    currentBookings = [];
-    currentSlots = [];
-    $("bookings").textContent = "Войди в аккаунт, чтобы увидеть заявки.";
-    $("scheduleList").textContent = "Войди в аккаунт администратора.";
-    resetAvailableTimes("Сначала выбери дату.");
-  }
+.panel {
+  background: linear-gradient(145deg, #191919, #121213);
+  border-color: var(--border);
+  border-radius: 16px;
+  padding: 24px;
 }
 
-/* Создание элементов без вставки пользовательского текста как HTML */
-function addText(parent, tag, text, className = "") {
-  const el = document.createElement(tag);
-  el.textContent = text ?? "";
-  if (className) el.className = className;
-  parent.appendChild(el);
-  return el;
+input, textarea, select {
+  background: #202020;
+  border-color: #48443b;
+  border-radius: 8px;
 }
 
-/* Динамические поля песен */
-function renderSongFields() {
-  const container = $("songFields");
-  const count = Number($("songs").value);
-
-  container.replaceChildren();
-
-  if (!Number.isInteger(count) || count < 1 || count > 100) {
-    $("price").textContent = "0";
-    $("priceBreakdown").textContent = "Укажи количество песен от 1 до 100.";
-    return;
-  }
-
-  for (let i = 0; i < count; i++) {
-    const card = document.createElement("div");
-    card.className = "song-card";
-
-    addText(card, "h3", `Песня №${i + 1}`);
-
-    const titleLabel = addText(card, "label", "Название песни");
-    titleLabel.htmlFor = `songTitle${i}`;
-
-    const titleInput = document.createElement("input");
-    titleInput.id = `songTitle${i}`;
-    titleInput.type = "text";
-    titleInput.maxLength = 300;
-    titleInput.placeholder = `Название песни №${i + 1}`;
-    titleInput.required = true;
-    card.appendChild(titleInput);
-
-    const peopleLabel = addText(card, "label", "Количество исполнителей");
-    peopleLabel.htmlFor = `songPeople${i}`;
-
-    const peopleInput = document.createElement("input");
-    peopleInput.id = `songPeople${i}`;
-    peopleInput.type = "number";
-    peopleInput.min = "1";
-    peopleInput.max = "100";
-    peopleInput.step = "1";
-    peopleInput.value = "1";
-    peopleInput.required = true;
-    peopleInput.dataset.songIndex = String(i);
-    peopleInput.addEventListener("input", calculatePrice);
-    card.appendChild(peopleInput);
-
-    const priceLine = addText(card, "div", "Стоимость: 5000 ₸", "song-price");
-    priceLine.id = `songPrice${i}`;
-
-    container.appendChild(card);
-  }
-
-  calculatePrice();
+button {
+  border-radius: 8px;
+  transition: filter .2s ease, transform .2s ease;
 }
 
-function collectSongDetails(validate = false) {
-  const count = Number($("songs").value);
-  const songs = [];
-
-  if (!Number.isInteger(count) || count < 1 || count > 100) {
-    throw new Error("Количество песен должно быть от 1 до 100.");
-  }
-
-  for (let i = 0; i < count; i++) {
-    const title = $(`songTitle${i}`)?.value.trim() || "";
-    const people = Number($(`songPeople${i}`)?.value);
-
-    if (validate && !title) {
-      throw new Error(`Укажи название песни №${i + 1}.`);
-    }
-
-    if (
-      !Number.isInteger(people) ||
-      people < 1 ||
-      people > 100
-    ) {
-      throw new Error(
-        `Для песни №${i + 1} укажи количество исполнителей от 1 до 100.`
-      );
-    }
-
-    songs.push({
-      title: title || `Песня ${i + 1}`,
-      people,
-      price: priceForPeople(people)
-    });
-  }
-
-  return songs;
+button:hover {
+  filter: brightness(1.08);
 }
 
-function calculatePrice() {
-  const container = $("songFields");
-  const count = Number($("songs").value);
-
-  if (!Number.isInteger(count) || count < 1 || count > 100) {
-    $("price").textContent = "0";
-    $("priceBreakdown").textContent = "Укажи количество песен от 1 до 100.";
-    return;
-  }
-
-  let total = 0;
-  const lines = [];
-
-  for (let i = 0; i < count; i++) {
-    const input = $(`songPeople${i}`);
-    const people = Number(input?.value);
-    const valid = Number.isInteger(people) && people >= 1 && people <= 100;
-    const songPrice = valid ? priceForPeople(people) : 0;
-
-    total += songPrice;
-
-    const priceLine = $(`songPrice${i}`);
-    if (priceLine) {
-      priceLine.textContent = `Стоимость: ${songPrice.toLocaleString("ru-RU")} ₸`;
-    }
-
-    if (valid) {
-      lines.push(`Песня ${i + 1}: ${people} чел. — ${songPrice.toLocaleString("ru-RU")} ₸`);
-    } else {
-      lines.push(`Песня ${i + 1}: проверь количество исполнителей`);
-    }
-  }
-
-  $("price").textContent = total.toLocaleString("ru-RU");
-  $("priceBreakdown").textContent = lines.join("\n");
+.home-hero {
+  position: relative;
+  overflow: hidden;
+  padding: 58px 28px;
+  margin: 24px 0;
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  background:
+    radial-gradient(ellipse at 85% 20%, #51412655, transparent 45%),
+    linear-gradient(135deg, #1b1b1b, #101011);
 }
 
-$("songs").addEventListener("input", renderSongFields);
-
-$("loginButton").addEventListener("click", async () => {
-  showMessage("Открываю вход через Google...");
-
-  const { error } = await supabaseClient.auth.signInWithOAuth({
-    provider: "google",
-    options: {
-      redirectTo: window.location.origin + window.location.pathname
-    }
-  });
-
-  if (error) {
-    showMessage("Ошибка входа: " + error.message, "error");
-  }
-});
-
-$("logoutButton").addEventListener("click", async () => {
-  const { error } = await supabaseClient.auth.signOut();
-
-  if (error) {
-    showMessage("Не удалось выйти: " + error.message, "error");
-  } else {
-    showMessage("Ты вышел из аккаунта.");
-  }
-});
-
-/* Загрузка заявок */
-async function loadBookings() {
-  if (!currentUser) return;
-
-  const userId = currentUser.id;
-  const admin = isAdmin();
-  const requestId = ++loadingRequest;
-
-  $("bookings").textContent = "Загрузка заявок...";
-
-  let query = supabaseClient.from("voxi_bookings").select("*");
-
-  if (!admin) {
-    query = query.eq("user_id", userId);
-  }
-
-  const { data, error } = await query
-    .order("booking_date", { ascending: true })
-    .order("booking_time", { ascending: true });
-
-  if (requestId !== loadingRequest) return;
-
-  if (error) {
-    $("bookings").textContent = "Не удалось загрузить заявки.";
-    showMessage("Ошибка загрузки: " + error.message, "error");
-    return;
-  }
-
-  if (!currentUser || currentUser.id !== userId || isAdmin() !== admin) return;
-
-  currentBookings = data || [];
-  renderBookings();
-
-  if ($("date").value) await loadAvailableTimes();
-  if (admin && $("scheduleDate").value) await loadScheduleSlots();
+.home-kicker {
+  color: var(--gold);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  font-size: 12px;
+  font-weight: bold;
 }
 
-/* Отображение заявок, включая разбивку по каждой песне */
-function renderBookings() {
-  const container = $("bookings");
-  container.replaceChildren();
-
-  if (currentBookings.length === 0) {
-    container.textContent = "Пока заявок нет.";
-    return;
-  }
-
-  const admin = isAdmin();
-
-  currentBookings.forEach((item, index) => {
-    const card = document.createElement("article");
-    card.className = "booking";
-
-    addText(card, "h3", "Заявка №" + (index + 1));
-
-    const details =
-      "Клиент: " + (item.client_name || "Не указано") +
-      "\nТелефон: " + (item.phone || "Не указан") +
-      "\nДата: " + (item.booking_date || "Не указана") +
-      "\nВремя: " + normalizeTime(item.booking_time);
-
-    addText(card, "p", details);
-
-    const songs = parseSongDetails(item);
-    const songContainer = document.createElement("div");
-    addText(songContainer, "h4", "Песни и стоимость");
-
-    songs.forEach((song, songIndex) => {
-      const line = document.createElement("div");
-      line.className = "song-detail";
-
-      addText(line, "strong", `Песня №${songIndex + 1}: ${song.title}`);
-      addText(
-        line,
-        "div",
-        `Исполнителей: ${song.people} · Стоимость: ${Number(song.price).toLocaleString("ru-RU")} ₸`
-      );
-
-      songContainer.appendChild(line);
-    });
-
-    card.appendChild(songContainer);
-
-    const totalPeople = songs.reduce(
-      (sum, song) => sum + (Number(song.people) || 0),
-      0
-    );
-
-    addText(card, "p",
-      `Всего исполнений по песням: ${totalPeople}\nКоличество песен: ${songs.length}\nОбщая стоимость: ${Number(item.price || 0).toLocaleString("ru-RU")} ₸`
-    );
-
-    if (!admin) {
-      addText(
-        card,
-        "div",
-        "Статус: " + (item.status || "Запланировано"),
-        "status-text"
-      );
-      container.appendChild(card);
-      return;
-    }
-
-    const actions = document.createElement("div");
-    actions.className = "booking-actions";
-
-    const wrapper = document.createElement("div");
-    addText(wrapper, "label", "Статус заявки");
-
-    const select = document.createElement("select");
-
-    validStatuses.forEach(status => {
-      const option = document.createElement("option");
-      option.value = status;
-      option.textContent = status;
-      select.appendChild(option);
-    });
-
-    select.value = validStatuses.includes(item.status)
-      ? item.status
-      : "Запланировано";
-
-    wrapper.appendChild(select);
-    actions.appendChild(wrapper);
-
-    select.addEventListener("change", async () => {
-      if (!isAdmin()) return;
-
-      const previous = item.status || "Запланировано";
-      const nextStatus = select.value;
-      select.disabled = true;
-
-      const { error } = await supabaseClient
-        .from("voxi_bookings")
-        .update({ status: nextStatus })
-        .eq("id", item.id);
-
-      select.disabled = false;
-
-      if (error) {
-        showMessage("Не удалось изменить статус: " + error.message, "error");
-        select.value = previous;
-        return;
-      }
-
-      item.status = nextStatus;
-      showMessage("Статус обновлён.", "success");
-      await loadBookings();
-    });
-
-    const del = document.createElement("button");
-    del.className = "danger";
-    del.textContent = "Удалить";
-
-    del.addEventListener("click", async () => {
-      if (!isAdmin()) return;
-
-      if (!confirm("Точно удалить заявку клиента " + (item.client_name || "") + "?")) {
-        return;
-      }
-
-      del.disabled = true;
-
-      const { error } = await supabaseClient
-        .from("voxi_bookings")
-        .delete()
-        .eq("id", item.id);
-
-      if (error) {
-        del.disabled = false;
-        showMessage("Не удалось удалить: " + error.message, "error");
-        return;
-      }
-
-      showMessage("Заявка удалена.", "success");
-      await loadBookings();
-    });
-
-    actions.appendChild(del);
-    card.appendChild(actions);
-    container.appendChild(card);
-  });
+.home-hero h2 {
+  max-width: 680px;
+  margin: 18px 0;
+  font-size: clamp(34px, 6vw, 62px);
+  line-height: 1.08;
+  letter-spacing: -1.5px;
 }
 
-/* Формирование списка времени с шагом 30 минут */
-function makeTimeOptions() {
-  const options = [];
-
-  for (let minutes = 5 * 60; minutes <= 23 * 60 + 30; minutes += 30) {
-    const h = String(Math.floor(minutes / 60)).padStart(2, "0");
-    const m = String(minutes % 60).padStart(2, "0");
-    options.push(`${h}:${m}`);
-  }
-
-  return options;
+.home-hero p {
+  max-width: 550px;
+  color: #c3c0b9;
+  font-size: 17px;
+  line-height: 1.8;
 }
 
-const allTimes = makeTimeOptions();
-
-function fillTimeSelect(select, selectedValue = "") {
-  select.replaceChildren();
-
-  const placeholder = document.createElement("option");
-  placeholder.value = "";
-  placeholder.textContent = "Выбери время";
-  select.appendChild(placeholder);
-
-  allTimes.forEach(time => {
-    const option = document.createElement("option");
-    option.value = time;
-    option.textContent = time;
-    select.appendChild(option);
-  });
-
-  select.value = selectedValue;
+.home-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 26px;
 }
 
-fillTimeSelect($("scheduleStart"), "10:00");
-fillTimeSelect($("scheduleEnd"), "19:00");
-
-function renderScheduleChoices() {
-  const container = $("scheduleChoices");
-  container.replaceChildren();
-
-  const start = $("scheduleStart").value;
-  const end = $("scheduleEnd").value;
-
-  allTimes.forEach(time => {
-    if (time < start || time >= end) return;
-
-    const label = document.createElement("label");
-    label.className = "slot-choice";
-
-    const checkbox = document.createElement("input");
-    checkbox.type = "checkbox";
-    checkbox.value = time;
-    checkbox.dataset.time = time;
-
-    const span = document.createElement("span");
-    span.textContent = time;
-
-    if ($("scheduleDate").value && bookingExists($("scheduleDate").value, time)) {
-      checkbox.disabled = true;
-      span.textContent = time + " — занято";
-    }
-
-    label.appendChild(checkbox);
-    label.appendChild(span);
-    container.appendChild(label);
-  });
+.home-actions button {
+  margin-top: 0;
+  min-height: 48px;
+  padding: 14px 20px;
 }
 
-$("scheduleStart").addEventListener("change", renderScheduleChoices);
-$("scheduleEnd").addEventListener("change", renderScheduleChoices);
-
-/* Клиенту доступны только открытые слоты */
-function resetAvailableTimes(message) {
-  const select = $("time");
-  select.replaceChildren();
-
-  const option = document.createElement("option");
-  option.value = "";
-  option.textContent = message;
-  select.appendChild(option);
-
-  select.disabled = true;
-  $("timeHelp").textContent = message;
+.waveform {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  height: 46px;
+  margin-top: 30px;
 }
 
-async function loadAvailableTimes() {
-  const date = $("date").value;
-
-  if (!currentUser || !date) {
-    resetAvailableTimes("Сначала выбери дату.");
-    return;
-  }
-
-  resetAvailableTimes("Загружаю доступные часы...");
-
-  const { data, error } = await supabaseClient
-    .from("voxi_schedule_slots")
-    .select("booking_time")
-    .eq("booking_date", date)
-    .eq("is_open", true)
-    .order("booking_time", { ascending: true });
-
-  if (error) {
-    resetAvailableTimes("Не удалось загрузить время.");
-    showMessage("Ошибка расписания: " + error.message, "error");
-    return;
-  }
-
-  const available = (data || [])
-    .map(slot => normalizeTime(slot.booking_time))
-    .filter(time => !bookingExists(date, time));
-
-  const select = $("time");
-  select.replaceChildren();
-
-  const placeholder = document.createElement("option");
-  placeholder.value = "";
-  placeholder.textContent = available.length
-    ? "Выбери время"
-    : "Свободных часов нет";
-
-  select.appendChild(placeholder);
-
-  available.forEach(time => {
-    const option = document.createElement("option");
-    option.value = time;
-    option.textContent = time;
-    select.appendChild(option);
-  });
-
-  select.disabled = available.length === 0;
-
-  $("timeHelp").textContent = available.length
-    ? "Показываются только часы, открытые администратором и ещё не занятые."
-    : "На эту дату пока нет свободных часов. Попробуй другую дату.";
+.waveform span {
+  width: 4px;
+  border-radius: 4px;
+  background: var(--gold);
+  opacity: .8;
 }
 
-$("date").min = localDateString();
-$("date").addEventListener("change", loadAvailableTimes);
+.waveform span:nth-child(6n + 1) { height: 13px; }
+.waveform span:nth-child(6n + 2) { height: 27px; }
+.waveform span:nth-child(6n + 3) { height: 40px; }
+.waveform span:nth-child(6n + 4) { height: 20px; }
+.waveform span:nth-child(6n + 5) { height: 33px; }
+.waveform span:nth-child(6n) { height: 16px; }
 
-/* Расписание администратора */
-async function loadScheduleSlots() {
-  if (!isAdmin()) return;
-
-  const date = $("scheduleDate").value;
-  const container = $("scheduleList");
-
-  container.replaceChildren();
-
-  if (!date) {
-    container.textContent = "Выбери дату.";
-    return;
-  }
-
-  const { data, error } = await supabaseClient
-    .from("voxi_schedule_slots")
-    .select("*")
-    .eq("booking_date", date)
-    .order("booking_time", { ascending: true });
-
-  if (error) {
-    container.textContent = "Не удалось загрузить расписание.";
-    showMessage("Ошибка расписания: " + error.message, "error");
-    return;
-  }
-
-  currentSlots = data || [];
-  renderScheduleChoices();
-
-  if (currentSlots.length === 0) {
-    container.textContent = "На эту дату часы ещё не добавлены.";
-    return;
-  }
-
-  currentSlots.forEach(slot => {
-    const time = normalizeTime(slot.booking_time);
-    const booked = bookingExists(date, time);
-
-    const row = document.createElement("div");
-    row.className = "slot-card";
-
-    const info = document.createElement("div");
-    addText(info, "strong", time);
-
-    addText(
-      info,
-      "div",
-      booked
-        ? "Есть активная заявка"
-        : slot.is_open
-          ? "Открыто для клиентов"
-          : "Закрыто",
-      booked || slot.is_open ? "slot-open" : "slot-closed"
-    );
-
-    row.appendChild(info);
-
-    const actions = document.createElement("div");
-
-    const toggle = document.createElement("button");
-    toggle.className = "secondary";
-    toggle.textContent = slot.is_open ? "Закрыть" : "Открыть";
-    toggle.disabled = booked;
-    toggle.title = booked
-      ? "Сначала отмените или удалите активную заявку"
-      : "";
-
-    toggle.addEventListener("click", async () => {
-      if (!isAdmin() || bookingExists(date, time)) return;
-
-      toggle.disabled = true;
-
-      const { error } = await supabaseClient
-        .from("voxi_schedule_slots")
-        .update({ is_open: !slot.is_open })
-        .eq("id", slot.id);
-
-      if (error) {
-        showMessage("Не удалось изменить час: " + error.message, "error");
-        toggle.disabled = false;
-        return;
-      }
-
-      showMessage(
-        slot.is_open
-          ? "Час закрыт для клиентов."
-          : "Час открыт для клиентов.",
-        "success"
-      );
-
-      await loadScheduleSlots();
-      await loadAvailableTimes();
-    });
-
-    const del = document.createElement("button");
-    del.className = "danger";
-    del.textContent = "Удалить час";
-    del.disabled = booked;
-    del.title = booked
-      ? "Нельзя удалить час с активной заявкой"
-      : "";
-
-    del.addEventListener("click", async () => {
-      if (!isAdmin() || bookingExists(date, time)) return;
-
-      if (!confirm(`Удалить ${time} из расписания на ${date}?`)) return;
-
-      del.disabled = true;
-
-      const { error } = await supabaseClient
-        .from("voxi_schedule_slots")
-        .delete()
-        .eq("id", slot.id);
-
-      if (error) {
-        showMessage("Не удалось удалить час: " + error.message, "error");
-        del.disabled = false;
-        return;
-      }
-
-      showMessage("Час удалён из расписания.", "success");
-      await loadScheduleSlots();
-      await loadAvailableTimes();
-    });
-
-    actions.appendChild(toggle);
-    actions.appendChild(del);
-    row.appendChild(actions);
-    container.appendChild(row);
-  });
+.home-features {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin: 24px 0;
 }
 
-$("scheduleDate").min = localDateString();
-$("scheduleDate").value = localDateString();
+.home-feature {
+  padding: 22px;
+  border: 1px solid var(--border);
+  border-radius: 15px;
+  background: #141415;
+}
 
-$("scheduleDate").addEventListener("change", async () => {
-  await loadScheduleSlots();
-});
+.feature-icon {
+  font-size: 27px;
+  color: var(--gold);
+}
 
-$("openSlotsButton").addEventListener("click", async () => {
-  if (!isAdmin()) return;
+.home-feature h3 {
+  margin: 14px 0 8px;
+}
 
-  const date = $("scheduleDate").value;
+.home-feature p {
+  color: var(--muted);
+  line-height: 1.7;
+  font-size: 14px;
+}
 
-  if (!date) {
-    showMessage("Сначала выбери дату расписания.", "error");
-    return;
+.home-section-title {
+  margin: 38px 0 16px;
+  font-size: 25px;
+}
+
+.home-footer {
+  padding: 28px 0;
+  margin-top: 35px;
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+.booking-panel-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.booking-panel-heading button {
+  margin-top: 0;
+}
+
+@media (max-width: 700px) {
+  .home-features {
+    grid-template-columns: 1fr;
   }
 
-  const selected = [
-    ...$("scheduleChoices").querySelectorAll('input[type="checkbox"]:checked')
-  ].map(input => input.value);
-
-  if (selected.length === 0) {
-    showMessage("Отметь хотя бы один час.", "error");
-    return;
+  .home-hero {
+    padding: 38px 20px;
   }
 
-  const allowed = selected.filter(time => !bookingExists(date, time));
-
-  if (allowed.length === 0) {
-    showMessage("Выбранные часы заняты активными заявками.", "error");
-    return;
+  .panel {
+    padding: 17px;
   }
 
-  $("openSlotsButton").disabled = true;
-
-  try {
-    const rows = allowed.map(time => ({
-      booking_date: date,
-      booking_time: time,
-      is_open: true
-    }));
-
-    const { error } = await supabaseClient
-      .from("voxi_schedule_slots")
-      .upsert(rows, { onConflict: "booking_date,booking_time" });
-
-    if (error) {
-      showMessage("Не удалось сохранить расписание: " + error.message, "error");
-      return;
-    }
-
-    showMessage(
-      "Расписание сохранено. Добавлено или открыто часов: " + allowed.length + ".",
-      "success"
-    );
-
-    await loadScheduleSlots();
-    await loadAvailableTimes();
-  } catch (error) {
-    showMessage("Ошибка: " + error.message, "error");
-  } finally {
-    $("openSlotsButton").disabled = false;
+  header h1 {
+    font-size: 36px;
   }
-});
-
-/* Создание заявки с отдельной стоимостью каждой песни */
-$("bookingForm").addEventListener("submit", async event => {
-  event.preventDefault();
-
-  if (!currentUser || isSaving) return;
-
-  const date = $("date").value;
-  const time = $("time").value;
-
-  if (!date || !time) {
-    showMessage("Выбери дату и доступное время из списка.", "error");
-    return;
-  }
-
-  if (bookingExists(date, time)) {
-    showMessage("Это время уже занято. Выбери другое.", "error");
-    await loadAvailableTimes();
-    return;
-  }
-
-  let songs;
-
-  try {
-    songs = collectSongDetails(true);
-  } catch (error) {
-    showMessage(error.message, "error");
-    return;
-  }
-
-  const clientName = $("name").value.trim();
-  const phone = $("phone").value.trim();
-
-  if (!clientName || !phone) {
-    showMessage("Заполни имя и номер телефона.", "error");
-    return;
-  }
-
-  const totalPeople = songs.reduce((sum, song) => sum + song.people, 0);
-  const totalPrice = songs.reduce((sum, song) => sum + song.price, 0);
-
-  if (!Number.isSafeInteger(totalPrice) || totalPrice < 1) {
-    showMessage("Не удалось рассчитать стоимость. Проверь количество исполнителей.", "error");
-    return;
-  }
-
-  const booking = {
-    client_name: clientName,
-    phone: phone,
-    booking_date: date,
-    booking_time: time,
-    people_count: totalPeople,
-    song_count: songs.length,
-    song_titles: JSON.stringify(songs),
-    price: totalPrice,
-    status: "Запланировано",
-    user_id: currentUser.id
-  };
-
-  isSaving = true;
-  $("submitButton").disabled = true;
-  $("submitButton").textContent = "Сохраняю...";
-
-  try {
-    const { error } = await supabaseClient
-      .from("voxi_bookings")
-      .insert(booking);
-
-    if (error) {
-      if (error.code === "23505") {
-        showMessage("Это время уже занято. Выбери другое.", "error");
-      } else if (error.code === "42501" || error.code === "403") {
-        showMessage("Это время больше недоступно. Выбери другой час.", "error");
-      } else {
-        showMessage("Не удалось сохранить заявку: " + error.message, "error");
-      }
-
-      await loadAvailableTimes();
-      return;
-    }
-
-    $("bookingForm").reset();
-    $("songs").value = "1";
-    renderSongFields();
-    resetAvailableTimes("Сначала выбери дату.");
-
-    showMessage("Заявка успешно сохранена!", "success");
-    await loadBookings();
-  } catch (error) {
-    showMessage("Ошибка: " + error.message, "error");
-  } finally {
-    isSaving = false;
-    $("submitButton").disabled = false;
-    $("submitButton").textContent = "Создать заявку";
-  }
-});
-
-/* Экспорт заявок — только для администратора */
-$("exportButton").addEventListener("click", () => {
-  if (!isAdmin()) {
-    showMessage("Резервное копирование доступно только администратору.", "error");
-    return;
-  }
-
-  const file = new Blob(
-    [JSON.stringify(currentBookings, null, 2)],
-    { type: "application/json;charset=utf-8" }
-  );
-
-  const url = URL.createObjectURL(file);
-  const link = document.createElement("a");
-
-  link.href = url;
-  link.download = "VOXi-backup-" + localDateString() + ".json";
-
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
-
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
-  showMessage("Резервная копия скачана.", "success");
-});
-
-/* Импорт заявок — только для администратора */
-$("restoreButton").addEventListener("click", async () => {
-  if (!isAdmin()) {
-    showMessage("Восстановление заявок доступно только администратору.", "error");
-    return;
-  }
-
-  const file = $("backupFile").files[0];
-
-  if (!file) {
-    showMessage("Сначала выбери JSON-файл.", "error");
-    return;
-  }
-
-  let imported;
-
-  try {
-    imported = JSON.parse(await file.text());
-  } catch (_) {
-    showMessage("Файл не удалось прочитать. Проверь формат JSON.", "error");
-    return;
-  }
-
-  if (!Array.isArray(imported)) {
-    showMessage("В файле должен находиться список заявок.", "error");
-    return;
-  }
-
-  const rows = [];
-
-  for (const item of imported) {
-    if (!item || typeof item !== "object" || Array.isArray(item)) {
-      showMessage("Файл содержит некорректную заявку.", "error");
-      return;
-    }
-
-    const name = item.client_name ?? item.name;
-    const date = item.booking_date ?? item.date;
-    const time = item.booking_time ?? item.time;
-    const people = Number(item.people_count ?? item.people);
-    const songCount = Number(item.song_count ?? item.songs);
-    const titles = item.song_titles ?? item.songNames ?? "";
-    const price = Number(item.price);
-
-    if (
-      typeof name !== "string" ||
-      !name.trim() ||
-      typeof item.phone !== "string" ||
-      !item.phone.trim() ||
-      typeof date !== "string" ||
-      !/^\d{4}-\d{2}-\d{2}$/.test(date) ||
-      typeof time !== "string" ||
-      !/^\d{2}:\d{2}(:\d{2})?$/.test(time) ||
-      !Number.isInteger(people) ||
-      people < 1 ||
-      people > 10000 ||
-      !Number.isInteger(songCount) ||
-      songCount < 1 ||
-      songCount > 100 ||
-      !Number.isSafeInteger(price) ||
-      price < 1 ||
-      typeof titles !== "string"
-    ) {
-      showMessage("В файле есть заявка с неверными данными.", "error");
-      return;
-    }
-
-    let ownerId = currentUser.id;
-
-    const uuid =
-      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-
-    if (
-      isAdmin() &&
-      typeof item.user_id === "string" &&
-      uuid.test(item.user_id)
-    ) {
-      ownerId = item.user_id;
-    }
-
-    rows.push({
-      client_name: name.trim(),
-      phone: item.phone.trim(),
-      booking_date: date,
-      booking_time: normalizeTime(time),
-      people_count: people,
-      song_count: songCount,
-      song_titles: titles,
-      price: price,
-      status: validStatuses.includes(item.status)
-        ? item.status
-        : "Запланировано",
-      user_id: ownerId
-    });
-  }
-
-  if (!rows.length) {
-    showMessage("В файле нет заявок для импорта.", "error");
-    return;
-  }
-
-  if (!confirm(
-    "Добавить " + rows.length +
-    " заявок? Часы для каждой заявки должны быть открыты в расписании."
-  )) {
-    return;
-  }
-
-  $("restoreButton").disabled = true;
-
-  try {
-    for (let i = 0; i < rows.length; i += 100) {
-      const { error } = await supabaseClient
-        .from("voxi_bookings")
-        .insert(rows.slice(i, i + 100));
-
-      if (error) {
-        showMessage(
-          "Импорт остановлен: " + error.message +
-          "\nЧасть заявок могла уже сохраниться. Проверь список перед повторным импортом.",
-          "error"
-        );
-
-        await loadBookings();
-        return;
-      }
-    }
-
-    $("backupFile").value = "";
-    showMessage("Заявки импортированы.", "success");
-    await loadBookings();
-  } finally {
-    $("restoreButton").disabled = false;
-  }
-});
-
-/* Авторизация */
-supabaseClient.auth.onAuthStateChange((event, session) => {
-  setSignedIn(session?.user || null);
-
-  setTimeout(async () => {
-    if (!currentUser) return;
-
-    await loadBookings();
-
-    if (isAdmin()) {
-      await loadScheduleSlots();
-    }
-  }, 0);
-});
-
-/* Начальная загрузка формы */
-renderSongFields();
-renderScheduleChoices();
-</script>
-</body>
-</html>
+}
