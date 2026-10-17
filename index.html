@@ -1,214 +1,55 @@
-
-/* VOXi — обновлённый дизайн */
-:root {
-  --gold: #d6b778;
-  --gold-light: #f0d9a1;
-  --bg: #0b0b0c;
-  --panel: #151516;
-  --border: #34312a;
-  --text: #f4f1e9;
-  --muted: #aaa7a0;
-}
-
-body {
-  background:
-    radial-gradient(ellipse at 50% 0%, #292319 0%, transparent 48%),
-    var(--bg);
-  color: var(--text);
-  font-family: Arial, sans-serif;
-}
-
-.container {
-  max-width: 1080px;
-}
-
-header {
-  border-bottom-color: var(--border);
-  padding: 20px 0;
-  margin-bottom: 28px;
-}
-
-header h1 {
-  font-size: 42px;
-  letter-spacing: 5px;
-  color: var(--gold-light);
-}
-
-.primary {
-  background: linear-gradient(135deg, var(--gold-light), var(--gold));
-  color: #17130b;
-}
-
-.primary:hover {
-  filter: brightness(1.08);
-}
-
-.secondary {
-  background: #242321;
-  border-color: #504b40;
-}
-
-.panel {
-  background: linear-gradient(145deg, #191919, #121213);
-  border-color: var(--border);
-  border-radius: 16px;
-  padding: 24px;
-}
-
-input, textarea, select {
-  background: #202020;
-  border-color: #48443b;
-  border-radius: 8px;
-}
-
-button {
-  border-radius: 8px;
-  transition: filter .2s ease, transform .2s ease;
-}
-
-button:hover {
-  filter: brightness(1.08);
-}
-
-.home-hero {
-  position: relative;
-  overflow: hidden;
-  padding: 58px 28px;
-  margin: 24px 0;
-  border: 1px solid var(--border);
-  border-radius: 22px;
-  background:
-    radial-gradient(ellipse at 85% 20%, #51412655, transparent 45%),
-    linear-gradient(135deg, #1b1b1b, #101011);
-}
-
-.home-kicker {
-  color: var(--gold);
-  letter-spacing: 3px;
-  text-transform: uppercase;
-  font-size: 12px;
-  font-weight: bold;
-}
-
-.home-hero h2 {
-  max-width: 680px;
-  margin: 18px 0;
-  font-size: clamp(34px, 6vw, 62px);
-  line-height: 1.08;
-  letter-spacing: -1.5px;
-}
-
-.home-hero p {
-  max-width: 550px;
-  color: #c3c0b9;
-  font-size: 17px;
-  line-height: 1.8;
-}
-
-.home-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 26px;
-}
-
-.home-actions button {
-  margin-top: 0;
-  min-height: 48px;
-  padding: 14px 20px;
-}
-
-.waveform {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  height: 46px;
-  margin-top: 30px;
-}
-
-.waveform span {
-  width: 4px;
-  border-radius: 4px;
-  background: var(--gold);
-  opacity: .8;
-}
-
-.waveform span:nth-child(6n + 1) { height: 13px; }
-.waveform span:nth-child(6n + 2) { height: 27px; }
-.waveform span:nth-child(6n + 3) { height: 40px; }
-.waveform span:nth-child(6n + 4) { height: 20px; }
-.waveform span:nth-child(6n + 5) { height: 33px; }
-.waveform span:nth-child(6n) { height: 16px; }
-
-.home-features {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 14px;
-  margin: 24px 0;
-}
-
-.home-feature {
-  padding: 22px;
-  border: 1px solid var(--border);
-  border-radius: 15px;
-  background: #141415;
-}
-
-.feature-icon {
-  font-size: 27px;
-  color: var(--gold);
-}
-
-.home-feature h3 {
-  margin: 14px 0 8px;
-}
-
-.home-feature p {
-  color: var(--muted);
-  line-height: 1.7;
-  font-size: 14px;
-}
-
-.home-section-title {
-  margin: 38px 0 16px;
-  font-size: 25px;
-}
-
-.home-footer {
-  padding: 28px 0;
-  margin-top: 35px;
-  border-top: 1px solid var(--border);
-  color: var(--muted);
-  font-size: 13px;
-  line-height: 1.8;
-}
-
-.booking-panel-heading {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.booking-panel-heading button {
-  margin-top: 0;
-}
-
-@media (max-width: 700px) {
-  .home-features {
-    grid-template-columns: 1fr;
-  }
-
-  .home-hero {
-    padding: 38px 20px;
-  }
-
-  .panel {
-    padding: 17px;
-  }
-
-  header h1 {
-    font-size: 36px;
-  }
-}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>VOXi — Студия звукозаписи</title>
+<style>
+*{box-sizing:border-box} :root{--gold:#d6b778;--gold2:#f0d9a1;--bg:#0b0b0c;--panel:#151516;--border:#34312a;--text:#f4f1e9;--muted:#aaa7a0}
+body{margin:0;padding:20px;background:radial-gradient(ellipse at 50% 0%,#292319 0%,transparent 48%),var(--bg);color:var(--text);font-family:Arial,sans-serif}.container{max-width:1080px;margin:auto}
+header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;border-bottom:1px solid var(--border);padding:20px 0;margin-bottom:22px}h1{margin:0;letter-spacing:5px;font-size:42px;color:var(--gold2)}h2{margin-top:0}h3{line-height:1.4}.muted{color:var(--muted)}
+.panel{background:linear-gradient(145deg,#191919,#121213);border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:22px}label{display:block;margin:14px 0 6px}input,textarea,select{width:100%;padding:12px;background:#202020;color:#fff;border:1px solid #48443b;border-radius:8px;font:inherit}input:focus,textarea:focus,select:focus{outline:1px solid var(--gold)}button{padding:12px 16px;margin-top:12px;border:0;border-radius:8px;cursor:pointer;font:inherit;font-weight:bold;transition:filter .2s,transform .2s}button:hover{filter:brightness(1.08)}button:disabled{opacity:.45;cursor:not-allowed}.primary{background:linear-gradient(135deg,var(--gold2),var(--gold));color:#17130b}.secondary{background:#242321;color:#fff;border:1px solid #504b40}.danger{background:#552727;color:#fff}.full{width:100%}.hidden{display:none!important}.notice{color:#c3c0b9;line-height:1.65}#message{white-space:pre-wrap;overflow-wrap:anywhere;margin:12px 0}.success{color:#9fdbab}.error{color:#ff9999}.role{display:inline-block;padding:5px 9px;border:1px solid #777;border-radius:5px;color:#ddd;font-size:12px;margin-top:8px}.price{font-size:25px;margin:20px 0 6px}.booking{border:1px solid #444;border-radius:10px;padding:16px;margin-top:14px;overflow-wrap:anywhere}.booking h3{margin-top:0}.booking p{line-height:1.6;color:#ddd;white-space:pre-wrap}.booking-actions{display:flex;align-items:end;gap:10px;flex-wrap:wrap}.booking-actions>div{flex:1;min-width:180px}.booking-actions button{margin-bottom:0}.status-text{color:#ddd;margin:10px 0}.slot-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px;margin-top:12px}.slot-choice{display:flex;align-items:center;gap:7px;margin:0;padding:10px;background:#292929;border:1px solid #555;border-radius:8px;cursor:pointer}.slot-choice input{width:auto;margin:0;accent-color:var(--gold)}.slot-choice:has(input:disabled){opacity:.35;cursor:not-allowed}.slot-card{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;border:1px solid #444;border-radius:8px;padding:12px;margin-top:10px}.slot-card button{margin:0}.slot-open{color:#9fdbab}.slot-closed{color:#ff9999}.small{font-size:13px}.song-card{border:1px solid #444;background:#202020;border-radius:9px;padding:14px;margin-top:14px}.song-card h3{margin:0 0 8px}.song-price{font-size:17px;margin-top:12px;color:#ddd}.total-box{padding:16px;background:#202020;border:1px solid #48443b;border-radius:8px;margin-top:20px}.total-box .price{margin:0;font-size:25px}.song-detail{padding:10px 12px;background:#262626;border-radius:7px;margin:8px 0;line-height:1.6}
+.home-hero{position:relative;overflow:hidden;padding:58px 28px;margin:24px 0;border:1px solid var(--border);border-radius:22px;background:radial-gradient(ellipse at 85% 20%,#51412655,transparent 45%),linear-gradient(135deg,#1b1b1b,#101011)}.home-kicker{color:var(--gold);letter-spacing:3px;text-transform:uppercase;font-size:12px;font-weight:bold}.home-hero h2{max-width:680px;margin:18px 0;font-size:clamp(34px,6vw,62px);line-height:1.08;letter-spacing:-1.5px}.home-hero p{max-width:550px;color:#c3c0b9;font-size:17px;line-height:1.8}.home-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px}.home-actions button{margin-top:0;min-height:48px;padding:14px 20px}.waveform{display:flex;align-items:center;gap:5px;height:46px;margin-top:30px}.waveform span{width:4px;border-radius:4px;background:var(--gold);opacity:.8}.waveform span:nth-child(6n+1){height:13px}.waveform span:nth-child(6n+2){height:27px}.waveform span:nth-child(6n+3){height:40px}.waveform span:nth-child(6n+4){height:20px}.waveform span:nth-child(6n+5){height:33px}.waveform span:nth-child(6n){height:16px}.home-features{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:24px 0}.home-feature{padding:22px;border:1px solid var(--border);border-radius:15px;background:#141415}.feature-icon{font-size:27px;color:var(--gold)}.home-feature h3{margin:14px 0 8px}.home-feature p{color:var(--muted);line-height:1.7;font-size:14px}.home-section-title{margin:38px 0 16px;font-size:25px}.home-footer{padding:28px 0;margin-top:35px;border-top:1px solid var(--border);color:var(--muted);font-size:13px;line-height:1.8}.booking-panel-heading{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.booking-panel-heading button{margin-top:0}
+@media(max-width:700px){body{padding:12px}.home-features{grid-template-columns:1fr}.home-hero{padding:38px 20px}.panel{padding:17px}header h1{font-size:36px}}
+</style></head><body><div class="container">
+<header><div><h1>VOXi</h1><div class="muted">Студия звукозаписи</div><div id="roleBadge" class="role hidden"></div></div><div><button id="loginButton" class="primary">Войти через Google</button><button id="logoutButton" class="secondary hidden">Выйти</button></div></header>
+<div id="message" role="status" aria-live="polite"></div>
+<section id="homePage" class="home-hero"><div class="home-kicker">Студия звукозаписи VOXi</div><h2>Твой голос.<br>Твоя история.</h2><p>Запиши песню для себя, близких или особенного события. Поможем сохранить твой голос и эмоции в музыке.</p><div class="home-actions"><button id="bookNowButton" class="primary">Записаться на время</button><button id="cabinetButton" class="secondary">Личный кабинет</button></div><div class="waveform" aria-hidden="true"></div></section>
+<section class="home-features"><article class="home-feature"><div class="feature-icon">♫</div><h3>Твоя песня</h3><p>Запись песен на день рождения, свадьбу и другие важные моменты.</p></article><article class="home-feature"><div class="feature-icon">◷</div><h3>Удобное время</h3><p>Выбери дату и свободный час из доступного расписания.</p></article><article class="home-feature"><div class="feature-icon">♪</div><h3>Для каждого голоса</h3><p>Можно записываться одному или компанией — стоимость рассчитается автоматически.</p></article></section>
+<section id="signedOut" class="panel"><h2>Добро пожаловать в VOXi</h2><p class="notice">Войди через Google, чтобы создавать заявки и просматривать записи.</p><button id="signedOutLogin" class="primary">Войти через Google</button></section>
+<main id="app" class="hidden"><section id="bookingPanel" class="panel hidden"><div class="booking-panel-heading"><h2>Запись на студию</h2><button id="closeBookingButton" class="secondary" type="button">Свернуть</button></div><form id="bookingForm"><label for="name">Имя и фамилия</label><input id="name" type="text" maxlength="150" required><label for="phone">Номер телефона</label><input id="phone" type="tel" maxlength="40" required><label for="date">Дата записи</label><input id="date" type="date" required><label for="time">Доступное время</label><select id="time" required disabled><option value="">Сначала выбери дату</option></select><p id="timeHelp" class="muted small">Выбери дату, чтобы увидеть доступные часы.</p><label for="songs">Количество песен</label><input id="songs" type="number" min="1" max="100" value="1" required><p class="notice">Для каждой песни укажи название и количество исполнителей. Цена рассчитывается отдельно для каждой песни.</p><div id="songFields"></div><div class="total-box"><div class="muted">Общая стоимость записи</div><div class="price"><strong><span id="price">5000</span> ₸</strong></div><div id="priceBreakdown" class="muted small">1 песня — 5000 ₸</div></div><button id="submitButton" class="primary full" type="submit">Создать заявку</button></form></section>
+<section id="schedulePanel" class="panel hidden"><h2>Моё расписание</h2><p class="notice">Выбери дату и отметь часы, когда готов принимать клиентов. Уже занятые активными заявками часы отмечены отдельно.</p><label for="scheduleDate">Дата расписания</label><input id="scheduleDate" type="date"><div class="booking-actions"><div><label for="scheduleStart">Начало диапазона</label><select id="scheduleStart"></select></div><div><label for="scheduleEnd">Конец диапазона</label><select id="scheduleEnd"></select></div></div><p class="muted small">Шаг времени — 30 минут.</p><div id="scheduleChoices" class="slot-grid"></div><button id="openSlotsButton" class="primary full" type="button">Открыть выбранные часы</button><h3 style="margin-top:26px">Часы на выбранную дату</h3><div id="scheduleList">Выбери дату.</div></section>
+<section class="panel"><h2 id="bookingsTitle">Мои заявки</h2><p id="bookingsDescription" class="muted">Здесь отображаются твои заявки.</p><div id="bookings">Войди в аккаунт, чтобы увидеть заявки.</div></section>
+<section id="backupPanel" class="panel hidden"><h2>Резервное копирование</h2><p class="notice">Скачай JSON-файл, чтобы сохранить копию заявок. Восстановление добавит записи из файла к текущему списку.</p><button id="exportButton" class="secondary full" type="button">Скачать резервную копию</button><label for="backupFile">Восстановить заявки из JSON-файла</label><input id="backupFile" type="file" accept=".json,application/json"><button id="restoreButton" class="secondary full" type="button">Импортировать заявки</button></section></main>
+<footer class="home-footer">VOXi — студия звукозаписи.<br>Твой голос. Твоя история.</footer></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script>
+"use strict";
+const SUPABASE_URL="https://vnykpjarjvacwhxvkxrk.supabase.co";const SUPABASE_KEY="sb_publishable_Jv-1ip1CSRKe2_cCjcGjmA_B333H-oC";const ADMIN_EMAIL="mops850@gmail.com";const supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);const $=id=>document.getElementById(id);
+let currentUser=null,currentBookings=[],currentSlots=[],isSaving=false,loadingRequest=0,openBookingAfterLogin=false;const validStatuses=["Запланировано","В процессе","Записано","Готово","Отменено"];
+// Декоративная волна без изображений
+const wave=$("homePage").querySelector(".waveform");wave.replaceChildren();for(let i=0;i<48;i++){const bar=document.createElement("span");wave.appendChild(bar)}
+function isAdmin(){return currentUser?.email?.toLowerCase()===ADMIN_EMAIL.toLowerCase()}function showMessage(text,type=""){ $("message").textContent=text;$("message").className=type }
+function localDateString(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`}function normalizeTime(v){return String(v||"").slice(0,5)}function isActiveBooking(b){return b.status!=="Отменено"}function bookingExists(date,time){return currentBookings.some(b=>b.booking_date===date&&normalizeTime(b.booking_time)===normalizeTime(time)&&isActiveBooking(b))}
+function priceForPeople(n){if(n===1)return 5000;if(n===2)return 6000;if(n===3)return 7000;if(n>=4)return n*2000;return 0}
+function parseSongDetails(item){const raw=item?.song_titles;if(typeof raw==="string"&&raw.trim()){try{const parsed=JSON.parse(raw);if(Array.isArray(parsed)&&parsed.every(s=>s&&typeof s==="object"&&typeof s.title==="string"))return parsed.map(s=>{const p=Number(s.people),ok=Number.isInteger(p)&&p>=1&&p<=100,people=ok?p:Number(item.people_count)||1;return{title:s.title,people,price:Number.isFinite(Number(s.price))?Number(s.price):priceForPeople(people)}})}catch(_){}}
+const people=Math.max(1,Number(item?.people_count)||1),count=Math.max(1,Number(item?.song_count)||1),total=Number(item?.price)||priceForPeople(people)*count,names=typeof raw==="string"?raw.split(/\r?\n/).map(s=>s.trim()).filter(Boolean):[];return Array.from({length:count},(_,i)=>({title:names[i]||`Песня ${i+1}`,people,price:i===0?total-priceForPeople(people)*(count-1):priceForPeople(people)}))}
+function setSignedIn(user){currentUser=user;const signed=!!user,admin=signed&&isAdmin();$("signedOut").classList.toggle("hidden",signed);$("app").classList.toggle("hidden",!signed);$("loginButton").classList.toggle("hidden",signed);$("logoutButton").classList.toggle("hidden",!signed);$("roleBadge").classList.toggle("hidden",!signed);$("roleBadge").textContent=admin?"Администратор VOXi":"Клиент VOXi";$("schedulePanel").classList.toggle("hidden",!admin);$("backupPanel").classList.toggle("hidden",!admin);$("bookingsTitle").textContent=admin?"Все заявки клиентов":"Мои заявки";$("bookingsDescription").textContent=admin?"Все заявки клиентов. Здесь можно менять статусы и удалять заявки.":"Здесь отображаются только твои заявки.";if(!user){loadingRequest++;currentBookings=[];currentSlots=[];$("bookings").textContent="Войди в аккаунт, чтобы увидеть заявки.";$("scheduleList").textContent="Войди в аккаунт администратора.";resetAvailableTimes("Сначала выбери дату.");$("bookingPanel").classList.add("hidden")}else if(openBookingAfterLogin){openBookingAfterLogin=false;$("bookingPanel").classList.remove("hidden");$("bookingPanel").scrollIntoView({behavior:"smooth",block:"start"})}}
+function addText(parent,tag,text,className=""){const el=document.createElement(tag);el.textContent=text??"";if(className)el.className=className;parent.appendChild(el);return el}
+function renderSongFields(){const c=$("songFields"),n=Number($("songs").value);c.replaceChildren();if(!Number.isInteger(n)||n<1||n>100){$("price").textContent="0";$("priceBreakdown").textContent="Укажи количество песен от 1 до 100.";return}for(let i=0;i<n;i++){const card=document.createElement("div");card.className="song-card";addText(card,"h3",`Песня №${i+1}`);const tl=addText(card,"label","Название песни");tl.htmlFor=`songTitle${i}`;const title=document.createElement("input");title.id=`songTitle${i}`;title.type="text";title.maxLength=300;title.placeholder=`Название песни №${i+1}`;title.required=true;card.appendChild(title);const pl=addText(card,"label","Количество исполнителей");pl.htmlFor=`songPeople${i}`;const people=document.createElement("input");people.id=`songPeople${i}`;people.type="number";people.min="1";people.max="100";people.step="1";people.value="1";people.required=true;people.addEventListener("input",calculatePrice);card.appendChild(people);const line=addText(card,"div","Стоимость: 5000 ₸","song-price");line.id=`songPrice${i}`;c.appendChild(card)}calculatePrice()}
+function collectSongDetails(validate=false){const n=Number($("songs").value),songs=[];if(!Number.isInteger(n)||n<1||n>100)throw Error("Количество песен должно быть от 1 до 100.");for(let i=0;i<n;i++){const title=$(`songTitle${i}`)?.value.trim()||"",people=Number($(`songPeople${i}`)?.value);if(validate&&!title)throw Error(`Укажи название песни №${i+1}.`);if(!Number.isInteger(people)||people<1||people>100)throw Error(`Для песни №${i+1} укажи количество исполнителей от 1 до 100.`);songs.push({title:title||`Песня ${i+1}`,people,price:priceForPeople(people)})}return songs}
+function calculatePrice(){const n=Number($("songs").value);if(!Number.isInteger(n)||n<1||n>100){$("price").textContent="0";$("priceBreakdown").textContent="Укажи количество песен от 1 до 100.";return}let total=0;const lines=[];for(let i=0;i<n;i++){const people=Number($(`songPeople${i}`)?.value),valid=Number.isInteger(people)&&people>=1&&people<=100,p=valid?priceForPeople(people):0;total+=p;const line=$(`songPrice${i}`);if(line)line.textContent=`Стоимость: ${p.toLocaleString("ru-RU")} ₸`;lines.push(valid?`Песня ${i+1}: ${people} чел. — ${p.toLocaleString("ru-RU")} ₸`:`Песня ${i+1}: проверь количество исполнителей`)}$("price").textContent=total.toLocaleString("ru-RU");$("priceBreakdown").textContent=lines.join("\n")}
+async function startGoogleLogin(forBooking=false){if(forBooking)openBookingAfterLogin=true;showMessage("Открываю вход через Google...");const{error}=await supabaseClient.auth.signInWithOAuth({provider:"google",options:{redirectTo:window.location.origin+window.location.pathname}});if(error){openBookingAfterLogin=false;showMessage("Ошибка входа: "+error.message,"error")}}
+$("loginButton").addEventListener("click",()=>startGoogleLogin(false));$("signedOutLogin").addEventListener("click",()=>startGoogleLogin(false));$("bookNowButton").addEventListener("click",()=>{if(!currentUser)return startGoogleLogin(true);$("bookingPanel").classList.remove("hidden");$("bookingPanel").scrollIntoView({behavior:"smooth",block:"start"})});$("cabinetButton").addEventListener("click",()=>{if(!currentUser)return startGoogleLogin(false);$("app").scrollIntoView({behavior:"smooth",block:"start"})});$("closeBookingButton").addEventListener("click",()=>$("bookingPanel").classList.add("hidden"));$("logoutButton").addEventListener("click",async()=>{const{error}=await supabaseClient.auth.signOut();if(error)showMessage("Не удалось выйти: "+error.message,"error");else showMessage("Ты вышел из аккаунта.")});$("songs").addEventListener("input",renderSongFields);
+async function loadBookings(){if(!currentUser)return;const userId=currentUser.id,admin=isAdmin(),request=++loadingRequest;$("bookings").textContent="Загрузка заявок...";let q=supabaseClient.from("voxi_bookings").select("*");if(!admin)q=q.eq("user_id",userId);const{data,error}=await q.order("booking_date",{ascending:true}).order("booking_time",{ascending:true});if(request!==loadingRequest)return;if(error){$("bookings").textContent="Не удалось загрузить заявки.";showMessage("Ошибка загрузки: "+error.message,"error");return}if(!currentUser||currentUser.id!==userId||isAdmin()!==admin)return;currentBookings=data||[];renderBookings();if($("date").value)await loadAvailableTimes();if(admin&&$("scheduleDate").value)await loadScheduleSlots()}
+function renderBookings(){const c=$("bookings");c.replaceChildren();if(!currentBookings.length){c.textContent="Пока заявок нет.";return}const admin=isAdmin();currentBookings.forEach((item,index)=>{const card=document.createElement("article");card.className="booking";addText(card,"h3","Заявка №"+(index+1));addText(card,"p",`Клиент: ${item.client_name||"Не указано"}\nТелефон: ${item.phone||"Не указан"}\nДата: ${item.booking_date||"Не указана"}\nВремя: ${normalizeTime(item.booking_time)}`);const songs=parseSongDetails(item),sc=document.createElement("div");addText(sc,"h4","Песни и стоимость");songs.forEach((song,i)=>{const line=document.createElement("div");line.className="song-detail";addText(line,"strong",`Песня №${i+1}: ${song.title}`);addText(line,"div",`Исполнителей: ${song.people} · Стоимость: ${Number(song.price).toLocaleString("ru-RU")} ₸`);sc.appendChild(line)});card.appendChild(sc);const people=songs.reduce((s,x)=>s+(Number(x.people)||0),0);addText(card,"p",`Всего исполнений по песням: ${people}\nКоличество песен: ${songs.length}\nОбщая стоимость: ${Number(item.price||0).toLocaleString("ru-RU")} ₸`);if(!admin){addText(card,"div","Статус: "+(item.status||"Запланировано"),"status-text");c.appendChild(card);return}const actions=document.createElement("div");actions.className="booking-actions";const wrap=document.createElement("div");addText(wrap,"label","Статус заявки");const sel=document.createElement("select");validStatuses.forEach(s=>{const o=document.createElement("option");o.value=s;o.textContent=s;sel.appendChild(o)});sel.value=validStatuses.includes(item.status)?item.status:"Запланировано";wrap.appendChild(sel);actions.appendChild(wrap);sel.addEventListener("change",async()=>{if(!isAdmin())return;const prev=item.status||"Запланировано",next=sel.value;sel.disabled=true;const{error}=await supabaseClient.from("voxi_bookings").update({status:next}).eq("id",item.id);sel.disabled=false;if(error){showMessage("Не удалось изменить статус: "+error.message,"error");sel.value=prev;return}item.status=next;showMessage("Статус обновлён.","success");await loadBookings()});const del=document.createElement("button");del.className="danger";del.textContent="Удалить";del.addEventListener("click",async()=>{if(!isAdmin()||!confirm("Точно удалить заявку клиента "+(item.client_name||"")+"?"))return;del.disabled=true;const{error}=await supabaseClient.from("voxi_bookings").delete().eq("id",item.id);if(error){del.disabled=false;showMessage("Не удалось удалить: "+error.message,"error");return}showMessage("Заявка удалена.","success");await loadBookings()});actions.appendChild(del);card.appendChild(actions);c.appendChild(card)})}
+function makeTimeOptions(){const a=[];for(let m=300;m<=1410;m+=30)a.push(`${String(Math.floor(m/60)).padStart(2,"0")}:${String(m%60).padStart(2,"0")}`);return a}const allTimes=makeTimeOptions();function fillTimeSelect(select,value=""){select.replaceChildren();const p=document.createElement("option");p.value="";p.textContent="Выбери время";select.appendChild(p);allTimes.forEach(t=>{const o=document.createElement("option");o.value=t;o.textContent=t;select.appendChild(o)});select.value=value}fillTimeSelect($("scheduleStart"),"10:00");fillTimeSelect($("scheduleEnd"),"19:00");
+function renderScheduleChoices(){const c=$("scheduleChoices");c.replaceChildren();const start=$("scheduleStart").value,end=$("scheduleEnd").value;allTimes.forEach(t=>{if(t<start||t>=end)return;const l=document.createElement("label");l.className="slot-choice";const cb=document.createElement("input");cb.type="checkbox";cb.value=t;if($("scheduleDate").value&&bookingExists($("scheduleDate").value,t)){cb.disabled=true}const s=document.createElement("span");s.textContent=cb.disabled?t+" — занято":t;l.append(cb,s);c.appendChild(l)})}$("scheduleStart").addEventListener("change",renderScheduleChoices);$("scheduleEnd").addEventListener("change",renderScheduleChoices);
+function resetAvailableTimes(msg){const s=$("time");s.replaceChildren();const o=document.createElement("option");o.value="";o.textContent=msg;s.appendChild(o);s.disabled=true;$("timeHelp").textContent=msg}
+async function loadAvailableTimes(){const date=$("date").value;if(!currentUser||!date){resetAvailableTimes("Сначала выбери дату.");return}resetAvailableTimes("Загружаю доступные часы...");const{data,error}=await supabaseClient.from("voxi_schedule_slots").select("booking_time").eq("booking_date",date).eq("is_open",true).order("booking_time",{ascending:true});if(error){resetAvailableTimes("Не удалось загрузить время.");showMessage("Ошибка расписания: "+error.message,"error");return}const available=(data||[]).map(s=>normalizeTime(s.booking_time)).filter(t=>!bookingExists(date,t));const s=$("time");s.replaceChildren();const p=document.createElement("option");p.value="";p.textContent=available.length?"Выбери время":"Свободных часов нет";s.appendChild(p);available.forEach(t=>{const o=document.createElement("option");o.value=t;o.textContent=t;s.appendChild(o)});s.disabled=!available.length;$("timeHelp").textContent=available.length?"Показываются только открытые и ещё не занятые часы.":"На эту дату пока нет свободных часов. Попробуй другую дату."}
+$("date").min=localDateString();$("date").addEventListener("change",loadAvailableTimes);$("scheduleDate").min=localDateString();$("scheduleDate").value=localDateString();$("scheduleDate").addEventListener("change",loadScheduleSlots);
+async function loadScheduleSlots(){if(!isAdmin())return;const date=$("scheduleDate").value,c=$("scheduleList");c.replaceChildren();if(!date){c.textContent="Выбери дату.";return}const{data,error}=await supabaseClient.from("voxi_schedule_slots").select("*").eq("booking_date",date).order("booking_time",{ascending:true});if(error){c.textContent="Не удалось загрузить расписание.";showMessage("Ошибка расписания: "+error.message,"error");return}currentSlots=data||[];renderScheduleChoices();if(!currentSlots.length){c.textContent="На эту дату часы ещё не добавлены.";return}currentSlots.forEach(slot=>{const time=normalizeTime(slot.booking_time),booked=bookingExists(date,time),row=document.createElement("div");row.className="slot-card";const info=document.createElement("div");addText(info,"strong",time);addText(info,"div",booked?"Есть активная заявка":slot.is_open?"Открыто для клиентов":"Закрыто",booked||slot.is_open?"slot-open":"slot-closed");row.appendChild(info);const actions=document.createElement("div"),toggle=document.createElement("button");toggle.className="secondary";toggle.textContent=slot.is_open?"Закрыть":"Открыть";toggle.disabled=booked;toggle.addEventListener("click",async()=>{if(!isAdmin()||bookingExists(date,time))return;toggle.disabled=true;const{error}=await supabaseClient.from("voxi_schedule_slots").update({is_open:!slot.is_open}).eq("id",slot.id);if(error){showMessage("Не удалось изменить час: "+error.message,"error");toggle.disabled=false;return}showMessage(slot.is_open?"Час закрыт для клиентов.":"Час открыт для клиентов.","success");await loadScheduleSlots();await loadAvailableTimes()});const del=document.createElement("button");del.className="danger";del.textContent="Удалить час";del.disabled=booked;del.addEventListener("click",async()=>{if(!isAdmin()||bookingExists(date,time)||!confirm(`Удалить ${time} из расписания на ${date}?`))return;del.disabled=true;const{error}=await supabaseClient.from("voxi_schedule_slots").delete().eq("id",slot.id);if(error){showMessage("Не удалось удалить час: "+error.message,"error");del.disabled=false;return}showMessage("Час удалён из расписания.","success");await loadScheduleSlots();await loadAvailableTimes()});actions.append(toggle,del);row.appendChild(actions);c.appendChild(row)})}
+$("openSlotsButton").addEventListener("click",async()=>{if(!isAdmin())return;const date=$("scheduleDate").value;if(!date){showMessage("Сначала выбери дату расписания.","error");return}const selected=[...$("scheduleChoices").querySelectorAll('input[type="checkbox"]:checked')].map(i=>i.value);if(!selected.length){showMessage("Отметь хотя бы один час.","error");return}const allowed=selected.filter(t=>!bookingExists(date,t));if(!allowed.length){showMessage("Выбранные часы заняты активными заявками.","error");return}$("openSlotsButton").disabled=true;try{const rows=allowed.map(t=>({booking_date:date,booking_time:t,is_open:true}));const{error}=await supabaseClient.from("voxi_schedule_slots").upsert(rows,{onConflict:"booking_date,booking_time"});if(error){showMessage("Не удалось сохранить расписание: "+error.message,"error");return}showMessage("Расписание сохранено. Добавлено или открыто часов: "+allowed.length+".","success");await loadScheduleSlots();await loadAvailableTimes()}catch(e){showMessage("Ошибка: "+e.message,"error")}finally{$("openSlotsButton").disabled=false}});
+$("bookingForm").addEventListener("submit",async e=>{e.preventDefault();if(!currentUser||isSaving)return;const date=$("date").value,time=$("time").value;if(!date||!time){showMessage("Выбери дату и доступное время из списка.","error");return}if(bookingExists(date,time)){showMessage("Это время уже занято. Выбери другое.","error");await loadAvailableTimes();return}let songs;try{songs=collectSongDetails(true)}catch(e){showMessage(e.message,"error");return}const clientName=$("name").value.trim(),phone=$("phone").value.trim();if(!clientName||!phone){showMessage("Заполни имя и номер телефона.","error");return}const totalPeople=songs.reduce((s,x)=>s+x.people,0),totalPrice=songs.reduce((s,x)=>s+x.price,0);if(!Number.isSafeInteger(totalPrice)||totalPrice<1){showMessage("Не удалось рассчитать стоимость. Проверь количество исполнителей.","error");return}const booking={client_name:clientName,phone,booking_date:date,booking_time:time,people_count:totalPeople,song_count:songs.length,song_titles:JSON.stringify(songs),price:totalPrice,status:"Запланировано",user_id:currentUser.id};isSaving=true;$("submitButton").disabled=true;$("submitButton").textContent="Сохраняю...";try{const{error}=await supabaseClient.from("voxi_bookings").insert(booking);if(error){showMessage(error.code==="23505"?"Это время уже занято. Выбери другое.":"Не удалось сохранить заявку: "+error.message,"error");await loadAvailableTimes();return}$("bookingForm").reset();$("songs").value="1";renderSongFields();resetAvailableTimes("Сначала выбери дату.");showMessage("Заявка успешно сохранена!","success");await loadBookings()}catch(e){showMessage("Ошибка: "+e.message,"error")}finally{isSaving=false;$("submitButton").disabled=false;$("submitButton").textContent="Создать заявку"}});
+$("exportButton").addEventListener("click",()=>{if(!isAdmin()){showMessage("Резервное копирование доступно только администратору.","error");return}const blob=new Blob([JSON.stringify(currentBookings,null,2)],{type:"application/json;charset=utf-8"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="VOXi-backup-"+localDateString()+".json";document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);showMessage("Резервная копия скачана.","success")});
+$("restoreButton").addEventListener("click",async()=>{if(!isAdmin())return showMessage("Восстановление заявок доступно только администратору.","error");const file=$("backupFile").files[0];if(!file)return showMessage("Сначала выбери JSON-файл.","error");let imported;try{imported=JSON.parse(await file.text())}catch(_){return showMessage("Файл не удалось прочитать. Проверь формат JSON.","error")}if(!Array.isArray(imported))return showMessage("В файле должен находиться список заявок.","error");const rows=[];for(const item of imported){if(!item||typeof item!=="object"||Array.isArray(item))return showMessage("Файл содержит некорректную заявку.","error");const name=item.client_name??item.name,date=item.booking_date??item.date,time=item.booking_time??item.time,people=Number(item.people_count??item.people),songCount=Number(item.song_count??item.songs),titles=item.song_titles??item.songNames??"",price=Number(item.price);if(typeof name!=="string"||!name.trim()||typeof item.phone!=="string"||!item.phone.trim()||typeof date!=="string"||!/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(date)||typeof time!=="string"||!/^[0-9]{2}:[0-9]{2}(:[0-9]{2})?$/.test(time)||!Number.isInteger(people)||people<1||people>10000||!Number.isInteger(songCount)||songCount<1||songCount>100||!Number.isSafeInteger(price)||price<1||typeof titles!=="string")return showMessage("В файле есть заявка с неверными данными.","error");let owner=currentUser.id;const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;if(typeof item.user_id==="string"&&uuid.test(item.user_id))owner=item.user_id;rows.push({client_name:name.trim(),phone:item.phone.trim(),booking_date:date,booking_time:normalizeTime(time),people_count:people,song_count:songCount,song_titles:titles,price,status:validStatuses.includes(item.status)?item.status:"Запланировано",user_id:owner})}if(!rows.length)return showMessage("В файле нет заявок для импорта.","error");if(!confirm(`Добавить ${rows.length} заявок? Часы для каждой заявки должны быть открыты в расписании.`))return;$("restoreButton").disabled=true;try{for(let i=0;i<rows.length;i+=100){const{error}=await supabaseClient.from("voxi_bookings").insert(rows.slice(i,i+100));if(error){showMessage("Импорт остановлен: "+error.message+"\nЧасть заявок могла уже сохраниться. Проверь список перед повторным импортом.","error");await loadBookings();return}}$("backupFile").value="";showMessage("Заявки импортированы.","success");await loadBookings()}finally{$("restoreButton").disabled=false}});
+supabaseClient.auth.onAuthStateChange((event,session)=>{setSignedIn(session?.user||null);setTimeout(async()=>{if(!currentUser)return;await loadBookings();if(isAdmin())await loadScheduleSlots()},0)});renderSongFields();renderScheduleChoices();
+</script></body></html>
