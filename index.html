@@ -227,6 +227,8 @@ function safeVOXiGetIntent(){try{return sessionStorage.getItem("voxi_auth_intent
 function safeVOXiClearIntent(){try{sessionStorage.removeItem("voxi_auth_intent")}catch(_){}}
 function openVOXiSection(target){
  if(!currentUser) return;
+ if(target==="cabinet"){window.location.assign("./cabinet.html");return;}
+ $("app").classList.remove("hidden");
  $("app").style.display="block";
  if(target==="booking") $("bookingPanel").classList.remove("hidden");
  else $("bookingPanel").classList.add("hidden");
