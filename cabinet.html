@@ -36,6 +36,19 @@ footer{text-align:center;color:#82766d;font-size:10px;padding:36px 0 55px;letter
 #cabinetGate a{color:#fbe1ab}
 #cabinetLoadError{color:#f6ae9e;text-align:center;font:500 12px Manrope,Arial,sans-serif}
 .cabinetExit{background:#1c1618;border:1px solid #e4b77c;color:#e4b77c;padding:10px 16px;border-radius:25px;cursor:pointer;font:600 13px Manrope,Arial,sans-serif}
+
+/* VOXi required contact profile */
+.voxi-contact-modal{width:min(510px,calc(100vw - 24px));max-height:90vh;overflow:auto;padding:0;border:1px solid #b88b54;border-radius:20px;background:linear-gradient(145deg,#241d24,#0c0d12);color:#f7e3c7;box-shadow:0 30px 90px #000c}
+.voxi-contact-modal::backdrop{background:#000c;backdrop-filter:blur(7px)}
+.voxi-contact-wrap{padding:27px}.voxi-contact-wrap h2{font:600 37px 'Cormorant Garamond',Georgia,serif;color:#efd0a0;margin:8px 0}
+.voxi-contact-wrap p{font:400 13px/1.65 Manrope,Arial,sans-serif;color:#c5b19a}
+.voxi-contact-wrap label{display:block;margin:16px 0 7px;font:600 12px Manrope,Arial,sans-serif;color:#f1c894}
+.voxi-contact-wrap input{box-sizing:border-box;width:100%;padding:12px 13px;background:#141217;border:1px solid #856342;border-radius:9px;color:#fff5e7;font:500 15px Manrope,Arial,sans-serif}
+.voxi-contact-wrap input:focus{outline:2px solid #dab980}
+.voxi-contact-wrap .save-contact{margin:18px 0 0;width:100%;padding:13px;border:1px solid #f4dcae;border-radius:10px;color:#261608;background:linear-gradient(#f2dab3,#b98c52);font:700 14px Manrope,Arial,sans-serif;cursor:pointer}
+.voxi-contact-wrap .save-contact:disabled{opacity:.5}.voxi-contact-wrap .cancel-contact{border:0;background:none;color:#d9ba8f;padding:12px;width:100%;cursor:pointer}
+#contactProfileError{min-height:18px;color:#ffb0a4!important;font-size:12px}
+@media(max-width:490px){.voxi-contact-wrap{padding:20px}.voxi-contact-wrap h2{font-size:31px}}
 </style></head><body><div id="cabinetGate">Проверяем вход через Google...</div><div id="cabinetLoadError"></div>
 <div class="noir" aria-hidden="true"></div>
 <!-- Icons with layered metallic gradients and embossed highlights. -->
@@ -60,6 +73,21 @@ footer{text-align:center;color:#82766d;font-size:10px;padding:36px 0 55px;letter
 <section class="grid-tail" aria-label="Дополнительные разделы"><button class="tile" data-tab="notifications" type="button"><span class="icon-coin"><svg><use href="#bell"/></svg></span><span><span class="tile-title" data-i18n="notifications">Уведомления</span><span class="tile-desc" data-i18n="notificationsDesc">Напоминания о посещении и сообщения о готовности песен.</span><span class="tile-foot"><span data-i18n="open">ОТКРЫТЬ РАЗДЕЛ</span><span class="tile-arrow">↗</span></span></span></button>
 <button class="tile" data-tab="profile" type="button"><span class="icon-coin"><svg><use href="#profile"/></svg></span><span><span class="tile-title" data-i18n="profile">Мой профиль</span><span class="tile-desc" data-i18n="profileDesc">Ваше имя, контакты и персональные настройки.</span><span class="tile-foot"><span data-i18n="open">ОТКРЫТЬ РАЗДЕЛ</span><span class="tile-arrow">↗</span></span></span></button></section>
 <div class="helper"><span data-i18n="help">Есть вопрос по вашей записи? Свяжитесь со студией VOXi.</span><a href="https://wa.me/77011637393" target="_blank" rel="noopener" data-i18n="contact">Написать в WhatsApp ↗</a></div></main><footer>© VOXi · KAZAKHSTAN · RECORDING STUDIO</footer></div>
+
+<dialog id="contactProfileDialog" class="voxi-contact-modal" aria-labelledby="contactProfileTitle">
+<div class="voxi-contact-wrap"><p class="kicker">VOXi · PERSONAL SPACE</p>
+<h2 id="contactProfileTitle">Ваш профиль VOXi</h2>
+<p id="contactProfileInfo">Введите имя и телефон для связи со студией.</p>
+<form id="contactProfileForm">
+<label id="contactNameLabel" for="contactNameInput">Имя и фамилия</label>
+<input id="contactNameInput" type="text" autocomplete="name" minlength="2" maxlength="150" required>
+<label id="contactPhoneLabel" for="contactPhoneInput">Номер телефона</label>
+<input id="contactPhoneInput" type="tel" autocomplete="tel" maxlength="30" placeholder="+7 700 123 45 67" required>
+<p id="contactProfileCaution">Номер не подтверждён автоматически. Старые песни студия выдаёт только после отдельной проверки владельца.</p>
+<p id="contactProfileError" role="alert"></p>
+<button id="contactSaveButton" class="save-contact" type="submit">Сохранить профиль</button>
+<button id="contactCancelButton" class="cancel-contact" type="button">Вернуться на главную</button>
+</form></div></dialog>
 <dialog class="modal" id="panel"><button type="button" class="close" id="dismiss" aria-label="Закрыть">×</button><p class="kicker">VOXi · PERSONAL SPACE</p><h2 id="modalTitle">Мои песни</h2><p id="modalDesc"></p><div class="empty" id="empty">Здесь пока нет готовых песен</div><p id="modalNote"></p><div class="modal-actions"><button class="pill" type="button" id="done" data-i18n="close">Закрыть</button><a class="contact" href="https://wa.me/77011637393" target="_blank" rel="noopener" data-i18n="contactShort">Связаться со студией ↗</a></div></dialog>
 <script>
 const dict={ru:{home:'Главная',account:'Мой кабинет',hero1:'Ваша музыка.',hero2:'Ваша история.',heroText:'Здесь живут ваши песни, видео и музыкальные воспоминания. Всё самое важное — в одном месте.',demo:'ДЕМОНСТРАЦИЯ ДИЗАЙНА',nextTitle:'БЛИЖАЙШАЯ ЗАПИСЬ',nextMain:'Записей пока нет',nextSub:'Ваше следующее посещение появится здесь',collectionTitle:'МОЯ КОЛЛЕКЦИЯ',collectionMain:'Ваш музыкальный архив',collectionSub:'Готовые песни и видео появятся после загрузки',sections:'МОИ РАЗДЕЛЫ',songs:'Мои песни',songsDesc:'Слушайте любимые записи и скачивайте готовые песни.',videos:'Мои видео',videosDesc:'Ваши выступления, клипы и памятные видеозаписи.',history:'История записей',historyDesc:'Даты посещений, названия песен и статусы записей.',notifications:'Уведомления',notificationsDesc:'Напоминания о посещении и сообщения о готовности песен.',profile:'Мой профиль',profileDesc:'Ваше имя, контакты и персональные настройки.',open:'ОТКРЫТЬ РАЗДЕЛ',help:'Есть вопрос по вашей записи? Свяжитесь со студией VOXi.',contact:'Написать в WhatsApp ↗',contactShort:'Связаться со студией ↗',close:'Закрыть',emptySongs:'Здесь пока нет готовых песен',emptyVideos:'Здесь пока нет видеозаписей',emptyHistory:'История ваших посещений появится здесь',emptyNotifications:'Пока нет новых уведомлений',emptyProfile:'Контактные данные появятся после подключения входа',note:'Это макет оформления. Данные клиента и загрузка файлов будут подключены к Supabase позже.'},kk:{home:'Басты бет',account:'Жеке кабинет',hero1:'Сіздің әніңіз.',hero2:'Сіздің тарихыңыз.',heroText:'Әндеріңіз, бейнелеріңіз және музыкалық естеліктеріңіз — бәрі бір жерде.',demo:'ДИЗАЙН ҮЛГІСІ',nextTitle:'КЕЛЕСІ ЖАЗЫЛУ',nextMain:'Әзірге жазылу жоқ',nextSub:'Келесі келу уақыты осында көрсетіледі',collectionTitle:'МЕНІҢ ЖИНАҒЫМ',collectionMain:'Музыкалық мұрағатыңыз',collectionSub:'Дайын әндер мен бейнелер жүктелгеннен кейін пайда болады',sections:'МЕНІҢ БӨЛІМДЕРІМ',songs:'Менің әндерім',songsDesc:'Дайын әндерді тыңдап, жүктеп алыңыз.',videos:'Менің бейнелерім',videosDesc:'Орындауларыңыз бен естелік бейнежазбалар.',history:'Жазылу тарихы',historyDesc:'Келу күндері, ән атаулары мен мәртебелері.',notifications:'Хабарламалар',notificationsDesc:'Жазылу туралы еске салулар мен дайын әндер туралы хабарламалар.',profile:'Менің профилім',profileDesc:'Атыңыз, байланыс ақпаратыңыз және баптаулар.',open:'БӨЛІМДІ АШУ',help:'Сұрағыңыз бар ма? VOXi студиясына хабарласыңыз.',contact:'WhatsApp арқылы жазу ↗',contactShort:'Студияға жазу ↗',close:'Жабу',emptySongs:'Әзірге дайын ән жоқ',emptyVideos:'Әзірге бейнежазба жоқ',emptyHistory:'Келу тарихы осында пайда болады',emptyNotifications:'Жаңа хабарлама жоқ',emptyProfile:'Кіру жүйесін қосқаннан кейін байланыс деректері көрсетіледі',note:'Бұл дизайн үлгісі. Клиенттің деректері мен файлдары кейін Supabase жүйесіне қосылады.'}};
@@ -72,7 +100,7 @@ document.getElementById('ru').onclick=()=>{language='ru';render()};document.getE
 (function(){
   const URL="https://vnykpjarjvacwhxvkxrk.supabase.co", KEY="sb_publishable_Jv-1ip1CSRKe2_cCjcGjmA_B333H-oC";
   const client=window.supabase?.createClient(URL,KEY);
-  let signedUser=null, myBookings=[];
+  let signedUser=null, myBookings=[], profileData=null, firstProfile=false;
   const el=id=>document.getElementById(id);
   const make=(tag,txt,cls)=>{const n=document.createElement(tag);n.textContent=txt||"";if(cls)n.className=cls;return n};
   const date=d=>{const s=String(d||"");const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(s);return m?m[3]+"."+m[2]+"."+m[1]:s};
@@ -87,6 +115,48 @@ document.getElementById('ru').onclick=()=>{language='ru';render()};document.getE
     el("cabinetCollectionMain").textContent=ru?"Ваш музыкальный архив":"Музыкалық мұрағатыңыз";
     el("cabinetCollectionSub").textContent=ru?"Готовые песни и видео появятся после загрузки":"Дайын әндер мен бейнелер жүктелгеннен кейін пайда болады";
   }
+
+  const contactText={
+   ru:{title:"Добро пожаловать в VOXi",edit:"Мой профиль VOXi",intro:"Укажите имя и телефон, чтобы студия могла найти ваши записи и связаться с вами.",editInfo:"Измените имя и номер телефона.",name:"Имя и фамилия",phone:"Номер телефона",caution:"Номер не подтверждается автоматически. Для получения архивных песен студия проверяет владельца по WhatsApp или известному номеру телефона.",save:"Сохранить профиль",back:"Вернуться на главную",cancel:"Отмена",editButton:"Изменить профиль",badName:"Введите имя (не менее 2 символов).",badPhone:"Проверьте номер телефона (например, +7 700 123 45 67).",loading:"Сохранение...",error:"Ошибка сохранения: ",phoneMissing:"Не указан"},
+   kk:{title:"VOXi-ге қош келдіңіз",edit:"VOXi профилім",intro:"Студия жазбаларыңызды табуы үшін атыңыз бен телефон нөміріңізді көрсетіңіз.",editInfo:"Атыңыз бен телефон нөміріңізді өзгертіңіз.",name:"Аты-жөні",phone:"Телефон нөмірі",caution:"Нөмір автоматты түрде расталмайды. Ескі әндерді беру алдында студия иесін WhatsApp немесе телефон арқылы тексереді.",save:"Профильді сақтау",back:"Басты бетке оралу",cancel:"Болдырмау",editButton:"Профильді өзгерту",badName:"Аты-жөніңізді енгізіңіз.",badPhone:"Телефон нөмірін тексеріңіз.",loading:"Сақталуда...",error:"Сақтау қатесі: ",phoneMissing:"Көрсетілмеген"}
+  };
+  const ct=()=>contactText[language==="kk"?"kk":"ru"];
+  const contactDialog=el("contactProfileDialog");
+  function normalizePhone(raw){
+    let d=String(raw||"").replace(/\\D/g,"");
+    if(d.length===10)d="7"+d;
+    if(d.length===11&&d[0]==="8")d="7"+d.slice(1);
+    return /^[1-9]\\d{9,14}$/.test(d)?"+"+d:null;
+  }
+  function openContactProfile(first){
+    if(!signedUser)return;firstProfile=!!first;
+    const t=ct(),recent=myBookings.find(x=>x.client_name||x.phone);
+    el("contactProfileTitle").textContent=first?t.title:t.edit;
+    el("contactProfileInfo").textContent=first?t.intro:t.editInfo;
+    el("contactNameLabel").textContent=t.name;el("contactPhoneLabel").textContent=t.phone;
+    el("contactProfileCaution").textContent=t.caution;el("contactSaveButton").textContent=t.save;
+    el("contactCancelButton").textContent=first?t.back:t.cancel;
+    el("contactNameInput").value=profileData?.full_name||recent?.client_name||signedUser.user_metadata?.full_name||signedUser.user_metadata?.name||"";
+    el("contactPhoneInput").value=profileData?.phone||recent?.phone||"";
+    el("contactProfileError").textContent="";
+    if(!contactDialog.open)contactDialog.showModal();
+  }
+  contactDialog.addEventListener("cancel",e=>{if(firstProfile)e.preventDefault()});
+  el("contactCancelButton").onclick=()=>{if(firstProfile)location.assign("./");else contactDialog.close()};
+  el("contactProfileForm").addEventListener("submit",async e=>{
+    e.preventDefault();if(!signedUser)return;
+    const t=ct(),name=el("contactNameInput").value.trim(),phone=normalizePhone(el("contactPhoneInput").value);
+    const errorBox=el("contactProfileError");
+    if(name.length<2){errorBox.textContent=t.badName;return}
+    if(!phone){errorBox.textContent=t.badPhone;return}
+    const save=el("contactSaveButton");save.disabled=true;save.textContent=t.loading;errorBox.textContent="";
+    try{
+      const {data,error}=await client.from("voxi_profiles").upsert({user_id:signedUser.id,full_name:name,phone},{onConflict:"user_id"}).select("user_id,full_name,phone").single();
+      if(error)throw error;profileData=data;firstProfile=false;contactDialog.close();
+      if(activeTab==="profile")window.hydrateCabinetTab("profile");
+    }catch(ex){errorBox.textContent=t.error+(ex.message||String(ex))}
+    finally{save.disabled=false;save.textContent=ct().save}
+  });
   window.hydrateCabinetTab=function(tab){
     const box=el("empty"),ru=language==="ru";box.replaceChildren();
     if(!signedUser){box.appendChild(make("p",ru?"Войдите через Google на главной странице.":"Басты бетте Google арқылы кіріңіз."));return;}
@@ -106,10 +176,11 @@ document.getElementById('ru').onclick=()=>{language='ru';render()};document.getE
       if(!n&&!ready.length)box.appendChild(make("p",ru?"Новых уведомлений пока нет.":"Жаңа хабарлама жоқ."));
       box.appendChild(make("small",ru?"Напоминания за день и за час до записи пока не подключены.":"Бір күн және бір сағат бұрын еске салу әзірге қосылмаған."));
     }else if(tab==="profile"){
-      const recent=myBookings.find(b=>b.client_name||b.phone);
-      box.appendChild(make("p",(ru?"Имя: ":"Аты: ")+(recent?.client_name||signedUser.user_metadata?.full_name||signedUser.user_metadata?.name||"—")));
+      box.appendChild(make("p",(ru?"Имя: ":"Аты: ")+(profileData?.full_name||signedUser.user_metadata?.full_name||signedUser.user_metadata?.name||"—")));
       box.appendChild(make("p","Email: "+(signedUser.email||"—")));
-      box.appendChild(make("p","Телефон: "+(recent?.phone||"—")));
+      box.appendChild(make("p","Телефон: "+(profileData?.phone||ct().phoneMissing)));
+      const editButton=make("button",ct().editButton,"cabinetExit");editButton.type="button";
+      editButton.addEventListener("click",()=>openContactProfile(!profileData));box.appendChild(editButton);
       const logout=make("button",ru?"Выйти из аккаунта":"Аккаунттан шығу","cabinetExit");
       logout.type="button";logout.addEventListener("click",async()=>{const {error}=await client.auth.signOut();if(error){alert(error.message);return;}location.assign("./")});
       box.appendChild(logout);
@@ -124,9 +195,15 @@ document.getElementById('ru').onclick=()=>{language='ru';render()};document.getE
     const {data,error}=await client.auth.getSession();
     if(error||!data?.session?.user){el("cabinetGate").innerHTML='Для доступа войдите через Google на <a href="./">главной странице VOXi</a>.';return;}
     signedUser=data.session.user;el("cabinetGate").remove();
-    const res=await client.from("voxi_bookings").select("*").eq("user_id",signedUser.id).order("booking_date",{ascending:false}).order("booking_time",{ascending:false});
-    if(res.error){el("cabinetLoadError").textContent="Не удалось загрузить историю: "+res.error.message;return;}
-    myBookings=res.data||[];updateSummary();
+    const [profile,bookings]=await Promise.all([
+      client.from("voxi_profiles").select("user_id,full_name,phone").eq("user_id",signedUser.id).maybeSingle(),
+      client.from("voxi_bookings").select("*").eq("user_id",signedUser.id).order("booking_date",{ascending:false}).order("booking_time",{ascending:false})
+    ]);
+    if(bookings.error)el("cabinetLoadError").textContent="Не удалось загрузить историю: "+bookings.error.message;
+    else myBookings=bookings.data||[];
+    if(profile.error){el("cabinetLoadError").textContent="Не удалось загрузить профиль: "+profile.error.message;return;}
+    profileData=profile.data||null;
+    updateSummary();if(!profileData)openContactProfile(true);
   }
   updateSummary();init();
 })();
