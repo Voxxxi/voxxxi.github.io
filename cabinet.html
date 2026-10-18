@@ -123,10 +123,10 @@ document.getElementById('ru').onclick=()=>{language='ru';render()};document.getE
   const ct=()=>contactText[language==="kk"?"kk":"ru"];
   const contactDialog=el("contactProfileDialog");
   function normalizePhone(raw){
-    let d=String(raw||"").replace(/\\D/g,"");
+    let d=String(raw||"").replace(/\D/g,"");
     if(d.length===10)d="7"+d;
     if(d.length===11&&d[0]==="8")d="7"+d.slice(1);
-    return /^[1-9]\\d{9,14}$/.test(d)?"+"+d:null;
+    return /^[1-9]\d{9,14}$/.test(d)?"+"+d:null;
   }
   function openContactProfile(first){
     if(!signedUser)return;firstProfile=!!first;
