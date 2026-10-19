@@ -2,3 +2,17 @@
 .voxi-admin-mode #scheduleChoices.admin-time-list{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))!important}.voxi-admin-mode #scheduleChoices .admin-hour{grid-template-columns:22px 58px 1fr!important;padding:12px!important;gap:8px!important}.voxi-admin-mode #scheduleChoices .admin-toggle{grid-column:2 / -1;width:100%!important}.voxi-admin-mode #scheduleChoices .admin-hour-state{font-size:11px!important}
 .voxi-user-dialog button{border:1px solid #b98e51;background:#17130f;color:#edc985;padding:10px 15px;border-radius:10px;font:500 14px Jost,sans-serif;cursor:pointer}.voxi-user-dialog button.primary{background:#d2ae6d;color:#15110b}.voxi-user-dialog button.danger{color:#f0a3a3;border-color:#9f5555;background:#32191a}.voxi-user-dialog select{width:100%;padding:11px;color:#f0e5d7;background:#080808;border:1px solid #c59b66;border-radius:8px;font:inherit;color-scheme:dark}.voxi-user-dialog label{display:block;margin:12px 0 5px;color:#d8c4a3}.voxi-users .voxi-client-row{display:flex;align-items:center;width:100%;background:transparent;color:inherit;border:0;border-bottom:1px solid #c8a45b35;border-radius:0;padding:14px 10px;text-align:left}.voxi-admin-heading .voxi-users-search[hidden]{display:none}
 .voxi-admin-nav{justify-content:flex-start}.voxi-admin-date-shortcuts{display:flex;gap:8px;margin:8px 0 16px}.voxi-admin-date-shortcuts button{width:auto!important;margin:0!important}.voxi-admin-legacy{margin-top:24px;color:#b9a98e}.voxi-admin-legacy>summary{cursor:pointer;font-size:13px}
+
+/* Each module has its own document URL; the public landing page stays clear. */
+.voxi-admin-nav a{display:inline-flex;align-items:center;justify-content:center;padding:10px 14px;min-height:42px;border-radius:8px;text-decoration:none;font:500 13px Manrope,Arial,sans-serif;background:#252329;color:#eee;border:1px solid #74644e}
+.voxi-admin-nav a.active{background:#c8a45b;color:#101010;border-color:#d9bd78}
+.voxi-admin-nav a[hidden],.voxi-admin-gate[hidden]{display:none!important}
+html:not([data-voxi-admin]) header :is(#usersEntry,#clientsEntry,#videoModerationEntry){display:none!important}
+html[data-voxi-admin] .container>main,html[data-voxi-admin] :is(.noir-wallpaper,.backdrop),html[data-voxi-admin] header :is(#account,#info,#adminEntry,#usersEntry,#clientsEntry,#videoModerationEntry){display:none!important}
+html[data-voxi-admin] body{background:#090809}
+html[data-voxi-admin] .container{max-width:1200px}
+html[data-voxi-admin] .voxi-functional{max-width:1100px;min-height:60vh}
+html[data-voxi-admin] body:not(.voxi-admin-mode) #app{display:none!important}
+html[data-voxi-admin] .brand-big{font-size:40px}
+html[data-voxi-admin] #signedOut{display:none!important}
+@media(max-width:600px){.voxi-admin-nav a{font-size:12px;padding:10px 8px}.voxi-user-detail{font-size:14px}.voxi-user-dialog input{max-width:100%}}

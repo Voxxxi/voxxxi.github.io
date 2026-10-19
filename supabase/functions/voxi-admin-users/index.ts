@@ -25,6 +25,7 @@ const adapter = {
  async audit(row:any){return checked(await server.from('voxi_admin_audit').insert(row).select('id').single()).id;},
  async auditResult(id:string,status:string){checked(await server.from('voxi_admin_audit').update({status}).eq('id',id));},
  async deleteUser(id:string){checked(await server.auth.admin.deleteUser(id));},
+ async setBan(id:string,banned:boolean){checked(await server.auth.admin.updateUserById(id,{ban_duration:banned?'876000h':'none'}));},
  async setRole(id:string,role:string){
   if(role==='client') checked(await server.from('voxi_staff').delete().eq('user_id',id));
   else checked(await server.from('voxi_staff').upsert({user_id:id,role,updated_at:new Date().toISOString()}));

@@ -22,15 +22,17 @@ export function createAdminHandler(api) {
    let body; try{body=JSON.parse(raw)}catch{return reply(400,{error:'Неверный запрос.'})}
    if(!body || typeof body!=='object') return reply(400,{error:'Неверный запрос.'});
    const {action,userId}=body;
-   if(!['delete_user','set_role'].includes(action) || typeof userId!=='string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(userId)) return reply(400,{error:'Укажите действие и корректный ID пользователя.'});
+   if(!['delete_user','set_role','set_ban'].includes(action) || typeof userId!=='string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(userId)) return reply(400,{error:'Укажите действие и корректный ID пользователя.'});
    if(userId.toLowerCase()===caller.id.toLowerCase() || await api.role(userId)==='owner') return reply(409,{error:'Аккаунт владельца защищён.'});
    if(!await api.targetExists(userId)) return reply(404,{error:'Пользователь уже удалён. Обновите список.'});
    if(action==='set_role' && !['client','helper','admin'].includes(body.role)) return reply(400,{error:'Недопустимая роль.'});
+   if(action==='set_ban' && typeof body.banned!=='boolean')return reply(400,{error:'Укажите состояние доступа.'});
    if(body.confirmUserId!==userId) return reply(400,{error:'Подтвердите выбранный аккаунт.'});
    if(action==='delete_user' && await api.hasMedia(userId)) return reply(409,{error:'У клиента есть файлы. Сначала разберите его медиатеку; автоматическое удаление файлов отключено.'});
-   auditId=await api.audit({actor_id:caller.id,target_id:userId,action,details:action==='set_role'?{role:body.role}:{}});
+   auditId=await api.audit({actor_id:caller.id,target_id:userId,action,details:action==='set_role'?{role:body.role}:action==='set_ban'?{banned:body.banned}:{}});
    if(action==='delete_user') await api.deleteUser(userId);
-   else await api.setRole(userId,body.role);
+   else if(action==='set_role')await api.setRole(userId,body.role);
+   else await api.setBan(userId,body.banned);
    try{await api.auditResult(auditId,'success')}catch{console.error('VOXi audit result update failed');}
    return reply(200,{ok:true,action,userId});
   } catch {

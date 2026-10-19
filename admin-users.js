@@ -41,8 +41,7 @@
   finally{if(request===version)find.disabled=false;}
  }
  function render(user){
-  const row=button('',()=>details(user),'voxi-client-row');row.append(node('strong',user.full_name||'Анкета не заполнена'),node('span',user.phone||'Телефон не указан'));
-  if(directoryMode==='users')row.append(node('small',roles[user.role]||'Клиент'));list.append(row);
+  const row=button('',()=>details(user),'voxi-client-row');row.append(node('strong',user.full_name||'Анкета не заполнена'),node('span',user.phone||'Телефон не указан'));list.append(row);
  }
  async function details(user){
   if(mutating||!canSee())return;dialog.querySelectorAll('audio').forEach(a=>a.pause());dialog.replaceChildren();const actor=currentUser.id;
@@ -50,13 +49,22 @@
   card.append(node('h3',user.full_name||'Анкета ещё не заполнена'));
   for(const [label,value] of [['Телефон',user.phone||'Не указан'],['Email',user.email||'Не указан'],['ID',user.user_id],['Роль',roles[user.role]||'Клиент']]){const p=node('p');p.append(node('strong',label+': '),node(label==='ID'?'code':'span',value));card.append(p);}
   card.append(button('Загрузить песню',()=>uploadTrack(user),'primary'),button('Закрыть',()=>dialog.close()));
+  const blocked=user.banned_until&&Date.parse(user.banned_until)>Date.now();card.append(node('p',blocked?'Доступ приостановлен':'Доступ активен','notice'));
+  const history=node('div');history.hidden=true;card.append(button('История записей',async()=>{history.hidden=!history.hidden;if(!history.hidden)await loadHistory(user,history,actor);}),history);
   const songs=node('div');card.append(node('h3','Песни клиента'),songs);dialog.showModal();songs.textContent='Загружаю песни…';
   void loadTracks(user,songs,actor);
   if(canManage&&user.role!=='owner'){
    const actions=node('div',undefined,'voxi-user-actions'),select=node('select');select.setAttribute('aria-label','Новая роль для '+(user.full_name||user.email));
    for(const role of ['client','helper','admin']){const o=node('option',roles[role]);o.value=role;select.append(o);}select.value=user.role;
-   actions.append(select,button('Применить роль',()=>{if(select.value!==user.role)confirmAction(user,'set_role',select.value);}),button('Удалить аккаунт',()=>confirmAction(user,'delete_user'),'danger'));card.append(actions);
+   actions.append(select,button('Применить роль',()=>{if(select.value!==user.role)confirmAction(user,'set_role',select.value);}),button(blocked?'Возобновить доступ':'Приостановить доступ',()=>confirmAction(user,'set_ban',!blocked)),button('Удалить аккаунт',()=>confirmAction(user,'delete_user'),'danger'));card.append(actions);
   }else if(user.role==='owner')card.append(node('p','Аккаунт владельца защищён.','muted'));
+ }
+ async function loadHistory(user,box,actor){
+  box.textContent='Загружаю историю записей…';try{const {data,error}=await supabaseClient.from('voxi_bookings').select('id,booking_date,booking_time,song_titles,people_count,song_count,status,price').eq('user_id',user.user_id).order('booking_date',{ascending:false}).order('booking_time',{ascending:false}).limit(100);if(error)throw error;if(currentUser?.id!==actor||!box.isConnected||!canSee())return;box.replaceChildren();if(!data.length){box.textContent='Записей этого клиента пока нет.';return;}
+   for(const record of data){const item=node('article',undefined,'voxi-track-row');item.append(node('strong',String(record.booking_date).split('-').reverse().join('.')+' · '+String(record.booking_time).slice(0,5)),node('p','Статус: '+record.status+' · Всего исполнителей: '+record.people_count));let songs;try{songs=JSON.parse(record.song_titles);}catch{songs=null;}
+    if(Array.isArray(songs)){for(const song of songs)item.append(node('p',String(song?.title||'Без названия')+' · Исполнителей: '+String(song?.people||song?.people_count||'—')));}else item.append(node('p',record.song_titles||'Название не указано'));box.append(item);
+   }if(data.length===100)box.append(node('small','Показаны последние 100 записей.'));
+  }catch(e){if(currentUser?.id===actor&&box.isConnected)box.textContent='Не удалось загрузить историю: '+e.message;}
  }
  async function loadTracks(user,box,actor){
   box.querySelectorAll('audio').forEach(a=>a.pause());
@@ -77,8 +85,9 @@
   dialog.querySelectorAll('audio').forEach(a=>a.pause());
   pending={user,action,role,actor:currentUser.id};dialog.replaceChildren();
   const form=node('form');dialog.append(form);
-  form.append(node('h2',action==='delete_user'?'Удалить аккаунт?':'Изменить роль?'),node('p',(user.full_name||user.email)+' · '+user.user_id));
+  form.append(node('h2',action==='delete_user'?'Удалить аккаунт?':action==='set_ban'?(role?'Приостановить доступ?':'Возобновить доступ?'):'Изменить роль?'),node('p',(user.full_name||user.email)+' · '+user.user_id));
   if(action==='delete_user')form.append(node('p','Будут удалены учётная запись, анкета, связанные заявки и сообщения чата. Действие необратимо. Для подтверждения введите УДАЛИТЬ.'));
+  else if(action==='set_ban')form.append(node('p',role?'Вход и доступ к данным кабинета будут приостановлены. Анкета, записи и песни сохранятся. Доступ можно будет возобновить.':'Клиент снова сможет входить в свой кабинет.'));
   else form.append(node('p',role==='admin'?'Администратор увидит клиентов, сможет вести заявки, расписание и медиатеку. Удаление аккаунтов и назначение ролей останутся у владельца.':role==='helper'?'Помощник сможет вести заявки и расписание, проверять видео и модерировать чат. Каталог клиентов, управление аккаунтами и песни ему недоступны.':'Права сотрудника будут сняты. Пользователь останется обычным клиентом.'));
   const confirm=node('input');confirm.setAttribute('aria-label','Подтверждение удаления');confirm.autocomplete='off';
   if(action==='delete_user'){confirm.required=true;confirm.pattern='УДАЛИТЬ';confirm.placeholder='УДАЛИТЬ';form.append(confirm);}
@@ -91,9 +100,9 @@
    const selected=pending;mutating=true;submit.disabled=cancel.disabled=true;result.textContent='Выполняю…';
    try{
     const {data:{session},error}=await supabaseClient.auth.getSession();if(error||!session||session.user.id!==selected.actor)throw Error('Войдите в аккаунт владельца заново.');
-    const response=await fetch(SUPABASE_URL+'/functions/v1/voxi-admin-users',{method:'POST',headers:{'Content-Type':'application/json',apikey:SUPABASE_KEY,Authorization:'Bearer '+session.access_token},body:JSON.stringify({action:selected.action,userId:selected.user.user_id,confirmUserId:selected.user.user_id,role:selected.role})});
+    const response=await fetch(SUPABASE_URL+'/functions/v1/voxi-admin-users',{method:'POST',headers:{'Content-Type':'application/json',apikey:SUPABASE_KEY,Authorization:'Bearer '+session.access_token},body:JSON.stringify({action:selected.action,userId:selected.user.user_id,confirmUserId:selected.user.user_id,role:selected.action==='set_role'?selected.role:undefined,banned:selected.action==='set_ban'?selected.role:undefined})});
     const body=await response.json();if(!response.ok||!body.ok)throw Error(body.error||'Ошибка сервера');
-    if(currentUser?.id!==selected.actor)return;pending=null;dialog.close();mutating=false;await load(page);message.textContent=action==='delete_user'?'Аккаунт удалён.':'Роль сохранена.';
+    if(currentUser?.id!==selected.actor)return;pending=null;dialog.close();mutating=false;await load(page);message.textContent=action==='delete_user'?'Аккаунт удалён.':action==='set_ban'?(selected.role?'Доступ приостановлен.':'Доступ возобновлён.'):'Роль сохранена.';
    }catch(error){if(currentUser?.id===selected.actor)result.textContent=error.message||'Ошибка. Обновите список перед повтором.';}
    finally{mutating=false;submit.disabled=cancel.disabled=false;}
   });

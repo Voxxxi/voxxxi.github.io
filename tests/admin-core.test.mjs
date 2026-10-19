@@ -6,7 +6,7 @@ function fixture(patch={}){
  const calls=[];
  const api={getUser:async()=>({id:owner}),sessionRole:async()=>'owner',role:async()=>'client',targetExists:async()=>true,hasMedia:async()=>false,
  audit:async x=>{calls.push(['audit',x]);return 'log';},auditResult:async(...x)=>calls.push(['auditResult',...x]),
- deleteUser:async x=>calls.push(['delete',x]),setRole:async(...x)=>calls.push(['role',...x]),...patch};
+ deleteUser:async x=>calls.push(['delete',x]),setRole:async(...x)=>calls.push(['role',...x]),setBan:async(...x)=>calls.push(['ban',...x]),...patch};
  const handler=createAdminHandler(api);
  const run=(body={action:'delete_user',userId:target,confirmUserId:target},headers={Authorization:'Bearer signed-user-token'})=>handler(new Request('https://example.test',{method:'POST',headers,body:JSON.stringify(body)}));
  return {calls,run};
@@ -35,6 +35,18 @@ test('deletes exactly selected account and audits success',async()=>{
 });
 test('role changes use explicit allowed role and selected account',async()=>{
  for(const role of ['client','helper','admin']){const f=fixture();assert.equal((await f.run({action:'set_role',role,userId:target,confirmUserId:target})).status,200);assert.deepEqual(f.calls[1],['role',target,role]);}
+});
+
+test('suspension and restoration audit and affect only the confirmed account',async()=>{
+ for(const banned of [true,false]){const f=fixture();const response=await f.run({action:'set_ban',userId:target,confirmUserId:target,banned});assert.equal(response.status,200);assert.deepEqual(f.calls.map(x=>x[0]),['audit','ban','auditResult']);assert.deepEqual(f.calls[1],['ban',target,banned]);assert.deepEqual(f.calls[0][1].details,{banned});}
+});
+test('invalid suspension state or unconfirmed recipient causes no mutation',async()=>{
+ for(const banned of [undefined,'false',1,null]){const f=fixture();assert.equal((await f.run({action:'set_ban',userId:target,confirmUserId:target,banned})).status,400);assert.equal(f.calls.length,0);}
+ const f=fixture();assert.equal((await f.run({action:'set_ban',userId:target,banned:true})).status,400);assert.equal(f.calls.length,0);
+});
+test('suspension cannot affect owner or be performed by other roles',async()=>{
+ for(const role of ['admin','helper','client',null]){const f=fixture({sessionRole:async()=>role});assert.equal((await f.run({action:'set_ban',userId:target,confirmUserId:target,banned:true})).status,403);assert.equal(f.calls.length,0);}
+ const f=fixture({role:async()=>'owner'});assert.equal((await f.run({action:'set_ban',userId:target,confirmUserId:target,banned:true})).status,409);assert.equal(f.calls.length,0);
 });
 test('audit failure prevents destructive operation',async()=>{
  const f=fixture({audit:async()=>{throw Error('no audit')}});assert.equal((await f.run()).status,500);assert.equal(f.calls.length,0);
