@@ -39,6 +39,7 @@
   const card=node('article',undefined,'voxi-user-card');
   card.append(node('h3',user.full_name||'Анкета ещё не заполнена'));
   for(const [label,value] of [['Телефон',user.phone||'Не указан'],['Email',user.email||'Не указан'],['ID',user.user_id],['Роль',roles[user.role]||'Клиент']]){const p=node('p');p.append(node('strong',label+': '),node(label==='ID'?'code':'span',value));card.append(p);}
+  card.append(button('Загрузить песню',()=>uploadTrack(user)));
   if(canManage&&user.role!=='owner'){
    const actions=node('div',undefined,'voxi-user-actions'),select=node('select');select.setAttribute('aria-label','Новая роль для '+(user.full_name||user.email));
    for(const role of ['client','helper','admin']){const o=node('option',roles[role]);o.value=role;select.append(o);}select.value=user.role;
@@ -72,5 +73,26 @@
   });
   dialog.showModal();(action==='delete_user'?confirm:cancel).focus();
  }
+ function uploadTrack(user){
+  if(mutating||!canSee())return;pending=null;dialog.replaceChildren();
+  const actor=currentUser.id,form=node('form');dialog.append(form);
+  form.append(node('h2','Загрузить готовую песню'),node('p','Получатель: '+(user.full_name||user.email)+' · '+user.user_id),node('p','Песня появится только в личном кабинете выбранного клиента. До 50 МБ: MP3, WAV, M4A, OGG, FLAC.'));
+  const titleLabel=node('label','Название песни'),title=node('input');title.required=true;title.maxLength=200;titleLabel.append(title);
+  const fileLabel=node('label','Аудиофайл'),file=node('input');file.type='file';file.required=true;file.accept='.mp3,.wav,.m4a,.ogg,.flac';fileLabel.append(file);
+  file.addEventListener('change',()=>{if(!title.value&&file.files[0])title.value=file.files[0].name.replace(/\.[^.]+$/,'').slice(0,200);});
+  const status=node('p');status.setAttribute('role','status');
+  const submit=node('button','Загрузить в кабинет','primary');submit.type='submit';const cancel=button('Отмена',()=>{if(!mutating)dialog.close();});form.append(titleLabel,fileLabel,status,submit,cancel);
+  form.addEventListener('submit',async e=>{
+   e.preventDefault();if(mutating||!canSee()||currentUser.id!==actor)return;
+   const selected=file.files[0];if(!selected)return;
+   mutating=true;submit.disabled=cancel.disabled=true;status.textContent='Загружаю песню. Не закрывайте страницу…';
+   try{
+    await voxiUploadPrivateTrack({client:supabaseClient,userId:user.user_id,file:selected,title:title.value,actorStillCurrent:()=>currentUser?.id===actor&&canSee()});
+    if(currentUser?.id!==actor)return;status.textContent='Песня добавлена в кабинет выбранного клиента.';submit.remove();file.disabled=title.disabled=true;cancel.textContent='Готово';
+   }catch(error){if(currentUser?.id===actor)status.textContent=error.message||'Не удалось загрузить песню.';}
+   finally{mutating=false;submit.disabled=cancel.disabled=false;}
+  });dialog.showModal();title.focus();
+ }
+ window.addEventListener('beforeunload',e=>{if(mutating){e.preventDefault();e.returnValue='';}});
  dialog.addEventListener('cancel',e=>{if(mutating)e.preventDefault();else pending=null;});
 })();

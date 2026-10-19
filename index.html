@@ -333,7 +333,7 @@ async function ensureVOXiRegistration(target="cabinet"){
   if(!registrationRedirecting){
    registrationRedirecting=true;
    safeVOXiStoreIntent(destination);
-   window.location.assign("./cabinet.html?v=20261019-registration1&registration=1&next="+destination);
+   window.location.assign("./cabinet.html?v=20261019-tracks1&registration=1&next="+destination);
   }
   return false;
  }catch(error){
@@ -344,7 +344,7 @@ async function ensureVOXiRegistration(target="cabinet"){
 async function openVOXiSection(target){
  if(!currentUser)return;
  if(!await ensureVOXiRegistration(target))return;
- if(target==="cabinet"){window.location.assign("./cabinet.html?v=20261019-registration1");return;}
+ if(target==="cabinet"){window.location.assign("./cabinet.html?v=20261019-tracks1");return;}
  $("app").classList.remove("hidden");
  $("app").style.display="block";
  if(target==="booking")$("bookingPanel").classList.remove("hidden");
@@ -515,5 +515,6 @@ if(supabaseClient)resumeVOXiOAuthIntent();else { /* The public landing page rend
 })();
 /* VOXI_ADMIN_V19_END */
 </script>
-<script src="/admin-users.js?v=20261019-users1"></script>
+<script src="/track-upload.js?v=20261019-tracks1"></script>
+<script src="/admin-users.js?v=20261019-tracks1"></script>
 </body></html>

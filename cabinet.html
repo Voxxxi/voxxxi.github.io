@@ -68,6 +68,7 @@ footer{text-align:center;color:#82766d;font-size:10px;padding:36px 0 55px;letter
 #voxiInstallButton:focus-visible{outline:2px solid #e8bc6e;outline-offset:3px}
 </style>
 <!-- /VOXi PWA -->
+<script src="/cabinet-songs.js?v=20261019-tracks1"></script>
 </head><body><div id="cabinetGate">Проверяем вход через Google...</div><div id="cabinetLoadError"></div>
 <div class="noir" aria-hidden="true"></div>
 <!-- Icons with layered metallic gradients and embossed highlights. -->
@@ -138,7 +139,7 @@ document.getElementById('ru').onclick=()=>{language='ru';render()};document.getE
     el("cabinetNextMain").textContent=n?date(n.booking_date)+" · "+time(n.booking_time):(ru?"Записей пока нет":"Әзірге жазылу жоқ");
     el("cabinetNextSub").textContent=n?(names(n).join(", ")||n.status||"VOXi"):(ru?"Ваше следующее посещение появится здесь":"Келесі келу уақыты осында көрсетіледі");
     el("cabinetCollectionMain").textContent=ru?"Ваш музыкальный архив":"Музыкалық мұрағатыңыз";
-    el("cabinetCollectionSub").textContent=ru?"Студия ещё не добавила песни и видео":"Студия әндер мен бейнелерді әлі қоспады";
+    el("cabinetCollectionSub").textContent=ru?"Готовые записи — в разделе «Мои песни»":"Дайын жазбалар — «Менің әндерім» бөлімінде";
   }
 
   const contactText={
@@ -207,13 +208,17 @@ document.getElementById('ru').onclick=()=>{language='ru';render()};document.getE
           location.assign("./?continue=booking");
           return;
         }
-        try{window.history.replaceState(null,"","./cabinet.html?v=20261019-registration1")}catch(_){}
+        try{window.history.replaceState(null,"","./cabinet.html?v=20261019-tracks1")}catch(_){}
       }
       if(activeTab==="profile")window.hydrateCabinetTab("profile");
     }catch(ex){errorBox.textContent=t.error+(ex.message||String(ex))}
     finally{savingProfile=false;save.disabled=false;save.textContent=ct().save}
   });
+  let songLoadVersion=0;
+  el("modal").addEventListener("close",()=>el("empty").querySelectorAll("audio").forEach(a=>a.pause()));
   window.hydrateCabinetTab=function(tab){
+    const request=++songLoadVersion;
+    el("empty").querySelectorAll("audio").forEach(a=>a.pause());
     const box=el("empty"),ru=language==="ru";box.replaceChildren();
     if(!signedUser){box.appendChild(make("p",ru?"Войдите через Google на главной странице.":"Басты бетте Google арқылы кіріңіз."));return;}
     if(dataLoading){box.appendChild(make("p",ru?"Загружаем ваши данные…":"Деректеріңіз жүктелуде…"));el("modalNote").textContent="";return}
@@ -234,7 +239,7 @@ document.getElementById('ru').onclick=()=>{language='ru';render()};document.getE
     }else if(tab==="notifications"){
       const n=nextBooking(),ready=myBookings.filter(b=>b.status==="Готово");
       if(n)box.appendChild(make("p",(ru?"Следующая запись: ":"Келесі жазылу: ")+date(n.booking_date)+" · "+time(n.booking_time)));
-      ready.forEach(b=>box.appendChild(make("p",ru?"Заявка от "+date(b.booking_date)+" отмечена как готовая. Свяжитесь со студией для получения песни.":date(b.booking_date)+" күнгі тапсырыс дайын. Әнді алу үшін студияға хабарласыңыз.")));
+      ready.forEach(b=>box.appendChild(make("p",ru?"Заявка от "+date(b.booking_date)+" отмечена как готовая. Проверьте раздел «Мои песни».":date(b.booking_date)+" күнгі тапсырыс дайын. «Менің әндерім» бөлімін тексеріңіз.")));
       if(!n&&!ready.length)box.appendChild(make("p",ru?"Новых уведомлений пока нет.":"Жаңа хабарлама жоқ."));
       box.appendChild(make("small",ru?"Напоминания за день и за час до записи пока не подключены.":"Бір күн және бір сағат бұрын еске салу әзірге қосылмаған."));
     }else if(tab==="profile"){
@@ -246,10 +251,13 @@ document.getElementById('ru').onclick=()=>{language='ru';render()};document.getE
       const logout=make("button",ru?"Выйти из аккаунта":"Аккаунттан шығу","cabinetExit");
       logout.type="button";logout.addEventListener("click",async()=>{const {error}=await client.auth.signOut();if(error){alert(error.message);return;}location.assign("./")});
       box.appendChild(logout);
+    }else if(tab==="songs"){
+      const userId=signedUser.id;
+      void window.voxiLoadClientSongs({client,userId,box,make,ru,isCurrent:()=>request===songLoadVersion&&signedUser?.id===userId&&activeTab==="songs",refresh:()=>window.hydrateCabinetTab("songs")});
     }else{
       box.appendChild(make("p",tab==="songs"?(ru?"Студия ещё не добавила готовые песни в ваш кабинет.":"Дайын әндер әзірге жүктелмеген."):(ru?"Студия ещё не добавила видео в ваш кабинет.":"Бейнелер әзірге жүктелмеген.")));
     }
-    el("modalNote").textContent=(tab==="songs"||tab==="videos")?(ru?"Здесь будут ваши готовые записи, добавленные студией.":"Студия қосқан дайын жазбаларыңыз осында көрсетіледі."):"";
+    el("modalNote").textContent=tab==="songs"?(ru?"Ваши песни доступны только вашему аккаунту.":"Әндеріңіз тек өз аккаунтыңызға қолжетімді."):"";
   };
   const originalRender=render;render=function(){originalRender();updateSummary()};
   function updateLoadErrors(){
