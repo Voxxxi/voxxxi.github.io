@@ -16,3 +16,23 @@ html[data-voxi-admin] body:not(.voxi-admin-mode) #app{display:none!important}
 html[data-voxi-admin] .brand-big{font-size:40px}
 html[data-voxi-admin] #signedOut{display:none!important}
 @media(max-width:600px){.voxi-admin-nav a{font-size:12px;padding:10px 8px}.voxi-user-detail{font-size:14px}.voxi-user-dialog input{max-width:100%}}
+
+@media(min-width:800px){
+ html[data-voxi-admin] .voxi-admin-mode #app{display:grid!important;grid-template-columns:220px minmax(0,1fr);gap:20px;align-items:start}
+ html[data-voxi-admin] #adminWorkspace{position:sticky;top:16px;padding:20px;margin:24px 0}
+ html[data-voxi-admin] #adminWorkspace .voxi-admin-heading h2{font-size:25px;line-height:1.2}
+ html[data-voxi-admin] #adminWorkspace .voxi-admin-heading>p{font-size:12px;line-height:1.5}
+ html[data-voxi-admin] #adminWorkspace .voxi-users-search{display:flex;flex-direction:column;gap:6px}
+ html[data-voxi-admin] #adminWorkspace .voxi-users-search input,html[data-voxi-admin] #adminWorkspace .voxi-users-search button{width:100%;min-width:0;margin:0;font-size:12px}
+ html[data-voxi-admin] .voxi-admin-nav{display:flex;flex-direction:column;gap:7px;margin:16px 0 0}
+ html[data-voxi-admin] .voxi-admin-nav a{justify-content:flex-start;width:100%}
+ html[data-voxi-admin] #adminWorkspace:has(.voxi-admin-overview:not([hidden])){grid-column:1/-1;position:static}
+ html[data-voxi-admin] #adminWorkspace:has(.voxi-admin-overview:not([hidden])) .voxi-admin-nav{display:grid;grid-template-columns:repeat(4,minmax(0,1fr))}
+ html[data-voxi-admin] #adminWorkspace:has(.voxi-admin-overview:not([hidden])) .voxi-users-search{flex-direction:row}
+}
+@media(max-width:799px){
+ html[data-voxi-admin] #adminWorkspace{padding:18px;margin-bottom:12px}
+ html[data-voxi-admin] #adminWorkspace .voxi-admin-heading h2{font-size:26px}
+ html[data-voxi-admin] .voxi-admin-nav{display:flex;flex-wrap:nowrap;overflow-x:auto;gap:7px;padding-bottom:5px;margin:12px 0 0}
+ html[data-voxi-admin] .voxi-admin-nav a{flex:0 0 auto;white-space:nowrap}
+}

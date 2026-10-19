@@ -25,7 +25,7 @@
  setSignedIn=function(user){signedIn(user);entry.classList.toggle('hidden',!canSee());clientsEntry.classList.toggle('hidden',!canSee());if(!canSee()){version++;list.replaceChildren();panel.classList.add('hidden');dialog.close();pending=null;}};
  entry.classList.toggle('hidden',!canSee());
  clientsEntry.classList.toggle('hidden',!canSee());
- async function open(){if(!canSee())return;await openVOXiSection('admin');if(!canSee())return;panel.querySelector('h2').textContent=directoryMode==='clients'?'Клиенты · готовые песни':'Пользователи · доступ и роли';window.voxiAdminShow?.(directoryMode);panel.classList.remove('hidden');panel.scrollIntoView({behavior:'smooth',block:'start'});await load(1);}
+ async function open(){if(!canSee())return;await openVOXiSection('admin');if(!canSee())return;panel.querySelector('h2').textContent=directoryMode==='clients'?'Клиенты · готовые песни':'Пользователи · доступ и роли';panel.querySelector('.notice').textContent=directoryMode==='clients'?'Найдите клиента по имени, фамилии, телефону или ID. Нажмите строку, чтобы открыть песни и историю записей.':'Все аккаунты, включая незаполненные анкеты. Поиск по имени, телефону, email или ID.';window.voxiAdminShow?.(directoryMode);panel.classList.remove('hidden');panel.scrollIntoView({behavior:'smooth',block:'start'});await load(1);}
  searchForm.addEventListener('submit',e=>{e.preventDefault();if(!mutating)load(1);});
  window.voxiOpenClients=async query=>{directoryMode='clients';search.value=query||'';await open();search.focus();};
  async function load(newPage){

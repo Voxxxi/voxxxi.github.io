@@ -57,7 +57,7 @@
  let openedFor=null;
  function syncRoute(){
   const allowed=staff();workspace.classList.toggle('hidden',!allowed);document.body.classList.toggle('voxi-admin-mode',allowed);gate.hidden=allowed;
-  if(!allowed){openedFor=null;generation++;overview.replaceChildren();gate.textContent=currentUser?'Рабочий кабинет доступен только сотрудникам студии.':'Для входа в рабочий кабинет войдите через Google.';return;}
+  if(!allowed){openedFor=null;generation++;overview.replaceChildren();const checking=currentUser&&typeof voxiStaffRole!=='undefined'&&voxiStaffRole===null;gate.textContent=checking?'Проверяем доступ к рабочему кабинету…':currentUser?'Рабочий кабинет доступен только сотрудникам студии.':'Для входа в рабочий кабинет войдите через Google.';return;}
   if(openedFor===currentUser.id)return;openedFor=currentUser.id;
   const key=['clients','upload','users'].includes(route)&&!directory()?'home':route;show(key);
   document.title='VOXi — '+(buttons.get(key)?.textContent||'Рабочий кабинет');
