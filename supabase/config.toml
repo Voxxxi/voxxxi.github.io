@@ -1,0 +1,3 @@
+[functions.voxi-admin-users]
+# The handler verifies the caller through Auth and checks a live owner session.
+verify_jwt = false
