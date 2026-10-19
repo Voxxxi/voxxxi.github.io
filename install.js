@@ -30,20 +30,26 @@
   const close = document.createElement("button");
   close.type = "button";
   close.className = "voxi-install-close";
-  dialog.append(title, text, status, install, close);
+  const chromeLink = document.createElement("a");
+  chromeLink.className = "voxi-open-chrome";
+  chromeLink.href = "intent://voxxxi.github.io/#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=https%3A%2F%2Fplay.google.com%2Fstore%2Fapps%2Fdetails%3Fid%3Dcom.android.chrome;end";
+  chromeLink.setAttribute("style", "box-sizing:border-box;display:block;width:100%;margin:0 0 12px;padding:12px 15px;border:1px solid #e8bd79;border-radius:100px;background:linear-gradient(120deg,#f0d198,#bd8a42);color:#21160b;font:600 12px/1.4 Manrope,Montserrat,Arial,sans-serif;text-align:center;text-decoration:none");
+  dialog.append(title, text, status, install, chromeLink, close);
   document.body.append(dialog);
   const refresh = () => {
     trigger.querySelector("span").textContent = say("Скачать приложение", "Қолданбаны жүктеу");
     title.textContent = say("VOXi на вашем телефоне", "VOXi телефоныңызда");
     close.textContent = say("Закрыть", "Жабу");
     install.textContent = say("Установить VOXi", "VOXi орнату");
-    install.hidden = !deferred || busy;
-    if (deferred) {
+    install.hidden = isSamsung || !deferred || busy;
+    chromeLink.hidden = !isSamsung;
+    chromeLink.textContent = say("Открыть VOXi в Google Chrome", "VOXi қолданбасын Google Chrome арқылы ашу");
+    if (deferred && !isSamsung) {
       text.textContent = say("Нажмите «Установить VOXi» и подтвердите установку в окне браузера.", "«VOXi орнату» түймесін басып, браузер терезесінде орнатуды растаңыз.");
     } else if (isIos) {
       text.textContent = say("В Safari нажмите «Поделиться» → «На экран Домой» → «Добавить». Если есть переключатель «Открывать как веб-приложение», оставьте его включённым.", "Safari-де «Бөлісу» → «Басты экранға қосу» → «Қосу» тармақтарын таңдаңыз. Веб-қолданба ретінде ашу параметрі болса, оны қосулы қалдырыңыз.");
     } else if (isSamsung) {
-      text.textContent = say("Откройте меню Samsung Internet → «Добавить страницу» → «Экран приложений» или «Главный экран». Если Android блокирует установку, отмените её и попробуйте обновлённый Chrome.", "Samsung Internet мәзірінде бетті қолданбалар не басты экранға қосу тармағын таңдаңыз. Android орнатуды бұғаттаса, тоқтатып, жаңартылған Chrome арқылы көріңіз.");
+      text.textContent = say("В Samsung Internet возможна ошибка установки приложения. Нажмите кнопку ниже: откроется Google Chrome. Уже в Chrome нажмите «Скачать приложение» и подтвердите установку.", "Samsung Internet арқылы орнату кезінде қате болуы мүмкін. Төмендегі түйме арқылы Google Chrome ашып, «Қолданбаны жүктеу» түймесін басыңыз.");
     } else {
       text.textContent = say(isAndroid
         ? "В Chrome нажмите ⋮ → «Установить и создать ярлык» → «Установить». В некоторых версиях пункт называется «Добавить на главный экран». Если окно установки ещё не готово, немного подождите и попробуйте снова."
@@ -58,6 +64,7 @@
   };
   const requestInstall = async () => {
     if (busy) return;
+    if (isSamsung) { showHelp(); return; }
     if (!deferred) { showHelp(); return; }
     busy = true;
     trigger.disabled = true;

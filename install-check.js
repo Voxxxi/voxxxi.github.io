@@ -1,8 +1,12 @@
 (() => {
+  const samsung = /SamsungBrowser/i.test(navigator.userAgent);
+  const chromeHelp = document.getElementById("chromeHelp");
+  if (chromeHelp) chromeHelp.hidden = !samsung;
   const out = document.getElementById("results");
   const report = document.getElementById("report");
   const summary = document.getElementById("summary");
   const nativeButton = document.getElementById("nativeInstall");
+  if (samsung) nativeButton.hidden = true;
   const copyButton = document.getElementById("copyReport");
   const copyStatus = document.getElementById("copyStatus");
   const runButton = document.getElementById("runChecks");
@@ -15,7 +19,7 @@
   const cleanError = error => String(error && error.message || error).slice(0, 220);
   const makeReport = () => {
     report.value = [
-      "VOXi — проверка установки, версия 1",
+      "VOXi — проверка установки, версия 2",
       "Время: " + new Date().toISOString(),
       "Браузер: " + navigator.userAgent,
       "HTTPS: " + window.isSecureContext,
@@ -113,8 +117,8 @@
   window.addEventListener("beforeinstallprompt", event => {
     event.preventDefault();
     promptEvent = event;
-    nativeButton.disabled = false;
-    installState = "Браузер предоставил системное окно установки.";
+    nativeButton.disabled = samsung;
+    installState = samsung ? "Samsung Internet предоставил окно, но предыдущая установка завершилась ошибкой. Нажмите «Открыть проверку в Google Chrome» выше." : "Браузер предоставил системное окно установки.";
     makeReport();
   });
   window.addEventListener("appinstalled", () => {
