@@ -32,7 +32,7 @@
   if(!canSee()||mutating)return;
   const id=currentUser.id,request=++version;page=Math.max(1,newPage);message.textContent='Загружаю пользователей…';list.replaceChildren();prev.disabled=next.disabled=true;find.disabled=true;
   try{
-   const {data,error}=await supabaseClient.rpc('voxi_admin_users',{p_search:search.value.trim(),p_page:page});if(error)throw error;
+   const {data,error}=await supabaseClient.rpc(directoryMode==='clients'?'voxi_admin_clients':'voxi_admin_users',{p_search:search.value.trim(),p_page:page});if(error)throw error;
    if(request!==version||currentUser?.id!==id||!canSee())return;
    total=Number(data.total)||0;canManage=data.canManage===true;message.textContent=total?'Найдено: '+total:'Пользователи не найдены.';
    for(const user of data.users)render(user);
@@ -77,7 +77,7 @@
   const form=node('form');dialog.append(form);
   form.append(node('h2',action==='delete_user'?'Удалить аккаунт?':'Изменить роль?'),node('p',(user.full_name||user.email)+' · '+user.user_id));
   if(action==='delete_user')form.append(node('p','Будут удалены учётная запись, анкета, связанные заявки и сообщения чата. Действие необратимо. Для подтверждения введите УДАЛИТЬ.'));
-  else form.append(node('p',role==='admin'?'Администратор увидит клиентов, сможет вести заявки, расписание и медиатеку. Удаление аккаунтов и назначение ролей останутся у владельца.':role==='helper'?'Помощник сможет просматривать и изменять заявки и расписание. Список пользователей, управление аккаунтами и медиатека ему недоступны.':'Права сотрудника будут сняты. Пользователь останется обычным клиентом.'));
+  else form.append(node('p',role==='admin'?'Администратор увидит клиентов, сможет вести заявки, расписание и медиатеку. Удаление аккаунтов и назначение ролей останутся у владельца.':role==='helper'?'Помощник сможет вести заявки и расписание, проверять видео и модерировать чат. Каталог клиентов, управление аккаунтами и песни ему недоступны.':'Права сотрудника будут сняты. Пользователь останется обычным клиентом.'));
   const confirm=node('input');confirm.setAttribute('aria-label','Подтверждение удаления');confirm.autocomplete='off';
   if(action==='delete_user'){confirm.required=true;confirm.pattern='УДАЛИТЬ';confirm.placeholder='УДАЛИТЬ';form.append(confirm);}
   const result=node('p');result.setAttribute('role','alert');form.append(result);
