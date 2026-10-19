@@ -142,8 +142,8 @@ document.getElementById('ru').onclick=()=>{language='ru';render()};document.getE
   }
 
   const contactText={
-   ru:{title:"Завершите регистрацию в VOXi",edit:"Мой профиль VOXi",intro:"Для завершения регистрации заполните все три поля: имя, фамилию и телефон.",editInfo:"Измените имя, фамилию и номер телефона.",name:"Имя",surname:"Фамилия",phone:"Номер телефона",caution:"Номер не подтверждается автоматически. Для получения архивных песен студия проверяет владельца по WhatsApp или известному номеру телефона.",save:"Сохранить профиль",back:"Вернуться на главную",cancel:"Отмена",editButton:"Изменить профиль",badName:"Введите имя и фамилию.",longName:"Имя и фамилия вместе должны содержать не более 150 символов.",badPhone:"Проверьте номер телефона (например, +7 700 123 45 67).",loading:"Сохранение...",error:"Ошибка сохранения: ",phoneMissing:"Не указан"},
-   kk:{title:"VOXi тіркеуін аяқтаңыз",edit:"VOXi профилім",intro:"Студия жазбаларыңызды табуы үшін атыңызды, тегіңізді және телефон нөміріңізді көрсетіңіз.",editInfo:"Атыңызды, тегіңізді және телефон нөміріңізді өзгертіңіз.",name:"Аты",surname:"Тегі",phone:"Телефон нөмірі",caution:"Нөмір автоматты түрде расталмайды. Ескі әндерді беру алдында студия иесін WhatsApp немесе телефон арқылы тексереді.",save:"Профильді сақтау",back:"Басты бетке оралу",cancel:"Болдырмау",editButton:"Профильді өзгерту",badName:"Атыңызды және тегіңізді енгізіңіз.",longName:"Аты мен тегі бірге 150 таңбадан аспауы керек.",badPhone:"Телефон нөмірін тексеріңіз.",loading:"Сақталуда...",error:"Сақтау қатесі: ",phoneMissing:"Көрсетілмеген"}
+   ru:{title:"Завершите регистрацию в VOXi",edit:"Мой профиль VOXi",intro:"Для завершения регистрации заполните все три поля: имя, фамилию и телефон.",editInfo:"Измените имя, фамилию и номер телефона.",name:"Имя",surname:"Фамилия",phone:"Номер телефона",caution:"Номер не подтверждается автоматически. Для получения архивных песен студия проверяет владельца по WhatsApp или известному номеру телефона.",save:"Сохранить профиль",back:"Выйти и вернуться на главную",cancel:"Отмена",editButton:"Изменить профиль",badName:"Введите имя и фамилию.",longName:"Имя и фамилия вместе должны содержать не более 150 символов.",badPhone:"Проверьте номер телефона (например, +7 700 123 45 67).",loading:"Сохранение...",error:"Ошибка сохранения: ",phoneMissing:"Не указан"},
+   kk:{title:"VOXi тіркеуін аяқтаңыз",edit:"VOXi профилім",intro:"Студия жазбаларыңызды табуы үшін атыңызды, тегіңізді және телефон нөміріңізді көрсетіңіз.",editInfo:"Атыңызды, тегіңізді және телефон нөміріңізді өзгертіңіз.",name:"Аты",surname:"Тегі",phone:"Телефон нөмірі",caution:"Нөмір автоматты түрде расталмайды. Ескі әндерді беру алдында студия иесін WhatsApp немесе телефон арқылы тексереді.",save:"Профильді сақтау",back:"Шығып, басты бетке оралу",cancel:"Болдырмау",editButton:"Профильді өзгерту",badName:"Атыңызды және тегіңізді енгізіңіз.",longName:"Аты мен тегі бірге 150 таңбадан аспауы керек.",badPhone:"Телефон нөмірін тексеріңіз.",loading:"Сақталуда...",error:"Сақтау қатесі: ",phoneMissing:"Көрсетілмеген"}
   };
   const ct=()=>contactText[language==="kk"?"kk":"ru"];
   const contactDialog=el("contactProfileDialog");
@@ -177,7 +177,17 @@ document.getElementById('ru').onclick=()=>{language='ru';render()};document.getE
     if(!contactDialog.open)contactDialog.showModal();
   }
   contactDialog.addEventListener("cancel",e=>{if(firstProfile)e.preventDefault()});
-  el("contactCancelButton").onclick=()=>{if(firstProfile)location.assign("./");else contactDialog.close()};
+  el("contactCancelButton").onclick=async()=>{
+    if(savingProfile)return;
+    if(!firstProfile){contactDialog.close();return;}
+    const cancel=el("contactCancelButton");cancel.disabled=true;
+    try{
+      const {error}=await client.auth.signOut();if(error)throw error;
+      try{sessionStorage.removeItem("voxi_auth_intent")}catch(_){}
+      location.assign("./");
+    }catch(error){el("contactProfileError").textContent=(language==="ru"?"Не удалось выйти: ":"Шығу мүмкін болмады: ")+(error.message||String(error));}
+    finally{cancel.disabled=false;}
+  };
   el("contactProfileForm").addEventListener("submit",async e=>{
     e.preventDefault();if(!signedUser||savingProfile||!client)return;
     const t=ct(),firstName=el("contactNameInput").value.trim().replace(/\s+/g," "),lastName=el("contactSurnameInput").value.trim().replace(/\s+/g," "),phone=normalizePhone(el("contactPhoneInput").value);
