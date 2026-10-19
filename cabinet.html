@@ -96,10 +96,12 @@ footer{text-align:center;color:#82766d;font-size:10px;padding:36px 0 55px;letter
 <dialog id="contactProfileDialog" class="voxi-contact-modal" aria-labelledby="contactProfileTitle">
 <div class="voxi-contact-wrap"><p class="kicker">VOXi · PERSONAL SPACE</p>
 <h2 id="contactProfileTitle">Ваш профиль VOXi</h2>
-<p id="contactProfileInfo">Введите имя и телефон для связи со студией.</p>
+<p id="contactProfileInfo">Введите имя, фамилию и телефон для связи со студией.</p>
 <form id="contactProfileForm">
-<label id="contactNameLabel" for="contactNameInput">Имя и фамилия</label>
-<input id="contactNameInput" type="text" autocomplete="name" minlength="2" maxlength="150" required>
+<label id="contactNameLabel" for="contactNameInput">Имя</label>
+<input id="contactNameInput" type="text" autocomplete="given-name" maxlength="75" required>
+<label id="contactSurnameLabel" for="contactSurnameInput">Фамилия</label>
+<input id="contactSurnameInput" type="text" autocomplete="family-name" maxlength="75" required>
 <label id="contactPhoneLabel" for="contactPhoneInput">Номер телефона</label>
 <input id="contactPhoneInput" type="tel" autocomplete="tel" maxlength="30" placeholder="+7 700 123 45 67" required>
 <p id="contactProfileCaution">Номер не подтверждён автоматически. Старые песни студия выдаёт только после отдельной проверки владельца.</p>
@@ -109,7 +111,7 @@ footer{text-align:center;color:#82766d;font-size:10px;padding:36px 0 55px;letter
 </form></div></dialog>
 <dialog class="modal" id="panel"><button type="button" class="close" id="dismiss" aria-label="Закрыть">×</button><p class="kicker">VOXi · PERSONAL SPACE</p><h2 id="modalTitle">Мои песни</h2><p id="modalDesc"></p><div class="empty" id="empty">Здесь пока нет готовых песен</div><p id="modalNote"></p><div class="modal-actions"><button class="pill" type="button" id="done" data-i18n="close">Закрыть</button><a class="contact" href="https://wa.me/77011637393" target="_blank" rel="noopener" data-i18n="contactShort">Связаться со студией ↗</a></div></dialog>
 <script>
-const dict={ru:{home:'Главная',account:'Мой кабинет',hero1:'Ваша музыка.',hero2:'Ваша история.',heroText:'Здесь живут ваши песни, видео и музыкальные воспоминания. Всё самое важное — в одном месте.',demo:'ДЕМОНСТРАЦИЯ ДИЗАЙНА',nextTitle:'БЛИЖАЙШАЯ ЗАПИСЬ',nextMain:'Записей пока нет',nextSub:'Ваше следующее посещение появится здесь',collectionTitle:'МОЯ КОЛЛЕКЦИЯ',collectionMain:'Ваш музыкальный архив',collectionSub:'Готовые песни и видео появятся после загрузки',sections:'МОИ РАЗДЕЛЫ',songs:'Мои песни',songsDesc:'Слушайте любимые записи и скачивайте готовые песни.',videos:'Мои видео',videosDesc:'Ваши выступления, клипы и памятные видеозаписи.',history:'История записей',historyDesc:'Даты посещений, названия песен и статусы записей.',notifications:'Уведомления',notificationsDesc:'Напоминания о посещении и сообщения о готовности песен.',profile:'Мой профиль',profileDesc:'Ваше имя, контакты и персональные настройки.',open:'ОТКРЫТЬ РАЗДЕЛ',help:'Есть вопрос по вашей записи? Свяжитесь со студией VOXi.',contact:'Написать в WhatsApp ↗',contactShort:'Связаться со студией ↗',close:'Закрыть',emptySongs:'Здесь пока нет готовых песен',emptyVideos:'Здесь пока нет видеозаписей',emptyHistory:'История ваших посещений появится здесь',emptyNotifications:'Пока нет новых уведомлений',emptyProfile:'Контактные данные появятся после подключения входа',note:'Это макет оформления. Данные клиента и загрузка файлов будут подключены к Supabase позже.'},kk:{home:'Басты бет',account:'Жеке кабинет',hero1:'Сіздің әніңіз.',hero2:'Сіздің тарихыңыз.',heroText:'Әндеріңіз, бейнелеріңіз және музыкалық естеліктеріңіз — бәрі бір жерде.',demo:'ДИЗАЙН ҮЛГІСІ',nextTitle:'КЕЛЕСІ ЖАЗЫЛУ',nextMain:'Әзірге жазылу жоқ',nextSub:'Келесі келу уақыты осында көрсетіледі',collectionTitle:'МЕНІҢ ЖИНАҒЫМ',collectionMain:'Музыкалық мұрағатыңыз',collectionSub:'Дайын әндер мен бейнелер жүктелгеннен кейін пайда болады',sections:'МЕНІҢ БӨЛІМДЕРІМ',songs:'Менің әндерім',songsDesc:'Дайын әндерді тыңдап, жүктеп алыңыз.',videos:'Менің бейнелерім',videosDesc:'Орындауларыңыз бен естелік бейнежазбалар.',history:'Жазылу тарихы',historyDesc:'Келу күндері, ән атаулары мен мәртебелері.',notifications:'Хабарламалар',notificationsDesc:'Жазылу туралы еске салулар мен дайын әндер туралы хабарламалар.',profile:'Менің профилім',profileDesc:'Атыңыз, байланыс ақпаратыңыз және баптаулар.',open:'БӨЛІМДІ АШУ',help:'Сұрағыңыз бар ма? VOXi студиясына хабарласыңыз.',contact:'WhatsApp арқылы жазу ↗',contactShort:'Студияға жазу ↗',close:'Жабу',emptySongs:'Әзірге дайын ән жоқ',emptyVideos:'Әзірге бейнежазба жоқ',emptyHistory:'Келу тарихы осында пайда болады',emptyNotifications:'Жаңа хабарлама жоқ',emptyProfile:'Кіру жүйесін қосқаннан кейін байланыс деректері көрсетіледі',note:'Бұл дизайн үлгісі. Клиенттің деректері мен файлдары кейін Supabase жүйесіне қосылады.'}};
+const dict={ru:{home:'Главная',account:'Мой кабинет',hero1:'Ваша музыка.',hero2:'Ваша история.',heroText:'Здесь живут ваши песни, видео и музыкальные воспоминания. Всё самое важное — в одном месте.',nextTitle:'БЛИЖАЙШАЯ ЗАПИСЬ',nextMain:'Записей пока нет',nextSub:'Ваше следующее посещение появится здесь',collectionTitle:'МОЯ КОЛЛЕКЦИЯ',collectionMain:'Ваш музыкальный архив',collectionSub:'Готовые песни и видео появятся после загрузки',sections:'МОИ РАЗДЕЛЫ',songs:'Мои песни',songsDesc:'Слушайте любимые записи и скачивайте готовые песни.',videos:'Мои видео',videosDesc:'Ваши выступления, клипы и памятные видеозаписи.',history:'История записей',historyDesc:'Даты посещений, названия песен и статусы записей.',notifications:'Уведомления',notificationsDesc:'Напоминания о посещении и сообщения о готовности песен.',profile:'Мой профиль',profileDesc:'Ваши имя, фамилия, телефон и персональные настройки.',open:'ОТКРЫТЬ РАЗДЕЛ',help:'Есть вопрос по вашей записи? Свяжитесь со студией VOXi.',contact:'Написать в WhatsApp ↗',contactShort:'Связаться со студией ↗',close:'Закрыть',emptySongs:'Здесь пока нет готовых песен',emptyVideos:'Здесь пока нет видеозаписей',emptyHistory:'История ваших посещений появится здесь',emptyNotifications:'Пока нет новых уведомлений',emptyProfile:'Загружаем профиль…',note:''},kk:{home:'Басты бет',account:'Жеке кабинет',hero1:'Сіздің әніңіз.',hero2:'Сіздің тарихыңыз.',heroText:'Әндеріңіз, бейнелеріңіз және музыкалық естеліктеріңіз — бәрі бір жерде.',nextTitle:'КЕЛЕСІ ЖАЗЫЛУ',nextMain:'Әзірге жазылу жоқ',nextSub:'Келесі келу уақыты осында көрсетіледі',collectionTitle:'МЕНІҢ ЖИНАҒЫМ',collectionMain:'Музыкалық мұрағатыңыз',collectionSub:'Дайын әндер мен бейнелер жүктелгеннен кейін пайда болады',sections:'МЕНІҢ БӨЛІМДЕРІМ',songs:'Менің әндерім',songsDesc:'Дайын әндерді тыңдап, жүктеп алыңыз.',videos:'Менің бейнелерім',videosDesc:'Орындауларыңыз бен естелік бейнежазбалар.',history:'Жазылу тарихы',historyDesc:'Келу күндері, ән атаулары мен мәртебелері.',notifications:'Хабарламалар',notificationsDesc:'Жазылу туралы еске салулар мен дайын әндер туралы хабарламалар.',profile:'Менің профилім',profileDesc:'Атыңыз, тегіңіз, телефон нөміріңіз және баптаулар.',open:'БӨЛІМДІ АШУ',help:'Сұрағыңыз бар ма? VOXi студиясына хабарласыңыз.',contact:'WhatsApp арқылы жазу ↗',contactShort:'Студияға жазу ↗',close:'Жабу',emptySongs:'Әзірге дайын ән жоқ',emptyVideos:'Әзірге бейнежазба жоқ',emptyHistory:'Келу тарихы осында пайда болады',emptyNotifications:'Жаңа хабарлама жоқ',emptyProfile:'Профиль жүктелуде…',note:''}};
 let language='ru',activeTab=null;const modal=document.getElementById('panel');function render(){const t=dict[language];document.querySelectorAll('[data-i18n]').forEach(x=>x.textContent=t[x.dataset.i18n]);document.getElementById('ru').classList.toggle('on',language==='ru');document.getElementById('kk').classList.toggle('on',language==='kk');document.getElementById('ru').setAttribute('aria-pressed',language==='ru');document.getElementById('kk').setAttribute('aria-pressed',language==='kk');document.documentElement.lang=language;if(activeTab)showTab(activeTab,false)}
 function showTab(tab,open=true){activeTab=tab;const t=dict[language];document.getElementById('modalTitle').textContent=t[tab];document.getElementById('modalDesc').textContent=t[tab+'Desc'];document.getElementById('empty').textContent=t['empty'+tab[0].toUpperCase()+tab.slice(1)];document.getElementById('modalNote').textContent=t.note;if(open)modal.showModal();if(typeof hydrateCabinetTab==="function")hydrateCabinetTab(tab)}
 document.querySelectorAll('[data-tab]').forEach(x=>x.addEventListener('click',()=>showTab(x.dataset.tab)));
@@ -118,8 +120,12 @@ document.getElementById('ru').onclick=()=>{language='ru';render()};document.getE
 <script>
 (function(){
   const URL="https://vnykpjarjvacwhxvkxrk.supabase.co", KEY="sb_publishable_Jv-1ip1CSRKe2_cCjcGjmA_B333H-oC";
-  const client=window.supabase?.createClient(URL,KEY);
+  let client=null,clientInitError=null;
+  try{client=window.supabase?.createClient(URL,KEY)}catch(error){clientInitError=error}
+
   let signedUser=null, myBookings=[], profileData=null, firstProfile=false;
+  let dataLoading=false,profileError=null,bookingsError=null,initializing=false,savingProfile=false;
+
   const el=id=>document.getElementById(id);
   const make=(tag,txt,cls)=>{const n=document.createElement(tag);n.textContent=txt||"";if(cls)n.className=cls;return n};
   const date=d=>{const s=String(d||"");const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(s);return m?m[3]+"."+m[2]+"."+m[1]:s};
@@ -132,12 +138,12 @@ document.getElementById('ru').onclick=()=>{language='ru';render()};document.getE
     el("cabinetNextMain").textContent=n?date(n.booking_date)+" · "+time(n.booking_time):(ru?"Записей пока нет":"Әзірге жазылу жоқ");
     el("cabinetNextSub").textContent=n?(names(n).join(", ")||n.status||"VOXi"):(ru?"Ваше следующее посещение появится здесь":"Келесі келу уақыты осында көрсетіледі");
     el("cabinetCollectionMain").textContent=ru?"Ваш музыкальный архив":"Музыкалық мұрағатыңыз";
-    el("cabinetCollectionSub").textContent=ru?"Готовые песни и видео появятся после загрузки":"Дайын әндер мен бейнелер жүктелгеннен кейін пайда болады";
+    el("cabinetCollectionSub").textContent=ru?"Студия ещё не добавила песни и видео":"Студия әндер мен бейнелерді әлі қоспады";
   }
 
   const contactText={
-   ru:{title:"Добро пожаловать в VOXi",edit:"Мой профиль VOXi",intro:"Укажите имя и телефон, чтобы студия могла найти ваши записи и связаться с вами.",editInfo:"Измените имя и номер телефона.",name:"Имя и фамилия",phone:"Номер телефона",caution:"Номер не подтверждается автоматически. Для получения архивных песен студия проверяет владельца по WhatsApp или известному номеру телефона.",save:"Сохранить профиль",back:"Вернуться на главную",cancel:"Отмена",editButton:"Изменить профиль",badName:"Введите имя (не менее 2 символов).",badPhone:"Проверьте номер телефона (например, +7 700 123 45 67).",loading:"Сохранение...",error:"Ошибка сохранения: ",phoneMissing:"Не указан"},
-   kk:{title:"VOXi-ге қош келдіңіз",edit:"VOXi профилім",intro:"Студия жазбаларыңызды табуы үшін атыңыз бен телефон нөміріңізді көрсетіңіз.",editInfo:"Атыңыз бен телефон нөміріңізді өзгертіңіз.",name:"Аты-жөні",phone:"Телефон нөмірі",caution:"Нөмір автоматты түрде расталмайды. Ескі әндерді беру алдында студия иесін WhatsApp немесе телефон арқылы тексереді.",save:"Профильді сақтау",back:"Басты бетке оралу",cancel:"Болдырмау",editButton:"Профильді өзгерту",badName:"Аты-жөніңізді енгізіңіз.",badPhone:"Телефон нөмірін тексеріңіз.",loading:"Сақталуда...",error:"Сақтау қатесі: ",phoneMissing:"Көрсетілмеген"}
+   ru:{title:"Добро пожаловать в VOXi",edit:"Мой профиль VOXi",intro:"Укажите имя, фамилию и телефон, чтобы студия могла найти ваши записи и связаться с вами.",editInfo:"Измените имя, фамилию и номер телефона.",name:"Имя",surname:"Фамилия",phone:"Номер телефона",caution:"Номер не подтверждается автоматически. Для получения архивных песен студия проверяет владельца по WhatsApp или известному номеру телефона.",save:"Сохранить профиль",back:"Вернуться на главную",cancel:"Отмена",editButton:"Изменить профиль",badName:"Введите имя и фамилию.",longName:"Имя и фамилия вместе должны содержать не более 150 символов.",badPhone:"Проверьте номер телефона (например, +7 700 123 45 67).",loading:"Сохранение...",error:"Ошибка сохранения: ",phoneMissing:"Не указан"},
+   kk:{title:"VOXi-ге қош келдіңіз",edit:"VOXi профилім",intro:"Студия жазбаларыңызды табуы үшін атыңызды, тегіңізді және телефон нөміріңізді көрсетіңіз.",editInfo:"Атыңызды, тегіңізді және телефон нөміріңізді өзгертіңіз.",name:"Аты",surname:"Тегі",phone:"Телефон нөмірі",caution:"Нөмір автоматты түрде расталмайды. Ескі әндерді беру алдында студия иесін WhatsApp немесе телефон арқылы тексереді.",save:"Профильді сақтау",back:"Басты бетке оралу",cancel:"Болдырмау",editButton:"Профильді өзгерту",badName:"Атыңызды және тегіңізді енгізіңіз.",longName:"Аты мен тегі бірге 150 таңбадан аспауы керек.",badPhone:"Телефон нөмірін тексеріңіз.",loading:"Сақталуда...",error:"Сақтау қатесі: ",phoneMissing:"Көрсетілмеген"}
   };
   const ct=()=>contactText[language==="kk"?"kk":"ru"];
   const contactDialog=el("contactProfileDialog");
@@ -147,15 +153,25 @@ document.getElementById('ru').onclick=()=>{language='ru';render()};document.getE
     if(d.length===11&&d[0]==="8")d="7"+d.slice(1);
     return /^[1-9]\d{9,14}$/.test(d)?"+"+d:null;
   }
+  function splitFullName(raw){
+    const parts=String(raw||"").trim().split(/\s+/).filter(Boolean);
+    return {first:parts.shift()||"",last:parts.join(" ")};
+  }
+  function completeProfile(profile){
+    const name=splitFullName(profile?.full_name);
+    return !!(name.first&&name.last&&normalizePhone(profile?.phone));
+  }
   function openContactProfile(first){
     if(!signedUser)return;firstProfile=!!first;
     const t=ct(),recent=myBookings.find(x=>x.client_name||x.phone);
     el("contactProfileTitle").textContent=first?t.title:t.edit;
     el("contactProfileInfo").textContent=first?t.intro:t.editInfo;
-    el("contactNameLabel").textContent=t.name;el("contactPhoneLabel").textContent=t.phone;
+    el("contactNameLabel").textContent=t.name;el("contactSurnameLabel").textContent=t.surname;el("contactPhoneLabel").textContent=t.phone;
     el("contactProfileCaution").textContent=t.caution;el("contactSaveButton").textContent=t.save;
     el("contactCancelButton").textContent=first?t.back:t.cancel;
-    el("contactNameInput").value=profileData?.full_name||recent?.client_name||signedUser.user_metadata?.full_name||signedUser.user_metadata?.name||"";
+    const name=splitFullName(profileData?.full_name||recent?.client_name||signedUser.user_metadata?.full_name||signedUser.user_metadata?.name||"");
+    el("contactNameInput").value=name.first||signedUser.user_metadata?.given_name||"";
+    el("contactSurnameInput").value=name.last||signedUser.user_metadata?.family_name||"";
     el("contactPhoneInput").value=profileData?.phone||recent?.phone||"";
     el("contactProfileError").textContent="";
     if(!contactDialog.open)contactDialog.showModal();
@@ -163,22 +179,30 @@ document.getElementById('ru').onclick=()=>{language='ru';render()};document.getE
   contactDialog.addEventListener("cancel",e=>{if(firstProfile)e.preventDefault()});
   el("contactCancelButton").onclick=()=>{if(firstProfile)location.assign("./");else contactDialog.close()};
   el("contactProfileForm").addEventListener("submit",async e=>{
-    e.preventDefault();if(!signedUser)return;
-    const t=ct(),name=el("contactNameInput").value.trim(),phone=normalizePhone(el("contactPhoneInput").value);
+    e.preventDefault();if(!signedUser||savingProfile||!client)return;
+    const t=ct(),firstName=el("contactNameInput").value.trim().replace(/\s+/g," "),lastName=el("contactSurnameInput").value.trim().replace(/\s+/g," "),phone=normalizePhone(el("contactPhoneInput").value);
+    const name=firstName+" "+lastName;
     const errorBox=el("contactProfileError");
-    if(name.length<2){errorBox.textContent=t.badName;return}
+    if(!firstName||!lastName){errorBox.textContent=t.badName;return}
+    if(name.length>150){errorBox.textContent=t.longName;return}
     if(!phone){errorBox.textContent=t.badPhone;return}
-    const save=el("contactSaveButton");save.disabled=true;save.textContent=t.loading;errorBox.textContent="";
+    savingProfile=true;const save=el("contactSaveButton");save.disabled=true;save.textContent=t.loading;errorBox.textContent="";
     try{
       const {data,error}=await client.from("voxi_profiles").upsert({user_id:signedUser.id,full_name:name,phone},{onConflict:"user_id"}).select("user_id,full_name,phone").single();
-      if(error)throw error;profileData=data;firstProfile=false;contactDialog.close();
+      if(error)throw error;profileData=data;profileError=null;firstProfile=false;contactDialog.close();updateLoadErrors();
       if(activeTab==="profile")window.hydrateCabinetTab("profile");
     }catch(ex){errorBox.textContent=t.error+(ex.message||String(ex))}
-    finally{save.disabled=false;save.textContent=ct().save}
+    finally{savingProfile=false;save.disabled=false;save.textContent=ct().save}
   });
   window.hydrateCabinetTab=function(tab){
     const box=el("empty"),ru=language==="ru";box.replaceChildren();
     if(!signedUser){box.appendChild(make("p",ru?"Войдите через Google на главной странице.":"Басты бетте Google арқылы кіріңіз."));return;}
+    if(dataLoading){box.appendChild(make("p",ru?"Загружаем ваши данные…":"Деректеріңіз жүктелуде…"));el("modalNote").textContent="";return}
+    const sectionError=tab==="profile"?profileError:(tab==="history"||tab==="notifications")?bookingsError:null;
+    if(sectionError){
+      box.appendChild(make("p",(ru?"Не удалось загрузить данные: ":"Деректерді жүктеу мүмкін болмады: ")+(sectionError.message||String(sectionError))));
+      const retry=make("button",ru?"Попробовать снова":"Қайта көру","cabinetExit");retry.type="button";retry.addEventListener("click",()=>{void init()});box.appendChild(retry);el("modalNote").textContent="";return;
+    }
     if(tab==="history"){
       if(!myBookings.length)box.appendChild(make("p",ru?"История записей пока пуста.":"Жазылу тарихы әзірге бос."));
       [...myBookings].sort((a,b)=>(b.booking_date+b.booking_time).localeCompare(a.booking_date+a.booking_time)).forEach(b=>{
@@ -191,38 +215,66 @@ document.getElementById('ru').onclick=()=>{language='ru';render()};document.getE
     }else if(tab==="notifications"){
       const n=nextBooking(),ready=myBookings.filter(b=>b.status==="Готово");
       if(n)box.appendChild(make("p",(ru?"Следующая запись: ":"Келесі жазылу: ")+date(n.booking_date)+" · "+time(n.booking_time)));
-      ready.forEach(b=>box.appendChild(make("p",ru?"Заявка от "+date(b.booking_date)+" отмечена как готовая. Свяжитесь со студией для получения песни.":date(b.booking_date)+" күнгі тапсырыс дайын. Әнді алу үшін студияға хабарласыңыз."));
+      ready.forEach(b=>box.appendChild(make("p",ru?"Заявка от "+date(b.booking_date)+" отмечена как готовая. Свяжитесь со студией для получения песни.":date(b.booking_date)+" күнгі тапсырыс дайын. Әнді алу үшін студияға хабарласыңыз.")));
       if(!n&&!ready.length)box.appendChild(make("p",ru?"Новых уведомлений пока нет.":"Жаңа хабарлама жоқ."));
       box.appendChild(make("small",ru?"Напоминания за день и за час до записи пока не подключены.":"Бір күн және бір сағат бұрын еске салу әзірге қосылмаған."));
     }else if(tab==="profile"){
       box.appendChild(make("p",(ru?"Имя: ":"Аты: ")+(profileData?.full_name||signedUser.user_metadata?.full_name||signedUser.user_metadata?.name||"—")));
       box.appendChild(make("p","Email: "+(signedUser.email||"—")));
       box.appendChild(make("p","Телефон: "+(profileData?.phone||ct().phoneMissing)));
-      const editButton=make("button",ct().editButton,"cabinetExit");editButton.type="button";
+      const editButton=make("button",profileData?ct().editButton:(ru?"Заполнить профиль":"Профильді толтыру"),"cabinetExit");editButton.type="button";
       editButton.addEventListener("click",()=>openContactProfile(!profileData));box.appendChild(editButton);
       const logout=make("button",ru?"Выйти из аккаунта":"Аккаунттан шығу","cabinetExit");
       logout.type="button";logout.addEventListener("click",async()=>{const {error}=await client.auth.signOut();if(error){alert(error.message);return;}location.assign("./")});
       box.appendChild(logout);
     }else{
-      box.appendChild(make("p",tab==="songs"?(ru?"Готовые песни пока не загружены. После настройки защищённого хранилища они появятся здесь.":"Дайын әндер әзірге жүктелмеген."):(ru?"Видео пока не загружены. После настройки защищённого хранилища они появятся здесь.":"Бейнелер әзірге жүктелмеген.")));
+      box.appendChild(make("p",tab==="songs"?(ru?"Студия ещё не добавила готовые песни в ваш кабинет.":"Дайын әндер әзірге жүктелмеген."):(ru?"Студия ещё не добавила видео в ваш кабинет.":"Бейнелер әзірге жүктелмеген.")));
     }
-    el("modalNote").textContent=(tab==="songs"||tab==="videos")?(ru?"Файлы будут доступны только их владельцу после подключения хранилища.":"Файлдар жеке сақтау орны қосылғаннан кейін қолжетімді болады."):"";
+    el("modalNote").textContent=(tab==="songs"||tab==="videos")?(ru?"Здесь будут ваши готовые записи, добавленные студией.":"Студия қосқан дайын жазбаларыңыз осында көрсетіледі."):"";
   };
   const originalRender=render;render=function(){originalRender();updateSummary()};
+  function updateLoadErrors(){
+    const errors=[];
+    if(profileError)errors.push((language==="ru"?"Профиль: ":"Профиль: ")+(profileError.message||String(profileError)));
+    if(bookingsError)errors.push((language==="ru"?"История записей: ":"Жазылу тарихы: ")+(bookingsError.message||String(bookingsError)));
+    el("cabinetLoadError").textContent=errors.join(" · ");
+  }
   async function init(){
-    if(!client){el("cabinetGate").textContent="Не удалось загрузить Google-вход. Проверьте соединение.";return;}
-    const {data,error}=await client.auth.getSession();
-    if(error||!data?.session?.user){el("cabinetGate").innerHTML='Для доступа войдите через Google на <a href="./">главной странице VOXi</a>.';return;}
-    signedUser=data.session.user;el("cabinetGate").remove();
-    const [profile,bookings]=await Promise.all([
-      client.from("voxi_profiles").select("user_id,full_name,phone").eq("user_id",signedUser.id).maybeSingle(),
-      client.from("voxi_bookings").select("*").eq("user_id",signedUser.id).order("booking_date",{ascending:false}).order("booking_time",{ascending:false})
-    ]);
-    if(bookings.error)el("cabinetLoadError").textContent="Не удалось загрузить историю: "+bookings.error.message;
-    else myBookings=bookings.data||[];
-    if(profile.error){el("cabinetLoadError").textContent="Не удалось загрузить профиль: "+profile.error.message;return;}
-    profileData=profile.data||null;
-    updateSummary();if(!profileData)openContactProfile(true);
+    if(initializing)return;initializing=true;
+    try{
+      if(!client)throw clientInitError||new Error(language==="ru"?"Не удалось загрузить подключение. Обновите страницу и проверьте интернет.":"Қосылым жүктелмеді. Бетті жаңартып, интернетті тексеріңіз.");
+      const {data,error}=await client.auth.getSession();
+      if(error)throw error;
+      if(!data?.session?.user){
+        signedUser=null;myBookings=[];profileData=null;
+        const gate=el("cabinetGate");
+        if(gate){gate.replaceChildren();gate.appendChild(make("span",language==="ru"?"Для доступа войдите через Google на ":"Google арқылы кіру үшін "));const link=make("a",language==="ru"?"главной странице VOXi":"VOXi басты бетіне өтіңіз");link.href="./";gate.appendChild(link);}
+        if(activeTab)window.hydrateCabinetTab(activeTab);
+        return;
+      }
+      signedUser=data.session.user;el("cabinetGate")?.remove();
+      dataLoading=true;profileError=null;bookingsError=null;
+      if(activeTab)window.hydrateCabinetTab(activeTab);
+      const [profile,bookings]=await Promise.allSettled([
+        client.from("voxi_profiles").select("user_id,full_name,phone").eq("user_id",signedUser.id).maybeSingle(),
+        client.from("voxi_bookings").select("*").eq("user_id",signedUser.id).order("booking_date",{ascending:false}).order("booking_time",{ascending:false})
+      ]);
+      if(profile.status==="rejected")profileError=profile.reason;
+      else if(profile.value.error)profileError=profile.value.error;
+      else profileData=profile.value.data||null;
+      if(bookings.status==="rejected")bookingsError=bookings.reason;
+      else if(bookings.value.error)bookingsError=bookings.value.error;
+      else myBookings=bookings.value.data||[];
+      dataLoading=false;updateLoadErrors();updateSummary();
+      if(activeTab)window.hydrateCabinetTab(activeTab);
+      if(!profileError&&!completeProfile(profileData))openContactProfile(true);
+    }catch(error){
+      dataLoading=false;
+      const gate=el("cabinetGate");
+      if(gate)gate.textContent=language==="ru"?"Не удалось проверить вход. Обновите страницу.":"Кіруді тексеру мүмкін болмады. Бетті жаңартыңыз.";
+      el("cabinetLoadError").textContent=(language==="ru"?"Ошибка загрузки кабинета: ":"Кабинетті жүктеу қатесі: ")+(error.message||String(error));
+      if(activeTab)window.hydrateCabinetTab(activeTab);
+    }finally{initializing=false;}
   }
   updateSummary();init();
 })();

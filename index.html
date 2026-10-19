@@ -286,7 +286,7 @@ function safeVOXiGetIntent(){try{return sessionStorage.getItem("voxi_auth_intent
 function safeVOXiClearIntent(){try{sessionStorage.removeItem("voxi_auth_intent")}catch(_){}}
 function openVOXiSection(target){
  if(!currentUser) return;
- if(target==="cabinet"){window.location.assign("./cabinet.html");return;}
+ if(target==="cabinet"){window.location.assign("./cabinet.html?v=20261019-profile2");return;}
  $("app").classList.remove("hidden");
  $("app").style.display="block";
  if(target==="booking") $("bookingPanel").classList.remove("hidden");
