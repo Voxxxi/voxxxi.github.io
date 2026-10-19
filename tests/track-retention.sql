@@ -1,0 +1,37 @@
+begin;
+do $test$
+declare own uuid; os uuid; customer uuid; cs uuid; tid uuid; denied boolean; 
+begin
+ select user_id into own from public.voxi_staff where role='owner';
+ select id into os from auth.sessions where user_id=own order by created_at desc limit 1;
+ select u.id,s.id into customer,cs from auth.users u join auth.sessions s on s.user_id=u.id where u.id<>own order by s.created_at desc limit 1;
+ insert into public.voxi_tracks(user_id,song_number,song_title,storage_path,file_name,file_size) values(customer,1,'__retention_test__',customer::text||'/__retention_test__.mp3','test.mp3',10) returning id into tid;
+ perform set_config('request.jwt.claims',jsonb_build_object('sub',customer,'role','authenticated','session_id',cs)::text,true);
+ set local role authenticated;
+ if (select count(*) from public.voxi_tracks where id=tid)<>1 then raise exception 'Own song missing'; end if;
+ denied:=false; begin perform public.voxi_track_retention(tid,customer,now()+interval '30 days'); exception when others then denied:=true; end;
+ if not denied then raise exception 'Client can change retention'; end if;
+ reset role;
+ update public.voxi_tracks set expires_at=now()-interval '1 second' where id=tid;
+ set local role authenticated;
+ if exists(select 1 from public.voxi_tracks where id=tid) then raise exception 'Expired song visible';end if;
+ reset role;
+ perform set_config('request.jwt.claims',jsonb_build_object('sub',own,'role','authenticated','session_id',os)::text,true);
+ set local role authenticated;
+ perform public.voxi_track_retention(tid,customer,now()+interval '30 days');
+ denied:=false; begin perform public.voxi_track_retention(tid,own,now()+interval '10 days'); exception when others then denied:=true;end;
+ if not denied then raise exception 'Wrong recipient accepted';end if;
+ reset role;
+ if not exists(select 1 from public.voxi_track_audit where track_id=tid and action='retention') then raise exception 'Audit missing';end if;
+ update public.voxi_tracks set deleted_at=now() where id=tid;
+ set local role authenticated;
+ denied:=false;begin perform public.voxi_track_retention(tid,customer,null); exception when others then denied:=true;end;
+ if not denied then raise exception 'Deleting song restored';end if;
+ reset role;
+ perform set_config('request.jwt.claims',jsonb_build_object('sub',customer,'role','authenticated','session_id',cs)::text,true);
+ set local role authenticated;
+ if exists(select 1 from public.voxi_tracks where id=tid) then raise exception 'Deleted song visible';end if;
+ reset role;
+end $test$;
+rollback;
+select 'PASS: retention limited to staff and exact recipient; expired/deleting songs hidden; audit; rollback' as verification;

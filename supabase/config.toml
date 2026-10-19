@@ -5,3 +5,7 @@ verify_jwt = false
 # Public feed; private actions validate Auth user and active session in the handler.
 [functions.voxi-videos]
 verify_jwt = false
+
+# Manual Auth/session checks or existing protected cron webhook.
+[functions.voxi-track-manager]
+verify_jwt = false
