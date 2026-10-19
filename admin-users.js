@@ -59,6 +59,7 @@
   }else if(user.role==='owner')card.append(node('p','Аккаунт владельца защищён.','muted'));
  }
  async function loadTracks(user,box,actor){
+  box.querySelectorAll('audio').forEach(a=>a.pause());
   try{const {data,error}=await supabaseClient.from('voxi_tracks').select('*').eq('user_id',user.user_id).order('created_at',{ascending:false});if(error)throw error;if(currentUser?.id!==actor||!canSee()||!box.isConnected)return;box.replaceChildren();if(!data.length){box.textContent='Готовые песни ещё не загружены.';return;}
    for(const track of data){const card=node('article',undefined,'voxi-track-row');card.append(node('strong',track.song_title),node('small',new Date(track.created_at).toLocaleDateString('ru-RU')+' · '+Math.ceil(track.file_size/1024/1024)+' МБ'));
     card.append(node('small',track.file_name));
@@ -73,6 +74,7 @@
  }
  function confirmAction(user,action,role){
   if(mutating||!canSee()||!canManage)return;
+  dialog.querySelectorAll('audio').forEach(a=>a.pause());
   pending={user,action,role,actor:currentUser.id};dialog.replaceChildren();
   const form=node('form');dialog.append(form);
   form.append(node('h2',action==='delete_user'?'Удалить аккаунт?':'Изменить роль?'),node('p',(user.full_name||user.email)+' · '+user.user_id));
@@ -98,7 +100,7 @@
   dialog.showModal();(action==='delete_user'?confirm:cancel).focus();
  }
  function uploadTrack(user){
-  if(mutating||!canSee())return;pending=null;dialog.replaceChildren();
+  if(mutating||!canSee())return;pending=null;dialog.querySelectorAll('audio').forEach(a=>a.pause());dialog.replaceChildren();
   const actor=currentUser.id,form=node('form');dialog.append(form);
   form.append(node('h2','Загрузить готовую песню'),node('p','Получатель: '+(user.full_name||user.email)+' · '+user.user_id),node('p','Песня появится только в личном кабинете выбранного клиента. До 50 МБ: MP3, WAV, M4A, OGG, FLAC.'));
   const titleLabel=node('label','Название песни'),title=node('input');title.required=true;title.maxLength=200;titleLabel.append(title);
