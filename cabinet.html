@@ -142,8 +142,8 @@ document.getElementById('ru').onclick=()=>{language='ru';render()};document.getE
   }
 
   const contactText={
-   ru:{title:"Добро пожаловать в VOXi",edit:"Мой профиль VOXi",intro:"Укажите имя, фамилию и телефон, чтобы студия могла найти ваши записи и связаться с вами.",editInfo:"Измените имя, фамилию и номер телефона.",name:"Имя",surname:"Фамилия",phone:"Номер телефона",caution:"Номер не подтверждается автоматически. Для получения архивных песен студия проверяет владельца по WhatsApp или известному номеру телефона.",save:"Сохранить профиль",back:"Вернуться на главную",cancel:"Отмена",editButton:"Изменить профиль",badName:"Введите имя и фамилию.",longName:"Имя и фамилия вместе должны содержать не более 150 символов.",badPhone:"Проверьте номер телефона (например, +7 700 123 45 67).",loading:"Сохранение...",error:"Ошибка сохранения: ",phoneMissing:"Не указан"},
-   kk:{title:"VOXi-ге қош келдіңіз",edit:"VOXi профилім",intro:"Студия жазбаларыңызды табуы үшін атыңызды, тегіңізді және телефон нөміріңізді көрсетіңіз.",editInfo:"Атыңызды, тегіңізді және телефон нөміріңізді өзгертіңіз.",name:"Аты",surname:"Тегі",phone:"Телефон нөмірі",caution:"Нөмір автоматты түрде расталмайды. Ескі әндерді беру алдында студия иесін WhatsApp немесе телефон арқылы тексереді.",save:"Профильді сақтау",back:"Басты бетке оралу",cancel:"Болдырмау",editButton:"Профильді өзгерту",badName:"Атыңызды және тегіңізді енгізіңіз.",longName:"Аты мен тегі бірге 150 таңбадан аспауы керек.",badPhone:"Телефон нөмірін тексеріңіз.",loading:"Сақталуда...",error:"Сақтау қатесі: ",phoneMissing:"Көрсетілмеген"}
+   ru:{title:"Завершите регистрацию в VOXi",edit:"Мой профиль VOXi",intro:"Для завершения регистрации заполните все три поля: имя, фамилию и телефон.",editInfo:"Измените имя, фамилию и номер телефона.",name:"Имя",surname:"Фамилия",phone:"Номер телефона",caution:"Номер не подтверждается автоматически. Для получения архивных песен студия проверяет владельца по WhatsApp или известному номеру телефона.",save:"Сохранить профиль",back:"Вернуться на главную",cancel:"Отмена",editButton:"Изменить профиль",badName:"Введите имя и фамилию.",longName:"Имя и фамилия вместе должны содержать не более 150 символов.",badPhone:"Проверьте номер телефона (например, +7 700 123 45 67).",loading:"Сохранение...",error:"Ошибка сохранения: ",phoneMissing:"Не указан"},
+   kk:{title:"VOXi тіркеуін аяқтаңыз",edit:"VOXi профилім",intro:"Студия жазбаларыңызды табуы үшін атыңызды, тегіңізді және телефон нөміріңізді көрсетіңіз.",editInfo:"Атыңызды, тегіңізді және телефон нөміріңізді өзгертіңіз.",name:"Аты",surname:"Тегі",phone:"Телефон нөмірі",caution:"Нөмір автоматты түрде расталмайды. Ескі әндерді беру алдында студия иесін WhatsApp немесе телефон арқылы тексереді.",save:"Профильді сақтау",back:"Басты бетке оралу",cancel:"Болдырмау",editButton:"Профильді өзгерту",badName:"Атыңызды және тегіңізді енгізіңіз.",longName:"Аты мен тегі бірге 150 таңбадан аспауы керек.",badPhone:"Телефон нөмірін тексеріңіз.",loading:"Сақталуда...",error:"Сақтау қатесі: ",phoneMissing:"Көрсетілмеген"}
   };
   const ct=()=>contactText[language==="kk"?"kk":"ru"];
   const contactDialog=el("contactProfileDialog");
@@ -190,6 +190,15 @@ document.getElementById('ru').onclick=()=>{language='ru';render()};document.getE
     try{
       const {data,error}=await client.from("voxi_profiles").upsert({user_id:signedUser.id,full_name:name,phone},{onConflict:"user_id"}).select("user_id,full_name,phone").single();
       if(error)throw error;profileData=data;profileError=null;firstProfile=false;contactDialog.close();updateLoadErrors();
+      const registrationParams=new URLSearchParams(window.location.search);
+      if(registrationParams.get("registration")==="1"){
+        if(registrationParams.get("next")==="booking"){
+          try{sessionStorage.setItem("voxi_auth_intent","booking")}catch(_){}
+          location.assign("./?continue=booking");
+          return;
+        }
+        try{window.history.replaceState(null,"","./cabinet.html?v=20261019-registration1")}catch(_){}
+      }
       if(activeTab==="profile")window.hydrateCabinetTab("profile");
     }catch(ex){errorBox.textContent=t.error+(ex.message||String(ex))}
     finally{savingProfile=false;save.disabled=false;save.textContent=ct().save}

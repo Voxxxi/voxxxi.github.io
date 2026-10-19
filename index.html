@@ -251,7 +251,8 @@ const audio=document.getElementById('audio'),play=document.getElementById('play'
 
 "use strict";
 const SUPABASE_URL="https://vnykpjarjvacwhxvkxrk.supabase.co";const SUPABASE_KEY="sb_publishable_Jv-1ip1CSRKe2_cCjcGjmA_B333H-oC";const ADMIN_EMAIL="mops850@gmail.com";const supabaseClient=window.supabase?.createClient(SUPABASE_URL,SUPABASE_KEY);const $=id=>document.getElementById(id);
-let currentUser=null,currentBookings=[],currentSlots=[],isSaving=false,loadingRequest=0,openBookingAfterLogin=false;const validStatuses=["Запланировано","В процессе","Записано","Готово","Отменено"];
+let currentUser=null,currentBookings=[],currentSlots=[],isSaving=false,loadingRequest=0,openBookingAfterLogin=false;
+let registrationUserId=null,registrationCheck=null,registrationRedirecting=false,registrationProfile=null;const validStatuses=["Запланировано","В процессе","Записано","Готово","Отменено"];
 // Декоративная волна без изображений
 // Homepage sound wave is rendered by the approved version 18 player. No decorative old wave required.
 function isAdmin(){return currentUser?.email?.toLowerCase()===ADMIN_EMAIL.toLowerCase()}function showMessage(text,type=""){ $("message").textContent=text;$("message").className=type }
@@ -259,7 +260,7 @@ function localDateString(){const d=new Date();return `${d.getFullYear()}-${Strin
 function priceForPeople(n){if(n===1)return 5000;if(n===2)return 6000;if(n===3)return 7000;if(n>=4)return n*2000;return 0}
 function parseSongDetails(item){const raw=item?.song_titles;if(typeof raw==="string"&&raw.trim()){try{const parsed=JSON.parse(raw);if(Array.isArray(parsed)&&parsed.every(s=>s&&typeof s==="object"&&typeof s.title==="string"))return parsed.map(s=>{const p=Number(s.people),ok=Number.isInteger(p)&&p>=1&&p<=100,people=ok?p:Number(item.people_count)||1;return{title:s.title,people,price:Number.isFinite(Number(s.price))?Number(s.price):priceForPeople(people)}})}catch(_){}}
 const people=Math.max(1,Number(item?.people_count)||1),count=Math.max(1,Number(item?.song_count)||1),total=Number(item?.price)||priceForPeople(people)*count,names=typeof raw==="string"?raw.split(/\r?\n/).map(s=>s.trim()).filter(Boolean):[];return Array.from({length:count},(_,i)=>({title:names[i]||`Песня ${i+1}`,people,price:i===0?total-priceForPeople(people)*(count-1):priceForPeople(people)}))}
-function setSignedIn(user){currentUser=user;const signed=!!user,admin=signed&&isAdmin();$("signedOut").classList.toggle("hidden",signed);$("app").classList.toggle("hidden",!signed);$("loginButton").classList.toggle("hidden",signed);$("logoutButton").classList.toggle("hidden",!signed);$("roleBadge").classList.toggle("hidden",!signed);$("roleBadge").textContent=admin?"Администратор VOXi":"Клиент VOXi";$("schedulePanel").classList.toggle("hidden",!admin);$("backupPanel").classList.toggle("hidden",!admin);$("bookingsTitle").textContent=admin?"Все заявки клиентов":"Мои заявки";$("bookingsDescription").textContent=admin?"Все заявки клиентов. Здесь можно менять статусы и удалять заявки.":"Здесь отображаются только твои заявки.";if(!user){loadingRequest++;currentBookings=[];currentSlots=[];$("bookings").textContent="Войди в аккаунт, чтобы увидеть заявки.";$("scheduleList").textContent="Войди в аккаунт администратора.";resetAvailableTimes("Сначала выбери дату.");$("bookingPanel").classList.add("hidden")}else if(openBookingAfterLogin){openBookingAfterLogin=false;openVOXiSection("booking")}}
+function setSignedIn(user){if(currentUser?.id!==user?.id){registrationUserId=null;registrationCheck=null;registrationRedirecting=false;registrationProfile=null}currentUser=user;const signed=!!user,admin=signed&&isAdmin();$("signedOut").classList.toggle("hidden",signed);$("app").classList.toggle("hidden",!signed);$("loginButton").classList.toggle("hidden",signed);$("logoutButton").classList.toggle("hidden",!signed);$("roleBadge").classList.toggle("hidden",!signed);$("roleBadge").textContent=admin?"Администратор VOXi":"Клиент VOXi";$("schedulePanel").classList.toggle("hidden",!admin);$("backupPanel").classList.toggle("hidden",!admin);$("bookingsTitle").textContent=admin?"Все заявки клиентов":"Мои заявки";$("bookingsDescription").textContent=admin?"Все заявки клиентов. Здесь можно менять статусы и удалять заявки.":"Здесь отображаются только твои заявки.";if(!user){loadingRequest++;currentBookings=[];currentSlots=[];$("bookings").textContent="Войди в аккаунт, чтобы увидеть заявки.";$("scheduleList").textContent="Войди в аккаунт администратора.";resetAvailableTimes("Сначала выбери дату.");$("bookingPanel").classList.add("hidden")}else if(openBookingAfterLogin){openBookingAfterLogin=false;openVOXiSection("booking")}}
 function addText(parent,tag,text,className=""){const el=document.createElement(tag);el.textContent=text??"";if(className)el.className=className;parent.appendChild(el);return el}
 function renderSongFields(){const c=$("songFields"),n=Number($("songs").value);c.replaceChildren();if(!Number.isInteger(n)||n<1||n>100){$("price").textContent="0";$("priceBreakdown").textContent="Укажи количество песен от 1 до 100.";return}for(let i=0;i<n;i++){const card=document.createElement("div");card.className="song-card";addText(card,"h3",`Песня №${i+1}`);const tl=addText(card,"label","Название песни");tl.htmlFor=`songTitle${i}`;const title=document.createElement("input");title.id=`songTitle${i}`;title.type="text";title.maxLength=300;title.placeholder=`Название песни №${i+1}`;title.required=true;card.appendChild(title);const pl=addText(card,"label","Количество исполнителей");pl.htmlFor=`songPeople${i}`;const people=document.createElement("input");people.id=`songPeople${i}`;people.type="number";people.min="1";people.max="100";people.step="1";people.value="1";people.required=true;people.addEventListener("input",calculatePrice);card.appendChild(people);const line=addText(card,"div","Стоимость: 5000 ₸","song-price");line.id=`songPrice${i}`;c.appendChild(card)}calculatePrice()}
 function collectSongDetails(validate=false){const n=Number($("songs").value),songs=[];if(!Number.isInteger(n)||n<1||n>100)throw Error("Количество песен должно быть от 1 до 100.");for(let i=0;i<n;i++){const title=$(`songTitle${i}`)?.value.trim()||"",people=Number($(`songPeople${i}`)?.value);if(validate&&!title)throw Error(`Укажи название песни №${i+1}.`);if(!Number.isInteger(people)||people<1||people>100)throw Error(`Для песни №${i+1} укажи количество исполнителей от 1 до 100.`);songs.push({title:title||`Песня ${i+1}`,people,price:priceForPeople(people)})}return songs}
@@ -275,31 +276,81 @@ async function loadAvailableTimes(){const date=$("date").value;if(!currentUser||
 $("date").min=localDateString();$("date").addEventListener("change",loadAvailableTimes);$("scheduleDate").min=localDateString();$("scheduleDate").value=localDateString();$("scheduleDate").addEventListener("change",loadScheduleSlots);
 async function loadScheduleSlots(){if(!isAdmin())return;const date=$("scheduleDate").value,c=$("scheduleList");c.replaceChildren();if(!date){c.textContent="Выбери дату.";return}const{data,error}=await supabaseClient.from("voxi_schedule_slots").select("*").eq("booking_date",date).order("booking_time",{ascending:true});if(error){c.textContent="Не удалось загрузить расписание.";showMessage("Ошибка расписания: "+error.message,"error");return}currentSlots=data||[];renderScheduleChoices();if(!currentSlots.length){c.textContent="На эту дату часы ещё не добавлены.";return}currentSlots.forEach(slot=>{const time=normalizeTime(slot.booking_time),booked=bookingExists(date,time),row=document.createElement("div");row.className="slot-card";const info=document.createElement("div");addText(info,"strong",time);addText(info,"div",booked?"Есть активная заявка":slot.is_open?"Открыто для клиентов":"Закрыто",booked||slot.is_open?"slot-open":"slot-closed");row.appendChild(info);const actions=document.createElement("div"),toggle=document.createElement("button");toggle.className="secondary";toggle.textContent=slot.is_open?"Закрыть":"Открыть";toggle.disabled=booked;toggle.addEventListener("click",async()=>{if(!isAdmin()||bookingExists(date,time))return;toggle.disabled=true;const{error}=await supabaseClient.from("voxi_schedule_slots").update({is_open:!slot.is_open}).eq("id",slot.id);if(error){showMessage("Не удалось изменить час: "+error.message,"error");toggle.disabled=false;return}showMessage(slot.is_open?"Час закрыт для клиентов.":"Час открыт для клиентов.","success");await loadScheduleSlots();await loadAvailableTimes()});const del=document.createElement("button");del.className="danger";del.textContent="Удалить час";del.disabled=booked;del.addEventListener("click",async()=>{if(!isAdmin()||bookingExists(date,time)||!confirm(`Удалить ${time} из расписания на ${date}?`))return;del.disabled=true;const{error}=await supabaseClient.from("voxi_schedule_slots").delete().eq("id",slot.id);if(error){showMessage("Не удалось удалить час: "+error.message,"error");del.disabled=false;return}showMessage("Час удалён из расписания.","success");await loadScheduleSlots();await loadAvailableTimes()});actions.append(toggle,del);row.appendChild(actions);c.appendChild(row)})}
 $("openSlotsButton").addEventListener("click",async()=>{if(!isAdmin())return;const date=$("scheduleDate").value;if(!date){showMessage("Сначала выбери дату расписания.","error");return}const selected=[...$("scheduleChoices").querySelectorAll('input[type="checkbox"]:checked')].map(i=>i.value);if(!selected.length){showMessage("Отметь хотя бы один час.","error");return}const allowed=selected.filter(t=>!bookingExists(date,t));if(!allowed.length){showMessage("Выбранные часы заняты активными заявками.","error");return}$("openSlotsButton").disabled=true;try{const rows=allowed.map(t=>({booking_date:date,booking_time:t,is_open:true}));const{error}=await supabaseClient.from("voxi_schedule_slots").upsert(rows,{onConflict:"booking_date,booking_time"});if(error){showMessage("Не удалось сохранить расписание: "+error.message,"error");return}showMessage("Расписание сохранено. Добавлено или открыто часов: "+allowed.length+".","success");await loadScheduleSlots();await loadAvailableTimes()}catch(e){showMessage("Ошибка: "+e.message,"error")}finally{$("openSlotsButton").disabled=false}});
-$("bookingForm").addEventListener("submit",async e=>{e.preventDefault();if(!currentUser||isSaving)return;const date=$("date").value,time=$("time").value;if(!date||!time){showMessage("Выбери дату и доступное время из списка.","error");return}if(bookingExists(date,time)){showMessage("Это время уже занято. Выбери другое.","error");await loadAvailableTimes();return}let songs;try{songs=collectSongDetails(true)}catch(e){showMessage(e.message,"error");return}const clientName=$("name").value.trim(),phone=$("phone").value.trim();if(!clientName||!phone){showMessage("Заполни имя и номер телефона.","error");return}const totalPeople=songs.reduce((s,x)=>s+x.people,0),totalPrice=songs.reduce((s,x)=>s+x.price,0);if(!Number.isSafeInteger(totalPrice)||totalPrice<1){showMessage("Не удалось рассчитать стоимость. Проверь количество исполнителей.","error");return}const booking={client_name:clientName,phone,booking_date:date,booking_time:time,people_count:totalPeople,song_count:songs.length,song_titles:JSON.stringify(songs),price:totalPrice,status:"Запланировано",user_id:currentUser.id};isSaving=true;$("submitButton").disabled=true;$("submitButton").textContent="Сохраняю...";try{const{error}=await supabaseClient.from("voxi_bookings").insert(booking);if(error){showMessage(error.code==="23505"?"Это время уже занято. Выбери другое.":"Не удалось сохранить заявку: "+error.message,"error");await loadAvailableTimes();return}$("bookingForm").reset();$("songs").value="1";renderSongFields();resetAvailableTimes("Сначала выбери дату.");showMessage("Заявка успешно сохранена!","success");await loadBookings()}catch(e){showMessage("Ошибка: "+e.message,"error")}finally{isSaving=false;$("submitButton").disabled=false;$("submitButton").textContent="Создать заявку"}});
+$("bookingForm").addEventListener("submit",async e=>{e.preventDefault();if(!currentUser||isSaving)return;if(!await ensureVOXiRegistration("booking"))return;const date=$("date").value,time=$("time").value;if(!date||!time){showMessage("Выбери дату и доступное время из списка.","error");return}if(bookingExists(date,time)){showMessage("Это время уже занято. Выбери другое.","error");await loadAvailableTimes();return}let songs;try{songs=collectSongDetails(true)}catch(e){showMessage(e.message,"error");return}const clientName=$("name").value.trim(),phone=$("phone").value.trim();if(!clientName||!phone){showMessage("Заполни имя и номер телефона.","error");return}const totalPeople=songs.reduce((s,x)=>s+x.people,0),totalPrice=songs.reduce((s,x)=>s+x.price,0);if(!Number.isSafeInteger(totalPrice)||totalPrice<1){showMessage("Не удалось рассчитать стоимость. Проверь количество исполнителей.","error");return}const booking={client_name:clientName,phone,booking_date:date,booking_time:time,people_count:totalPeople,song_count:songs.length,song_titles:JSON.stringify(songs),price:totalPrice,status:"Запланировано",user_id:currentUser.id};isSaving=true;$("submitButton").disabled=true;$("submitButton").textContent="Сохраняю...";try{const{error}=await supabaseClient.from("voxi_bookings").insert(booking);if(error){showMessage(error.code==="23505"?"Это время уже занято. Выбери другое.":"Не удалось сохранить заявку: "+error.message,"error");await loadAvailableTimes();return}$("bookingForm").reset();$("songs").value="1";renderSongFields();resetAvailableTimes("Сначала выбери дату.");showMessage("Заявка успешно сохранена!","success");await loadBookings()}catch(e){showMessage("Ошибка: "+e.message,"error")}finally{isSaving=false;$("submitButton").disabled=false;$("submitButton").textContent="Создать заявку"}});
 $("exportButton").addEventListener("click",()=>{if(!isAdmin()){showMessage("Резервное копирование доступно только администратору.","error");return}const blob=new Blob([JSON.stringify(currentBookings,null,2)],{type:"application/json;charset=utf-8"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="VOXi-backup-"+localDateString()+".json";document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);showMessage("Резервная копия скачана.","success")});
 $("restoreButton").addEventListener("click",async()=>{if(!isAdmin())return showMessage("Восстановление заявок доступно только администратору.","error");const file=$("backupFile").files[0];if(!file)return showMessage("Сначала выбери JSON-файл.","error");let imported;try{imported=JSON.parse(await file.text())}catch(_){return showMessage("Файл не удалось прочитать. Проверь формат JSON.","error")}if(!Array.isArray(imported))return showMessage("В файле должен находиться список заявок.","error");const rows=[];for(const item of imported){if(!item||typeof item!=="object"||Array.isArray(item))return showMessage("Файл содержит некорректную заявку.","error");const name=item.client_name??item.name,date=item.booking_date??item.date,time=item.booking_time??item.time,people=Number(item.people_count??item.people),songCount=Number(item.song_count??item.songs),titles=item.song_titles??item.songNames??"",price=Number(item.price);if(typeof name!=="string"||!name.trim()||typeof item.phone!=="string"||!item.phone.trim()||typeof date!=="string"||!/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(date)||typeof time!=="string"||!/^[0-9]{2}:[0-9]{2}(:[0-9]{2})?$/.test(time)||!Number.isInteger(people)||people<1||people>10000||!Number.isInteger(songCount)||songCount<1||songCount>100||!Number.isSafeInteger(price)||price<1||typeof titles!=="string")return showMessage("В файле есть заявка с неверными данными.","error");let owner=currentUser.id;const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;if(typeof item.user_id==="string"&&uuid.test(item.user_id))owner=item.user_id;rows.push({client_name:name.trim(),phone:item.phone.trim(),booking_date:date,booking_time:normalizeTime(time),people_count:people,song_count:songCount,song_titles:titles,price,status:validStatuses.includes(item.status)?item.status:"Запланировано",user_id:owner})}if(!rows.length)return showMessage("В файле нет заявок для импорта.","error");if(!confirm(`Добавить ${rows.length} заявок? Часы для каждой заявки должны быть открыты в расписании.`))return;$("restoreButton").disabled=true;try{for(let i=0;i<rows.length;i+=100){const{error}=await supabaseClient.from("voxi_bookings").insert(rows.slice(i,i+100));if(error){showMessage("Импорт остановлен: "+error.message+"\nЧасть заявок могла уже сохраниться. Проверь список перед повторным импортом.","error");await loadBookings();return}}$("backupFile").value="";showMessage("Заявки импортированы.","success");await loadBookings()}finally{$("restoreButton").disabled=false}});
-if(supabaseClient) supabaseClient.auth.onAuthStateChange((event,session)=>{setSignedIn(session?.user||null);setTimeout(async()=>{if(!currentUser)return;await loadBookings();if(isAdmin())await loadScheduleSlots()},0)});renderSongFields();renderScheduleChoices();
+if(supabaseClient) supabaseClient.auth.onAuthStateChange((event,session)=>{setSignedIn(session?.user||null);setTimeout(async()=>{if(!currentUser)return;if(!await ensureVOXiRegistration(safeVOXiGetIntent()||(openBookingAfterLogin?"booking":"cabinet")))return;await loadBookings();if(isAdmin())await loadScheduleSlots()},0)});renderSongFields();renderScheduleChoices();
 
 // VOXi: keep the homepage clean. The existing Supabase features open only by user intent.
 function safeVOXiStoreIntent(value){try{sessionStorage.setItem("voxi_auth_intent",value)}catch(_){}}
 function safeVOXiGetIntent(){try{return sessionStorage.getItem("voxi_auth_intent")}catch(_){return null}}
 function safeVOXiClearIntent(){try{sessionStorage.removeItem("voxi_auth_intent")}catch(_){}}
-function openVOXiSection(target){
- if(!currentUser) return;
- if(target==="cabinet"){window.location.assign("./cabinet.html?v=20261019-profile2");return;}
+function normalizeVOXiProfilePhone(raw){
+ let value=String(raw||"").replace(/\D/g,"");
+ if(value.length===10)value="7"+value;
+ if(value.length===11&&value[0]==="8")value="7"+value.slice(1);
+ return /^[1-9]\d{9,14}$/.test(value)?"+"+value:null;
+}
+function isVOXiProfileComplete(profile){
+ return String(profile?.full_name||"").trim().split(/\s+/).filter(Boolean).length>=2&&!!normalizeVOXiProfilePhone(profile?.phone);
+}
+async function ensureVOXiRegistration(target="cabinet"){
+ const user=currentUser;
+ if(!user)return false;
+ if(isAdmin())return true;
+ const destination=target==="booking"?"booking":"cabinet";
+ try{
+  if(registrationUserId!==user.id||!registrationCheck){
+   registrationUserId=user.id;
+   registrationCheck=Promise.resolve(supabaseClient.from("voxi_profiles").select("user_id,full_name,phone").eq("user_id",user.id).maybeSingle());
+  }
+  const result=await registrationCheck;
+  if(currentUser?.id!==user.id)return false;
+  if(result.error){registrationCheck=null;throw result.error}
+  if(isVOXiProfileComplete(result.data)){
+   registrationProfile=result.data;
+   if(!$("name").value)$("name").value=result.data.full_name;
+   if(!$("phone").value)$("phone").value=normalizeVOXiProfilePhone(result.data.phone);
+   return true;
+  }
+  if(!registrationRedirecting){
+   registrationRedirecting=true;
+   safeVOXiStoreIntent(destination);
+   window.location.assign("./cabinet.html?v=20261019-registration1&registration=1&next="+destination);
+  }
+  return false;
+ }catch(error){
+  if(currentUser?.id===user.id){registrationCheck=null;registrationRedirecting=false;showMessage("Не удалось проверить профиль. Попробуйте войти в кабинет ещё раз: "+(error.message||String(error)),"error");}
+  return false;
+ }
+}
+async function openVOXiSection(target){
+ if(!currentUser)return;
+ if(!await ensureVOXiRegistration(target))return;
+ if(target==="cabinet"){window.location.assign("./cabinet.html?v=20261019-registration1");return;}
  $("app").classList.remove("hidden");
  $("app").style.display="block";
- if(target==="booking") $("bookingPanel").classList.remove("hidden");
+ if(target==="booking")$("bookingPanel").classList.remove("hidden");
  else $("bookingPanel").classList.add("hidden");
  requestAnimationFrame(()=>{
   (target==="booking"?$("bookingPanel"):$("app")).scrollIntoView({behavior:"smooth",block:"start"});
  });
 }
 async function resumeVOXiOAuthIntent(){
- const {data}=await supabaseClient.auth.getSession();
- if(!data.session?.user)return;
- const intent=safeVOXiGetIntent();
- if(intent){safeVOXiClearIntent();setTimeout(()=>openVOXiSection(intent),200)}
+ try{
+  const {data,error}=await supabaseClient.auth.getSession();
+  if(error)throw error;
+  if(!data.session?.user)return;
+  if(!currentUser)setSignedIn(data.session.user);
+  const explicitBooking=new URLSearchParams(window.location.search).get("continue")==="booking";
+  const intent=safeVOXiGetIntent()||(explicitBooking?"booking":null);
+  if(!await ensureVOXiRegistration(intent||"cabinet"))return;
+  if(intent){
+   safeVOXiClearIntent();openBookingAfterLogin=false;
+   if(explicitBooking){const address=new URL(window.location.href);address.searchParams.delete("continue");window.history.replaceState(null,"",address.pathname+address.search+address.hash);}
+   await openVOXiSection(intent);
+  }
+ }catch(error){showMessage("Не удалось завершить вход: "+(error.message||String(error)),"error");}
 }
 if(supabaseClient)resumeVOXiOAuthIntent();else { /* The public landing page renders offline. Sign-in requires Supabase online. */ }
 
