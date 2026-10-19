@@ -24,6 +24,8 @@
   if(key==='home')void summary();
  }
  window.voxiAdminShow=show;
+ const dateShortcuts=el('div',undefined,'voxi-admin-date-shortcuts');for(const [offset,label]of [[0,'Сегодня'],[1,'Завтра']]){const b=el('button',label,'secondary');b.type='button';b.addEventListener('click',()=>{const d=new Date();d.setDate(d.getDate()+offset);by('scheduleDate').value=new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10);by('scheduleDate').dispatchEvent(new Event('change'));});dateShortcuts.append(b);}by('scheduleDate').after(dateShortcuts);
+ const legacy=by('scheduleList'),legacyTitle=legacy.previousElementSibling,legacyWrap=el('details',undefined,'voxi-admin-legacy');legacy.before(legacyWrap);legacyWrap.append(el('summary','Старые интервалы расписания'));if(legacyTitle?.tagName==='H3'){legacyTitle.hidden=true;legacyWrap.append(legacyTitle);}legacyWrap.append(legacy);
  async function summary(){
   if(!staff())return;const actor=currentUser.id,request=++generation;overview.replaceChildren();
   const today=new Date(),date=new Date(today.getTime()-today.getTimezoneOffset()*60000).toISOString().slice(0,10);
