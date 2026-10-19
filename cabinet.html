@@ -68,7 +68,9 @@ footer{text-align:center;color:#82766d;font-size:10px;padding:36px 0 55px;letter
 #voxiInstallButton:focus-visible{outline:2px solid #e8bc6e;outline-offset:3px}
 </style>
 <!-- /VOXi PWA -->
-<script src="/cabinet-songs.js?v=20261019-tracks1"></script>
+<script src="/cabinet-songs.js?v=20261019-videos1"></script>
+<link rel="stylesheet" href="/videos.css?v=20261019-videos1"/>
+<script src="/video-client.js?v=20261019-videos1"></script>
 </head><body><div id="cabinetGate">Проверяем вход через Google...</div><div id="cabinetLoadError"></div>
 <div class="noir" aria-hidden="true"></div>
 <!-- Icons with layered metallic gradients and embossed highlights. -->
@@ -208,17 +210,18 @@ document.getElementById('ru').onclick=()=>{language='ru';render()};document.getE
           location.assign("./?continue=booking");
           return;
         }
-        try{window.history.replaceState(null,"","./cabinet.html?v=20261019-tracks1")}catch(_){}
+        try{window.history.replaceState(null,"","./cabinet.html?v=20261019-videos1")}catch(_){}
       }
       if(activeTab==="profile")window.hydrateCabinetTab("profile");
     }catch(ex){errorBox.textContent=t.error+(ex.message||String(ex))}
     finally{savingProfile=false;save.disabled=false;save.textContent=ct().save}
   });
-  let songLoadVersion=0;
-  el("modal").addEventListener("close",()=>el("empty").querySelectorAll("audio").forEach(a=>a.pause()));
+  let songLoadVersion=0,videoLoadVersion=0;
+  el("modal").addEventListener("close",()=>el("empty").querySelectorAll("audio,video").forEach(a=>a.pause()));
   window.hydrateCabinetTab=function(tab){
-    const request=++songLoadVersion;
-    el("empty").querySelectorAll("audio").forEach(a=>a.pause());
+    const request=++songLoadVersion,videoRequest=++videoLoadVersion;
+    el("empty").dispatchEvent(new Event("voxi-cabinet-dispose"));
+    el("empty").querySelectorAll("audio,video").forEach(a=>a.pause());
     const box=el("empty"),ru=language==="ru";box.replaceChildren();
     if(!signedUser){box.appendChild(make("p",ru?"Войдите через Google на главной странице.":"Басты бетте Google арқылы кіріңіз."));return;}
     if(dataLoading){box.appendChild(make("p",ru?"Загружаем ваши данные…":"Деректеріңіз жүктелуде…"));el("modalNote").textContent="";return}
@@ -254,10 +257,13 @@ document.getElementById('ru').onclick=()=>{language='ru';render()};document.getE
     }else if(tab==="songs"){
       const userId=signedUser.id;
       void window.voxiLoadClientSongs({client,userId,box,make,ru,isCurrent:()=>request===songLoadVersion&&signedUser?.id===userId&&activeTab==="songs",refresh:()=>window.hydrateCabinetTab("songs")});
+    }else if(tab==="videos"){
+      const userId=signedUser.id;
+      void window.voxiLoadClientVideos({client,userId,box,make,ru,isCurrent:()=>videoRequest===videoLoadVersion&&signedUser?.id===userId&&activeTab==="videos",refresh:()=>window.hydrateCabinetTab("videos")});
     }else{
       box.appendChild(make("p",tab==="songs"?(ru?"Студия ещё не добавила готовые песни в ваш кабинет.":"Дайын әндер әзірге жүктелмеген."):(ru?"Студия ещё не добавила видео в ваш кабинет.":"Бейнелер әзірге жүктелмеген.")));
     }
-    el("modalNote").textContent=tab==="songs"?(ru?"Ваши песни доступны только вашему аккаунту.":"Әндеріңіз тек өз аккаунтыңызға қолжетімді."):"";
+    el("modalNote").textContent=tab==="songs"?(ru?"Ваши песни доступны только вашему аккаунту.":"Әндеріңіз тек өз аккаунтыңызға қолжетімді."):tab==="videos"?(ru?"На главной показываются только одобренные ролики.":"Басты бетте тек мақұлданған бейнелер көрсетіледі."):"";
   };
   const originalRender=render;render=function(){originalRender();updateSummary()};
   function updateLoadErrors(){

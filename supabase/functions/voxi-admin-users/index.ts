@@ -18,7 +18,9 @@ const adapter = {
  async hasMedia(id:string){
   const tracks=checked(await server.from('voxi_tracks').select('id').eq('user_id',id).limit(1));
   const files=checked(await server.storage.from('voxi-tracks').list(id,{limit:1}));
-  return tracks.length>0||files.length>0;
+  const videos=checked(await server.from('voxi_videos').select('id').eq('user_id',id).limit(1));
+  const videoFiles=checked(await server.storage.from('voxi-videos').list(id,{limit:1}));
+  return tracks.length>0||files.length>0||videos.length>0||videoFiles.length>0;
  },
  async audit(row:any){return checked(await server.from('voxi_admin_audit').insert(row).select('id').single()).id;},
  async auditResult(id:string,status:string){checked(await server.from('voxi_admin_audit').update({status}).eq('id',id));},

@@ -1,3 +1,7 @@
 [functions.voxi-admin-users]
 # The handler verifies the caller through Auth and checks a live owner session.
 verify_jwt = false
+
+# Public feed; private actions validate Auth user and active session in the handler.
+[functions.voxi-videos]
+verify_jwt = false
