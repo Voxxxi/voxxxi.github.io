@@ -120,7 +120,7 @@ let language='ru',activeTab=null;const modal=document.getElementById('panel');fu
 function showTab(tab,open=true){activeTab=tab;const t=dict[language];document.getElementById('modalTitle').textContent=t[tab];document.getElementById('modalDesc').textContent=t[tab+'Desc'];document.getElementById('empty').textContent=t['empty'+tab[0].toUpperCase()+tab.slice(1)];document.getElementById('modalNote').textContent=t.note;if(open)modal.showModal();if(typeof hydrateCabinetTab==="function")hydrateCabinetTab(tab)}
 document.querySelectorAll('[data-tab]').forEach(x=>x.addEventListener('click',()=>showTab(x.dataset.tab)));
 document.getElementById('ru').onclick=()=>{language='ru';render()};document.getElementById('kk').onclick=()=>{language='kk';render()};document.getElementById('dismiss').onclick=()=>modal.close();document.getElementById('done').onclick=()=>modal.close();modal.addEventListener('close',()=>activeTab=null);render();
-</script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</script><script src="booking-client.js?v=1"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 (function(){
   const URL="https://vnykpjarjvacwhxvkxrk.supabase.co", KEY="sb_publishable_Jv-1ip1CSRKe2_cCjcGjmA_B333H-oC";
@@ -129,7 +129,7 @@ document.getElementById('ru').onclick=()=>{language='ru';render()};document.getE
 
   window.voxiCabinetClient=client;
   let signedUser=null, myBookings=[], profileData=null, firstProfile=false;
-  let dataLoading=false,profileError=null,bookingsError=null,initializing=false,savingProfile=false;
+  let dataLoading=false,profileError=null,bookingsError=null,initializing=false,savingProfile=false,authGeneration=0;
 
   const el=id=>document.getElementById(id);
   const make=(tag,txt,cls)=>{const n=document.createElement(tag);n.textContent=txt||"";if(cls)n.className=cls;return n};
@@ -137,7 +137,7 @@ document.getElementById('ru').onclick=()=>{language='ru';render()};document.getE
   const time=t=>String(t||"").slice(0,5);
   const today=()=>{const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")};
   function names(b){let v=b.song_titles||"";try{const a=JSON.parse(v);if(Array.isArray(a))return a.map(s=>String(s.title||"")).filter(Boolean)}catch(_){}return String(v).split(/\r?\n/).filter(Boolean)}
-  function nextBooking(){return [...myBookings].filter(b=>b.booking_date>=today()&&b.status!=="Отменено").sort((a,b)=>(a.booking_date+a.booking_time).localeCompare(b.booking_date+b.booking_time))[0]}
+  function nextBooking(){return [...myBookings].filter(b=>window.voxiCanCancel(b)).sort((a,b)=>(a.booking_date+a.booking_time).localeCompare(b.booking_date+b.booking_time))[0]}
   function updateSummary(){
     const ru=language==="ru",n=nextBooking();
     el("cabinetNextMain").textContent=n?date(n.booking_date)+" · "+time(n.booking_time):(ru?"Записей пока нет":"Әзірге жазылу жоқ");
@@ -233,12 +233,15 @@ document.getElementById('ru').onclick=()=>{language='ru';render()};document.getE
       const retry=make("button",ru?"Попробовать снова":"Қайта көру","cabinetExit");retry.type="button";retry.addEventListener("click",()=>{void init()});box.appendChild(retry);el("modalNote").textContent="";return;
     }
     if(tab==="history"){
+      const actor=signedUser.id;
+      const refresh=make("button",ru?"Обновить историю":"Тарихты жаңарту","cabinetExit");refresh.type="button";refresh.addEventListener("click",()=>void init());box.appendChild(refresh);
       if(!myBookings.length)box.appendChild(make("p",ru?"История записей пока пуста.":"Жазылу тарихы әзірге бос."));
       [...myBookings].sort((a,b)=>(b.booking_date+b.booking_time).localeCompare(a.booking_date+a.booking_time)).forEach(b=>{
         const card=make("article","","cabinet-record");
         card.appendChild(make("strong",date(b.booking_date)+" · "+time(b.booking_time)));
         card.appendChild(make("p",names(b).join(" · ")||(ru?"Без названия":"Атауы жоқ")));
         card.appendChild(make("small",(b.status||"Запланировано")+" · "+Number(b.price||0).toLocaleString("ru-RU")+" ₸"));
+        const cancel=window.voxiCancelControl?.({client,booking:b,make,ru,isCurrent:()=>signedUser?.id===actor&&activeTab==="history"&&request===songLoadVersion,onDone:()=>{updateSummary();window.hydrateCabinetTab("history")}});if(cancel)card.appendChild(cancel);
         box.appendChild(card);
       });
     }else if(tab==="notifications"){
@@ -275,11 +278,12 @@ document.getElementById('ru').onclick=()=>{language='ru';render()};document.getE
     el("cabinetLoadError").textContent=errors.join(" · ");
   }
   async function init(){
-    if(initializing)return;initializing=true;
+    if(initializing)return;initializing=true;const authRequest=authGeneration;
     try{
       if(!client)throw clientInitError||new Error(language==="ru"?"Не удалось загрузить подключение. Обновите страницу и проверьте интернет.":"Қосылым жүктелмеді. Бетті жаңартып, интернетті тексеріңіз.");
       const {data,error}=await client.auth.getSession();
       if(error)throw error;
+      if(authRequest!==authGeneration)return;
       if(!data?.session?.user){
         signedUser=null;myBookings=[];profileData=null;
         const gate=el("cabinetGate");
@@ -294,6 +298,7 @@ document.getElementById('ru').onclick=()=>{language='ru';render()};document.getE
         client.from("voxi_profiles").select("user_id,full_name,phone").eq("user_id",signedUser.id).maybeSingle(),
         client.from("voxi_bookings").select("*").eq("user_id",signedUser.id).order("booking_date",{ascending:false}).order("booking_time",{ascending:false})
       ]);
+      if(authRequest!==authGeneration)return;
       if(profile.status==="rejected")profileError=profile.reason;
       else if(profile.value.error)profileError=profile.value.error;
       else profileData=profile.value.data||null;
@@ -304,13 +309,15 @@ document.getElementById('ru').onclick=()=>{language='ru';render()};document.getE
       if(activeTab)window.hydrateCabinetTab(activeTab);
       if(!profileError&&!completeProfile(profileData))openContactProfile(true);
     }catch(error){
+      if(authRequest!==authGeneration)return;
       dataLoading=false;
       const gate=el("cabinetGate");
       if(gate)gate.textContent=language==="ru"?"Не удалось проверить вход. Обновите страницу.":"Кіруді тексеру мүмкін болмады. Бетті жаңартыңыз.";
       el("cabinetLoadError").textContent=(language==="ru"?"Ошибка загрузки кабинета: ":"Кабинетті жүктеу қатесі: ")+(error.message||String(error));
       if(activeTab)window.hydrateCabinetTab(activeTab);
-    }finally{initializing=false;}
+    }finally{if(authRequest===authGeneration)initializing=false;}
   }
+  client?.auth.onAuthStateChange((event,session)=>{if(event==="SIGNED_OUT"||(signedUser&&session?.user?.id&&signedUser.id!==session.user.id)){authGeneration++;initializing=false;signedUser=null;myBookings=[];profileData=null;profileError=bookingsError=null;dataLoading=false;songLoadVersion++;videoLoadVersion++;contactDialog.close();el("panel").close();updateSummary();el("cabinetLoadError").textContent=language==="ru"?"Аккаунт изменился. Обновите страницу для входа.":"Аккаунт өзгерді. Кіру үшін бетті жаңартыңыз.";}});
   updateSummary();init();
 })();
-</script><script src="chat.js?v=ai5"></script><script src="ui-language.js?v=6"></script></body></html>
+</script><script src="chat.js?v=ai5"></script><script src="ui-language.js?v=7"></script></body></html>

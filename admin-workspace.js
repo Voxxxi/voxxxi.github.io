@@ -22,6 +22,20 @@
  const nav=el('nav',undefined,'voxi-admin-nav');nav.setAttribute('aria-label','Разделы администратора');
  const quick=el('form',undefined,'voxi-users-search'),quickInput=el('input'),quickSubmit=el('button','Найти клиента','secondary');quickInput.type='search';quickInput.placeholder='Имя или телефон клиента';quickInput.setAttribute('aria-label','Быстрый поиск клиента');quickSubmit.type='submit';quick.append(quickInput,quickSubmit);head.append(quick);quick.addEventListener('submit',e=>{e.preventDefault();if(directory())location.assign(destination('clients')+'&q='+encodeURIComponent(quickInput.value.trim()));});
  const overview=el('div',undefined,'voxi-admin-overview');workspace.append(head,nav,overview);main.prepend(workspace);
+ 
+ const bookingTools=el('div',undefined,'voxi-users-search'),bookingSearch=el('input'),bookingFilter=el('select'),bookingRefresh=el('button',undefined,'secondary');
+ bookingSearch.type='search';bookingFilter.setAttribute('aria-label','Фильтр заявок');bookingSearch.setAttribute('aria-label','Поиск заявок');bookingRefresh.type='button';
+ const filterLabels=[['all','Все заявки','Барлық өтінім'],['upcoming','Предстоящие','Алдағы'],['today','Сегодня','Бүгін'],['done','Готовые','Дайын'],['cancelled','Отменённые','Бас тартылған']];
+ for(const [value]of filterLabels){const option=el('option');option.value=value;bookingFilter.append(option);}
+ const toolLabels=()=>{const kk=document.documentElement.lang==='kk';bookingSearch.placeholder=kk?'Аты, телефон немесе ән':'Имя, телефон или песня';bookingRefresh.textContent=kk?'Тізімді жаңарту':'Обновить список';[...bookingFilter.options].forEach((o,i)=>o.textContent=filterLabels[i][kk?2:1]);};
+ bookingFilter.value='all';toolLabels();new MutationObserver(toolLabels).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
+ bookingTools.append(bookingSearch,bookingFilter,bookingRefresh);by('bookings').before(bookingTools);
+ bookingSearch.addEventListener('input',()=>renderBookings());bookingFilter.addEventListener('change',()=>renderBookings());
+ bookingRefresh.addEventListener('click',async()=>{if(!staff())return;bookingRefresh.disabled=true;try{await loadBookings();}finally{bookingRefresh.disabled=false;}});
+ window.voxiFilterBookings=rows=>{if(!staff())return rows;const query=bookingSearch.value.trim().toLocaleLowerCase(),day=new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Oral',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+ return rows.filter(b=>(!query||[b.client_name,b.phone,b.song_titles].some(x=>String(x||'').toLocaleLowerCase().includes(query)))&&
+ (bookingFilter.value==='all'||bookingFilter.value==='today'&&b.booking_date===day||bookingFilter.value==='upcoming'&&b.booking_date>=day&&!['Отменено','Готово'].includes(b.status)||bookingFilter.value==='done'&&b.status==='Готово'||bookingFilter.value==='cancelled'&&b.status==='Отменено'));};
+
  let current='home',generation=0;
  const targets={home:null,bookings:bookingSection,schedule:by('schedulePanel'),clients:by('usersPanel'),upload:by('usersPanel'),income:by('incomePanel'),maintenance:by('maintenancePanel'),videos:by('videoModerationPanel'),backup:by('backupPanel')};
  const buttons=new Map();
