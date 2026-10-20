@@ -2,6 +2,12 @@
 .brand-big i::after{display:none!important}
 .brand-dot{display:none!important}
 body{padding-bottom:80px}
+.voxi-maintenance-actions{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0}
+.voxi-functional .voxi-maintenance-actions button{margin:0;min-height:44px}
+#maintenancePanel progress{appearance:none;-webkit-appearance:none;height:9px;border:1px solid #7a603d;border-radius:99px;overflow:hidden;background:#2b231b;accent-color:#dfb66f}
+#maintenancePanel progress::-webkit-progress-bar{background:#2b231b}
+#maintenancePanel progress::-webkit-progress-value{background:linear-gradient(90deg,#ae7a38,#edcb8c);border-radius:99px}
+#maintenancePanel progress::-moz-progress-bar{background:#dfb66f;border-radius:99px}
 @media(min-width:800px){html[data-voxi-admin] #adminWorkspace:has(.voxi-admin-overview:not([hidden])) .voxi-admin-nav{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:799px){html[data-voxi-admin] .voxi-admin-nav a:last-child{grid-column:1/-1}}
 .voxi-directory-filters{justify-content:flex-start!important}
