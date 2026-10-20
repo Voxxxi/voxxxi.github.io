@@ -47,5 +47,19 @@ do $$declare a record;r jsonb;begin
  begin perform public.voxi_studio_statistics('2098-01-01');raise exception 'Revoked owner read statistics';exception when insufficient_privilege then null;end;
 end $$;
 reset role;
+select set_config('request.jwt.claims','{}',true);
+create temporary table service_bulk_tracks as select gen_random_uuid() id,(select id from service_actors where label='client') user_id,gs number from generate_series(1,50) gs;
+insert into voxi_private.r2_uploads(actor,user_id,path,bytes,title,file_name,content_type,state,verified_at)
+ select (select id from service_actors where label='owner'),user_id,user_id::text||'/'||id::text||'.wav',44,'Bulk test','bulk-test.wav','audio/wav','stored',now() from service_bulk_tracks;
+insert into public.voxi_tracks(id,user_id,song_number,song_title,storage_path,storage_provider,file_name,file_size,created_at)
+ select id,user_id,100+number,'service-test-bulk',user_id::text||'/'||id::text||'.wav','r2','bulk-test.wav',44,now()+interval '1 second' from service_bulk_tracks;
+update voxi_private.track_notifications set read_at=now() where track_id in(select id from service_bulk_tracks);
+update voxi_private.track_notifications set read_at=null,created_at=now()-interval '1 day' where track_id=(select id from service_tracks where label='ready');
+set local role authenticated;
+do $$declare a record;r jsonb;begin
+ select * into a from service_actors where label='client';perform set_config('request.jwt.claims',jsonb_build_object('sub',a.id,'role','authenticated','session_id',a.sid)::text,true);
+ r:=public.voxi_ready_notifications();if r->>'unread_count'<>'1' or jsonb_array_length(r->'items')<>50 or r->'items'->0->>'track_id'<>(select id::text from service_tracks where label='ready') then raise exception 'Old unread message became unreachable beyond history limit';end if;
+end $$;
+reset role;
 rollback;
 select 'PASS: verified song notifications, read state, foreign isolation, expired/unverified exclusion, fresh sessions, versioned consent, anonymous aggregate counter, owner-only statistics and Asia/Oral boundaries; all fixtures rolled back' verification;
