@@ -8,6 +8,8 @@
  const route=requested==='users'?'clients':routeKeys.includes(requested)?requested:'home';
  const destination=key=>'./admin.html?section='+encodeURIComponent(key);
  if(!adminDocument){
+  const keepBookingSeparate=()=>{for(const id of ['schedulePanel','backupPanel'])by(id)?.classList.add('voxi-admin-off');by('bookings')?.closest('section')?.classList.add('voxi-admin-off');};
+  keepBookingSeparate();const publicSigned=setSignedIn;setSignedIn=function(user){publicSigned(user);keepBookingSeparate();};
   const oldOpen=openVOXiSection;openVOXiSection=async function(target){if(staff()&&['admin','cabinet'].includes(target)){location.assign(destination('home'));return;}return oldOpen(target);};
   window.voxiOpenClients=query=>location.assign(destination('clients')+(query?'&q='+encodeURIComponent(query):''));
   return;
