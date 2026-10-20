@@ -1,0 +1,25 @@
+begin;
+create temporary table ai_test_actors as select u.id,coalesce(s.role,'client') role,(select id from auth.sessions a where a.user_id=u.id order by created_at desc limit 1) sid from auth.users u left join public.voxi_staff s on s.user_id=u.id;
+grant select on ai_test_actors to authenticated;
+set local role authenticated;
+do $$declare a record;c record;begin
+ select * into a from ai_test_actors where role='owner' and sid is not null limit 1;
+ select * into c from ai_test_actors where role='client' and sid is not null limit 1;
+ perform set_config('request.jwt.claims',jsonb_build_object('sub',c.id,'role','authenticated','session_id',c.sid)::text,true);
+ if not public.voxi_ai_session_active() then raise exception 'Active client rejected';end if;
+ if not public.voxi_ai_claim() or public.voxi_ai_claim() then raise exception 'Quota or cooldown incorrect';end if;
+ begin perform public.voxi_health_owner();raise exception 'Client read diagnostics';exception when insufficient_privilege then null;end;
+ begin perform public.voxi_monitor_facts();raise exception 'Client read monitor facts';exception when insufficient_privilege then null;end;
+ begin insert into public.voxi_ai_replies(message_id,body,kind) values(gen_random_uuid(),'Forged','ai');raise exception 'Client forged AI reply';exception when insufficient_privilege then null;end;
+ perform set_config('request.jwt.claims',jsonb_build_object('sub',c.id,'role','authenticated','session_id',gen_random_uuid())::text,true);
+ if public.voxi_ai_session_active() then raise exception 'Revoked session accepted';end if;
+ begin perform public.voxi_ai_claim();raise exception 'Revoked client got quota';exception when insufficient_privilege then null;end;
+ perform set_config('request.jwt.claims',jsonb_build_object('sub',a.id,'role','authenticated','session_id',a.sid)::text,true);
+ perform public.voxi_health_owner();
+ if has_function_privilege('anon','public.voxi_ai_claim()','execute') or has_function_privilege('authenticated','public.voxi_ai_monitor_claim()','execute') then raise exception 'Excessive grant';end if;
+end $$;
+reset role;
+update voxi_private.ai_limits set calls=100 where day=(now() at time zone 'UTC')::date and bucket='global';
+do $$begin if public.voxi_ai_monitor_claim() then raise exception 'Global cap bypass';end if;end $$;
+rollback;
+select 'PASS: daily cap, cooldown, fresh sessions, owner diagnostics and service-only AI replies; fixtures rolled back' verification;
