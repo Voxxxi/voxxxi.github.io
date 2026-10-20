@@ -35,3 +35,4 @@ test('R2 refuses spoofed audio and preserves ambiguous delivered object',async()
 test('JSON parser stops oversized requests without reading unlimited bodies',async()=>{
  await assert.rejects(readJsonBody(new Request('https://unit.test',{method:'POST',body:'x'.repeat(5000)})));
 });
+test('technical R2 probe requires the server-only secret before any object operation',async()=>{const f=fixture();assert.equal((await f.call({action:'selftest'},{'x-voxi-secret':'wrong'},false)).status,401);assert.equal(f.log.length,0);});
