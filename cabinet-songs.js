@@ -2,18 +2,21 @@ window.voxiLoadClientSongs=async function({client,userId,box,make,ru,isCurrent,r
  const retry=()=>{const b=make('button',ru?'Обновить список':'Тізімді жаңарту','cabinetExit');b.type='button';b.addEventListener('click',refresh);return b;};
  box.appendChild(make('p',ru?'Загружаем ваши песни…':'Әндеріңіз жүктелуде…'));
  try{
-  const {data:tracks,error}=await client.from('voxi_tracks').select('id,song_title,storage_path,file_name,file_size,created_at,expires_at').eq('user_id',userId).order('created_at',{ascending:false}).limit(100);
+  const {data:tracks,error}=await client.from('voxi_tracks').select('id,song_title,storage_path,file_name,file_size,created_at,expires_at,storage_provider').eq('user_id',userId).order('created_at',{ascending:false}).limit(100);
   if(error)throw error;if(!isCurrent())return;box.replaceChildren();
   if(!tracks?.length){box.appendChild(make('p',ru?'Студия ещё не добавила готовые песни в ваш кабинет.':'Дайын әндер әзірге жүктелмеген.'));box.appendChild(retry());return;}
   const valid=tracks.filter(t=>t.storage_path.startsWith(userId+'/'));
   if(valid.length!==tracks.length)box.appendChild(make('p',ru?'Часть файлов недоступна. Обратитесь в студию.':'Кейбір файлдар қолжетімсіз. Студияға хабарласыңыз.'));
-  const signed=valid.length?await client.storage.from('voxi-tracks').createSignedUrls(valid.map(t=>t.storage_path),3600):{data:[],error:null};
+  const legacy=valid.filter(t=>t.storage_provider!=='r2');
+  const signed=legacy.length?await client.storage.from('voxi-tracks').createSignedUrls(legacy.map(t=>t.storage_path),900):{data:[],error:null};
   if(signed.error)throw signed.error;if(!isCurrent())return;
   const urls=new Map(signed.data.map(item=>[item.path,item]));
   for(const track of valid){
    const card=make('article','','cabinet-record');card.appendChild(make('strong',track.song_title));
    if(track.expires_at)card.appendChild(make('p',(ru?'Доступно до: ':'Қолжетімді мерзімі: ')+new Date(track.expires_at).toLocaleString(ru?'ru-RU':'kk-KZ')));
-   const item=urls.get(track.storage_path);
+   let item=urls.get(track.storage_path);
+   if(track.storage_provider==='r2')try{item=await window.voxiTrackUrl(client,track);}catch{item=null;}
+   if(!isCurrent())return;
    if(item?.signedUrl&&!item.error){
     const player=document.createElement('audio');player.controls=true;player.preload='none';player.src=item.signedUrl;player.style.width='100%';player.setAttribute('aria-label',track.song_title);card.appendChild(player);
     player.addEventListener('play',()=>{box.querySelectorAll('audio').forEach(other=>{if(other!==player)other.pause();});});
@@ -21,7 +24,7 @@ window.voxiLoadClientSongs=async function({client,userId,box,make,ru,isCurrent,r
     const download=make('button',ru?'Скачать песню':'Әнді жүктеп алу','cabinetExit');download.type='button';
     download.addEventListener('click',async()=>{
      if(!isCurrent())return;download.disabled=true;
-     try{const {data,error}=await client.storage.from('voxi-tracks').createSignedUrl(track.storage_path,3600,{download:track.file_name});if(error)throw error;if(!isCurrent())return;
+     try{const {data,error}=await (window.voxiTrackUrl?window.voxiTrackUrl(client,track,true).then(data=>({data,error:null})):client.storage.from('voxi-tracks').createSignedUrl(track.storage_path,3600,{download:track.file_name}));if(error)throw error;if(!isCurrent())return;
       const link=document.createElement('a');link.href=data.signedUrl;link.download=track.file_name;link.rel='noopener';document.body.appendChild(link);link.click();link.remove();
      }catch{if(isCurrent())card.appendChild(make('p',ru?'Не удалось скачать песню. Попробуйте ещё раз.':'Ән жүктелмеді. Қайта көріңіз.'));}finally{download.disabled=false;}
     });card.appendChild(download);

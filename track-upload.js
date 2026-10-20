@@ -20,6 +20,7 @@ async function voxiUploadPrivateTrack({client,userId,file,title,expiresAt=null,b
  if(bookingId!==null&&(!Number.isSafeInteger(bookingId)||bookingId<1))throw Error('Выберите корректную заявку клиента.');
  if(bookingId!==null&&(!Number.isInteger(bookingSongNumber)||bookingSongNumber<1||bookingSongNumber>100)||bookingId===null&&bookingSongNumber!==null)throw Error('Выберите песню из заявки.');
  if(!actorStillCurrent())throw Error('Аккаунт изменился. Откройте загрузку заново.');
+ if(typeof window!=='undefined'&&window.voxiUploadR2Track)return window.voxiUploadR2Track({client,userId,file,title,expiresAt,bookingId,bookingSongNumber,actorStillCurrent,info});
  const path=userId+'/'+crypto.randomUUID()+'.'+info.extension;
  const bucket=client.storage.from('voxi-tracks');let stored=false,metadataAttempted=false,insertRejected=false;
  try{

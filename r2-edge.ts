@@ -1,0 +1,60 @@
+import {createClient} from 'npm:@supabase/supabase-js@2.49.8';
+import {configured,inventory,putObject,headObject,deleteObject,signedGet} from './r2-s3.ts';
+import {readExactBody,validAudio,readJsonBody} from './r2-core.mjs';
+const url=Deno.env.get('SUPABASE_URL')!,service=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,anon=Deno.env.get('SUPABASE_ANON_KEY')!;
+const db=createClient(url,service,{auth:{persistSession:false,autoRefreshToken:false}});
+const checked=(r:any)=>{if(r.error)throw r.error;return r.data;};
+const headers={'Content-Type':'application/json','Cache-Control':'no-store','Access-Control-Allow-Origin':'https://voxxxi.github.io','Vary':'Origin','Access-Control-Allow-Headers':'authorization,apikey,content-type,x-client-info,x-voxi-upload','Access-Control-Allow-Methods':'POST,OPTIONS'};
+const uuid=(v:any)=>typeof v==='string'&&/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v);
+Deno.serve(async(req:Request)=>{
+ const reply=(status:number,data:any)=>new Response(JSON.stringify(data),{status,headers});
+ if(req.headers.get('Origin')&&req.headers.get('Origin')!=='https://voxxxi.github.io')return reply(403,{error:'Недопустимый источник'});
+ if(req.method==='OPTIONS')return new Response(null,{status:204,headers});
+ if(req.method!=='POST')return reply(405,{error:'Используйте POST'});
+ try{
+  const token=req.headers.get('Authorization')?.match(/^Bearer (\S+)$/i)?.[1];if(!token)return reply(401,{error:'Войдите заново'});
+  const auth=await db.auth.getUser(token);if(auth.error||!auth.data.user)return reply(401,{error:'Войдите заново'});
+  const actor=auth.data.user.id,caller=createClient(url,anon,{global:{headers:{Authorization:'Bearer '+token}},auth:{persistSession:false,autoRefreshToken:false}});
+  const role=checked(await caller.rpc('voxi_staff_session')),staff=['owner','admin'].includes(role);
+  const uploadId=req.headers.get('x-voxi-upload');
+  if(uploadId){
+   if(!staff||!uuid(uploadId))return reply(403,{error:'Нет доступа'});
+   const item=checked(await db.rpc('voxi_r2_claim',{p_id:uploadId,p_actor:actor}));
+   try{
+    const bytes=await readExactBody(req,Number(item.bytes));if(!validAudio(bytes,item.file_name))throw Error('Неверный формат аудио');
+    // Recheck the live session after reading a potentially slow upload.
+    if(!['owner','admin'].includes(checked(await caller.rpc('voxi_staff_session'))))throw Error('Войдите заново');
+    await putObject(item.path,bytes,item.content_type);const size=await headObject(item.path);if(size!==Number(item.bytes))throw Error('Размер файла не подтверждён');
+    checked(await db.rpc('voxi_r2_verify',{p_id:uploadId,p_bytes:size}));
+    const trackId=checked(await caller.rpc('voxi_r2_finalize',{p_id:uploadId}));return reply(200,{trackId,path:item.path});
+   }catch{
+    // Never delete after an ambiguous metadata acknowledgement. The owner can
+    // retry finalization by reservation ID; abandoned objects stay in the quota.
+    return reply(503,{error:'Не удалось подтвердить выдачу. Обновите песни клиента; повторите подтверждение этой загрузки, прежде чем загружать файл снова.',uploadId});
+   }
+  }
+  const body=await readJsonBody(req);
+  if(body.action==='read'){
+   if(!uuid(body.trackId))return reply(400,{error:'Выберите песню'});
+   const t=checked(await caller.from('voxi_tracks').select('id,user_id,storage_path,storage_provider,file_name,deleted_at,expires_at').eq('id',body.trackId).maybeSingle());
+   if(!t||t.deleted_at||t.expires_at&&new Date(t.expires_at)<=new Date()||!t.storage_path.startsWith(t.user_id+'/'))return reply(404,{error:'Песня недоступна'});
+   if(t.storage_provider!=='r2')return reply(400,{error:'Другое хранилище'});
+   return reply(200,{signedUrl:await signedGet(t.storage_path,body.download===true?t.file_name:undefined)});
+  }
+  if(!staff)return reply(403,{error:'Нет доступа'});
+  if(body.action==='finalize'&&uuid(body.uploadId))return reply(200,{trackId:checked(await caller.rpc('voxi_r2_finalize',{p_id:body.uploadId}))});
+  if(body.action==='status'){
+   if(role!=='owner')return reply(403,{error:'Нет доступа'});
+   if(!configured())return reply(200,{configured:false});const current=await inventory();
+   const pending=checked(await db.rpc('voxi_r2_pending_bytes'));
+   return reply(200,{configured:true,bytes:current.bytes,objects:current.objects,reservedBytes:Number(pending),limitBytes:9000000000,checkedAt:new Date().toISOString()});
+  }
+  if(body.action==='prepare'){
+   if(!uuid(body.userId)||!Number.isSafeInteger(body.bytes))return reply(400,{error:'Проверьте клиента и файл'});
+   const current=await inventory();
+   const item=checked(await db.rpc('voxi_r2_reserve',{p_actor:actor,p_user:body.userId,p_bytes:body.bytes,p_title:body.title,p_name:body.fileName,p_type:body.contentType,p_booking:body.bookingId??null,p_slot:body.songSlot??null,p_expires:body.expiresAt??null,p_inventory:current.bytes}));
+   return reply(200,{uploadId:item.id});
+  }
+  return reply(400,{error:'Неизвестное действие'});
+ }catch(error){const limit=String((error as any)?.message||'').includes('лимит 9');return reply(limit?409:503,{error:limit?'Достигнут лимит R2 9 ГБ. Освободите место.':'Не удалось выполнить действие. Обновите страницу и проверьте список песен.'});}
+});
