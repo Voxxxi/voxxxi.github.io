@@ -1,0 +1,19 @@
+(()=>{
+ 'use strict';
+ const audio=document.getElementById('audio'),play=document.getElementById('play'),root=document.querySelector('[aria-label="Музыкальный плеер"]');if(!audio||!play||!root)return;
+ audio.removeAttribute('src');audio.preload='none';
+ const name=root.querySelector('.track-name'),nav=document.createElement('div'),status=document.createElement('p');nav.className='voxi-portfolio-nav';status.className='voxi-portfolio-status';status.setAttribute('role','status');root.append(nav,status);
+ const prev=document.createElement('button'),next=document.createElement('button'),position=document.createElement('span');prev.type=next.type='button';nav.append(prev,position,next);
+ let tracks=[],queue=[],index=0,loading=true,failed=false;
+ const ru=()=>document.documentElement.lang!=='kk';
+ function shuffled(items){const copy=[...items];for(let i=copy.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[copy[i],copy[j]]=[copy[j],copy[i]];}return copy;}
+ function labels(){prev.textContent=ru()?'← Предыдущая':'← Алдыңғы';next.textContent=ru()?'Следующая →':'Келесі →';prev.disabled=next.disabled=tracks.length<2;nav.hidden=!tracks.length;play.disabled=loading||!tracks.length;play.setAttribute('aria-label',audio.paused?(ru()?'Воспроизвести':'Ойнату'):(ru()?'Пауза':'Кідірту'));if(!tracks.length){name.textContent=ru()?'ЛУЧШИЕ РАБОТЫ СТУДИИ':'СТУДИЯНЫҢ ҮЗДІК ЖҰМЫСТАРЫ';status.textContent=loading?(ru()?'Загружаем подборку…':'Жинақ жүктелуде…'):failed?(ru()?'Подборка временно недоступна. Обновите страницу.':'Жинақ уақытша қолжетімсіз. Бетті жаңартыңыз.'):(ru()?'Здесь скоро зазвучат наши лучшие записи.':'Жақында мұнда үздік жазбаларымызды тыңдай аласыз.');}}
+ function select(at){index=at;const track=queue[index];audio.src=track.src;name.textContent=track.title;position.textContent=(index+1)+' / '+queue.length;status.textContent=ru()?'Случайный порядок · работы студии VOXi':'Кездейсоқ ретпен · VOXi студиясының жұмыстары';labels();}
+ async function advance(step){if(!tracks.length)return;const wasPlaying=!audio.paused;audio.pause();let at=index+step;if(at>=queue.length){const last=queue[index];queue=shuffled(tracks);if(queue.length>1&&queue[0].src===last.src)[queue[0],queue[1]]=[queue[1],queue[0]];at=0;}if(at<0)at=queue.length-1;select(at);if(wasPlaying)try{await audio.play();}catch{playbackError();}}
+ function playbackError(){status.textContent=ru()?'Не удалось воспроизвести запись. Выберите следующую или попробуйте ещё раз.':'Жазба ойнатылмады. Келесісін таңдаңыз немесе қайта көріңіз.';}
+ prev.addEventListener('click',()=>void advance(-1));next.addEventListener('click',()=>void advance(1));
+ play.onclick=async()=>{if(!tracks.length)return;if(!audio.paused){audio.pause();return;}try{await audio.play();status.textContent='';}catch{playbackError();}};
+ audio.addEventListener('ended',async()=>{await advance(1);try{await audio.play();}catch{playbackError();}});audio.addEventListener('error',()=>{if(tracks.length)playbackError();});audio.addEventListener('play',labels);audio.addEventListener('pause',labels);
+ new MutationObserver(labels).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
+ labels();fetch('portfolio.json',{cache:'no-cache'}).then(r=>{if(!r.ok)throw Error();return r.json();}).then(data=>{if(!Array.isArray(data.tracks))throw Error();const seen=new Set();tracks=data.tracks.filter(t=>{if(!t||typeof t.title!=='string'||!t.title.trim()||typeof t.src!=='string')return false;const url=new URL(t.src,location.href);if(url.origin!==location.origin||!/^\/portfolio\/[\w./% -]+\.(mp3|wav|m4a|ogg|flac)$/i.test(url.pathname)||seen.has(url.href))return false;seen.add(url.href);return true;});queue=shuffled(tracks);loading=false;if(queue.length)select(0);else labels();}).catch(()=>{loading=false;failed=true;labels();});
+})();

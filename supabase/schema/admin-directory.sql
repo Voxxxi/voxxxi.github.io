@@ -10,8 +10,8 @@ begin
    coalesce(s.role,'client') as role,u.created_at,u.banned_until,
    (trim(coalesce(p.full_name,'')) ~ '\S+\s+\S+' and trim(coalesce(p.phone,''))<>'') as profile_complete
   from auth.users u left join public.voxi_profiles p on p.user_id=u.id left join public.voxi_staff s on s.user_id=u.id
-  where q='' or strpos(lower(coalesce(p.full_name,'')),lower(q))>0 or strpos(lower(coalesce(u.email,'')),lower(q))>0 or strpos(u.id::text,lower(q))>0
-   or (digits<>'' and regexp_replace(q,'[^[:alpha:]]','','g')='' and strpos(regexp_replace(coalesce(p.phone,''),'[^0-9]','','g'),digits)>0)
+  where coalesce(s.role,'client')<>'owner' and (q='' or strpos(lower(coalesce(p.full_name,'')),lower(q))>0 or strpos(lower(coalesce(u.email,'')),lower(q))>0 or strpos(u.id::text,lower(q))>0
+   or (digits<>'' and regexp_replace(q,'[^[:alpha:]]','','g')='' and strpos(regexp_replace(coalesce(p.phone,''),'[^0-9]','','g'),digits)>0))
  ), filtered as (
   select * from matches where filter_name='all' or (filter_name='complete' and profile_complete) or (filter_name='incomplete' and not profile_complete)
    or (filter_name='staff' and role<>'client') or (filter_name='suspended' and banned_until>now())

@@ -10,16 +10,17 @@
  const prev=button(()=>show(index-1)),position=el('span'),next=button(()=>show(index+1)),refresh=button(load),like=button(toggleLike);like.setAttribute('aria-pressed','false');nav.append(prev,position,next,refresh,like);section.append(message,video,caption,nav);
  let videos=[],index=0,liked=new Set(),liking=false,requestVersion=0,likesVersion=0;
  const ru=()=>document.documentElement.lang!=='kk',user=()=>typeof currentUser!=='undefined'?currentUser:null;
- function labels(){heading.textContent=ru()?'Праздники с VOXi':'VOXi-мен мерекелер';intro.textContent=ru()?'Видео наших клиентов':'Клиенттеріміздің бейнелері';prev.textContent=ru()?'← Назад':'← Артқа';next.textContent=ru()?'Далее →':'Келесі →';refresh.textContent=ru()?'Другие видео':'Басқа бейнелер';likeLabel();}
+ function labels(){heading.textContent=ru()?'Праздники с VOXi':'VOXi-мен мерекелер';intro.textContent=ru()?'Видео наших клиентов':'Клиенттеріміздің бейнелері';prev.textContent=ru()?'← Назад':'← Артқа';next.textContent=ru()?'Далее →':'Келесі →';refresh.textContent=ru()?'Другие видео':'Басқа бейнелер';if(!videos.length){message.textContent=ru()?'Скоро здесь появятся видео наших клиентов. А пока — настроение студии.':'Жақында мұнда клиенттеріміздің бейнелері пайда болады. Әзірге студия атмосферасын тамашалаңыз.';title.textContent=ru()?'В ритме VOXi':'VOXi ырғағымен';name.textContent=ru()?'Студийная заставка · без звука':'Студиялық бейне · дыбыссыз';}likeLabel();}
  function likeLabel(){const v=videos[index];like.textContent='♡ '+(v?.likes||0);like.setAttribute('aria-label',ru()?'Мне нравится':'Ұнайды');like.setAttribute('aria-pressed',v&&liked.has(v.id)?'true':'false');like.disabled=!v||liking;}
  function show(at){
-  video.pause();if(!videos.length){video.style.display='none';caption.hidden=true;prev.disabled=next.disabled=like.disabled=true;position.textContent='';return;}
+  video.pause();if(!videos.length){video.src='media/studio-loop.mp4';video.poster='media/studio-poster.jpg';video.muted=true;video.loop=true;video.style.display='block';caption.hidden=false;description.textContent='';prev.hidden=next.hidden=like.hidden=true;position.textContent='';labels();if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches&&!navigator.connection?.saveData)void video.play().catch(()=>{});return;}
+  video.loop=false;video.muted=false;video.removeAttribute('poster');prev.hidden=next.hidden=like.hidden=false;
   index=(at+videos.length)%videos.length;const v=videos[index];video.src=v.url;video.style.display='block';caption.hidden=false;title.textContent=v.title;name.textContent=v.name;description.textContent=v.description||'';position.textContent=(index+1)+' / '+videos.length;prev.disabled=next.disabled=videos.length<2;likeLabel();
  }
  async function load(){
   const version=++requestVersion;refresh.disabled=true;message.textContent=ru()?'Загружаем видео…':'Бейнелер жүктелуде…';
   try{const data=await voxiVideoRequest(null,'feed');if(version!==requestVersion)return;videos=data.videos;message.textContent=videos.length?'':ru()?'Здесь появятся видео клиентов после проверки.':'Тексерілген клиент бейнелері осында пайда болады.';show(0);await loadLikes();}
-  catch{if(version===requestVersion)message.textContent=ru()?'Видео временно недоступны. Попробуйте обновить список.':'Бейнелер уақытша қолжетімсіз. Тізімді жаңартып көріңіз.';}
+  catch{if(version===requestVersion){if(!videos.length)show(0);message.textContent=ru()?'Видео клиентов временно недоступны. Попробуйте обновить список.':'Клиент бейнелері уақытша қолжетімсіз. Тізімді жаңартып көріңіз.';}}
   finally{if(version===requestVersion)refresh.disabled=false;}
  }
  async function loadLikes(){

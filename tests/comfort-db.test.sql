@@ -11,7 +11,7 @@ select * into c from test_actors where role='client' and sid is not null limit 1
 if a.id is null or c.id is null then raise exception 'Active sessions required';end if;
 perform set_config('request.jwt.claims',jsonb_build_object('sub',a.id,'role','authenticated','session_id',a.sid)::text,true);
 foreach k in array array['all','complete','incomplete','staff','suspended'] loop
-r:=public.voxi_admin_directory('',1,k);if (r->>'total')::int<>(r->'counts'->>k)::int then raise exception 'Filter mismatch';end if;
+r:=public.voxi_admin_directory('',1,k);if exists(select 1 from jsonb_array_elements(r->'users') j where j->>'user_id'=a.id::text or j->>'role'='owner') then raise exception 'Owner appeared in clients';end if;if (r->>'total')::int<>(r->'counts'->>k)::int then raise exception 'Filter mismatch';end if;
 end loop;
 baseline:=(public.voxi_income_month((now() at time zone 'Asia/Oral')::date)->>'amount')::numeric;
 perform set_config('voxi.test_baseline',baseline::text,true);

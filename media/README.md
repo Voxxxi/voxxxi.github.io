@@ -1,0 +1,1 @@
+The studio loop and poster are original VOXi procedural artwork created for this site. No third-party concert footage, music, Cubase interface or client media is used. H.264 MP4, 960×540, 18fps, eight-second silent loop. This is a clearly labelled temporary studio visual while the moderated client feed is empty.
