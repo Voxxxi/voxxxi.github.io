@@ -23,3 +23,5 @@ test('payment, included work, preparation and delivery match the owner rules',()
  assert.equal(operatorLanguage('Минусовка керек пе?'),'kk');
  assert.match(referenceAnswer('Можно читать текст с телефона на записи?','ru'),/Читать текст с листа или телефона можно/);
 });
+
+test('operator does not invent a current discount or available hour',()=>{assert.match(referenceAnswer('Есть скидки?','ru'),/только на указанное время/);assert.match(referenceAnswer('Жеңілдік бар ма?','kk'),/тек көрсетілген уақытқа/);});

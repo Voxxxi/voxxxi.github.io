@@ -241,6 +241,7 @@ document.getElementById('ru').onclick=()=>{language='ru';render()};document.getE
         card.appendChild(make("strong",date(b.booking_date)+" · "+time(b.booking_time)));
         card.appendChild(make("p",names(b).join(" · ")||(ru?"Без названия":"Атауы жоқ")));
         card.appendChild(make("small",(b.status||"Запланировано")+" · "+Number(b.price||0).toLocaleString("ru-RU")+" ₸"));
+        if(Number(b.discount_percent)>0)card.appendChild(make("p",(ru?"Скидка при записи: ":"Жазылған кездегі жеңілдік: ")+b.discount_percent+"%"));
         const cancel=window.voxiCancelControl?.({client,booking:b,make,ru,isCurrent:()=>signedUser?.id===actor&&activeTab==="history"&&request===songLoadVersion,onDone:()=>{updateSummary();window.hydrateCabinetTab("history")}});if(cancel)card.appendChild(cancel);
         box.appendChild(card);
       });

@@ -1,0 +1,17 @@
+.voxi-studio-updates{max-width:1180px;margin:48px auto;padding:0 24px;color:#ebd0a5;grid-column:1/-1;font-family:Manrope,Arial,sans-serif}
+.voxi-studio-updates h2{font:500 clamp(27px,4vw,38px)/1.2 Georgia,serif;color:#e8c58c;margin:0 0 12px}
+.voxi-updates-intro{font-size:14px;color:#b9aa98;line-height:1.7;margin-bottom:22px}
+.voxi-news-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:18px}
+.voxi-news-card{padding:25px;border:1px solid #806442;border-radius:20px;background:linear-gradient(135deg,#25201d,#131115);min-width:0}
+.voxi-news-card small{font-size:10px;color:#bca17a;letter-spacing:1.4px}.voxi-news-card h3{font:500 25px/1.35 Georgia,serif;color:#f0d4a0;margin:14px 0}
+.voxi-news-card p{font:400 13px/1.8 Manrope,Arial,sans-serif;color:#cbbbA5;white-space:pre-line;overflow-wrap:anywhere}
+.voxi-studio-updates button,.voxi-studio-updates a.secondary{display:inline-block;box-sizing:border-box;min-height:44px;padding:12px 16px;border:1px solid #aa8757;border-radius:12px;background:#282229;color:#efdbb6;font:600 12px/1.5 Manrope,Arial,sans-serif;text-decoration:none;cursor:pointer;margin-top:10px}
+.voxi-studio-updates button:hover,.voxi-studio-updates a.secondary:hover{background:#3d3025}.voxi-studio-updates button:focus-visible{outline:2px solid #efca87;outline-offset:3px}
+.voxi-open-slots{display:flex;flex-wrap:wrap;gap:8px}.voxi-open-slots button{margin-top:0;text-align:left}
+.voxi-offer-forms{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}.voxi-offer-forms form{min-width:0;padding:20px;border:1px solid #64513b;border-radius:18px}.voxi-offer-forms label{display:block;margin:14px 0 6px}.voxi-offer-forms label>span{display:block;margin-bottom:7px}.voxi-offer-forms textarea{min-height:120px;resize:vertical}.voxi-offer-forms input[type=checkbox]{width:22px!important;height:22px;accent-color:#d2ae6f}.voxi-offer-forms .voxi-news-card{margin-top:20px}
+.voxi-update-row{padding:16px 0;border-bottom:1px solid #55432f;display:flex;flex-wrap:wrap;gap:10px;align-items:center}.voxi-update-row strong{flex:1 1 100%;overflow-wrap:anywhere}.voxi-update-row small{flex:1 1 100%;color:#c4b39b}.voxi-update-row button{margin:0!important;width:auto!important;min-height:44px}
+.voxi-preparation{margin-top:25px;padding:16px;border:1px solid #725b3b;border-radius:14px;color:#d6c2a0;font-size:13px;line-height:1.8}.voxi-preparation summary{cursor:pointer;font-weight:600}.voxi-preparation p{margin-bottom:0}
+@media(max-width:850px){.voxi-offer-forms{grid-template-columns:1fr}}
+@media(max-width:600px){.voxi-studio-updates{margin:30px auto;padding:0 18px}.voxi-news-card{padding:20px}.voxi-news-card h3{font-size:23px}.voxi-offer-forms form{padding:16px}}
+@media(max-width:799px){html[data-voxi-admin] .voxi-admin-nav a:last-child:nth-child(even){grid-column:auto}}
+@media(min-width:800px){html[data-voxi-admin] #adminWorkspace:has(.voxi-admin-overview:not([hidden])) .voxi-admin-nav a:last-child:nth-child(3n+1){grid-column:1/-1}}

@@ -1,0 +1,63 @@
+begin;
+create temporary table updates_test_actor as select gen_random_uuid() id,gen_random_uuid() sid;
+insert into auth.users(id,email,raw_user_meta_data) select id,'rollback-updates-'||id||'@example.invalid','{}'::jsonb from updates_test_actor;
+insert into auth.sessions(id,user_id,created_at,updated_at) select sid,id,now(),now() from updates_test_actor;
+insert into public.voxi_profiles(user_id,full_name,phone) select id,'Rollback Client','+70000000000' from updates_test_actor on conflict(user_id) do update set full_name=excluded.full_name,phone=excluded.phone;
+create temporary table updates_test_ids(kind text,id uuid);
+with n as(insert into public.voxi_announcements(title_ru,body_ru,published,ends_at) values('Rollback live','Visible text',true,now()+interval '1 day') returning id) insert into updates_test_ids select 'live',id from n;
+with n as(insert into public.voxi_announcements(title_ru,body_ru,published,starts_at,ends_at) values('Rollback expired','Hidden text',true,now()-interval '2 days',now()-interval '1 day') returning id) insert into updates_test_ids select 'expired',id from n;
+with n as(insert into public.voxi_announcements(title_ru,body_ru,published,ends_at) values('Rollback draft','Hidden text',false,now()+interval '1 day') returning id) insert into updates_test_ids select 'draft',id from n;
+insert into public.voxi_slot_offers(booking_date,booking_time,percent,active,ends_at) values('2098-12-27','13:00',20,true,now()+interval '1 day');
+insert into public.voxi_schedule_slots(booking_date,booking_time,is_open) values('2098-12-27','13:00',true);
+grant select on updates_test_actor,updates_test_ids to anon,authenticated;
+set local role anon;
+do $$declare result jsonb;begin
+ result:=public.voxi_studio_updates();
+ if not exists(select 1 from jsonb_array_elements(result->'announcements') n where n->>'id'=(select id::text from updates_test_ids where kind='live')) then raise exception 'Published announcement missing';end if;
+ if exists(select 1 from jsonb_array_elements(result->'announcements') n where n->>'id' in(select id::text from updates_test_ids where kind in('draft','expired'))) then raise exception 'Draft or expired announcement exposed';end if;
+ if exists(select 1 from jsonb_array_elements(result->'slots') s where s ? 'client_name' or s ? 'phone' or s ? 'user_id') then raise exception 'Private slot fields exposed';end if;
+ begin perform 1 from public.voxi_announcements;raise exception 'Anonymous table read';exception when insufficient_privilege then null;end;
+ if (public.voxi_slot_offer('2098-12-27','13:00')->>'percent')::int<>20 then raise exception 'Offer lookup incorrect';end if;
+end $$;
+reset role;
+create temporary table updates_test_booking(id bigint);
+grant select,insert on updates_test_booking to authenticated;
+set local role authenticated;
+do $$declare a record;b bigint;begin
+ select * into strict a from updates_test_actor;perform set_config('request.jwt.claims',jsonb_build_object('sub',a.id,'role','authenticated','session_id',a.sid)::text,true);
+ if exists(select 1 from public.voxi_announcements) then raise exception 'Client can inspect drafts';end if;
+ begin insert into public.voxi_announcements(title_ru,body_ru,ends_at) values('Denied','Denied',now()+interval '1 day');raise exception 'Client can publish';exception when insufficient_privilege then null;end;
+ begin insert into public.voxi_slot_offers(booking_date,booking_time,percent,active,ends_at) values('2098-12-27','14:00',90,true,now()+interval '1 day');raise exception 'Client can create discount';exception when insufficient_privilege then null;end;
+ begin insert into public.voxi_bookings(client_name,phone,booking_date,booking_time,people_count,song_count,song_titles,price,status,user_id) values('Rollback offer','+70000000000','2098-12-27','13:00',3,2,'[{"title":"First","people":1,"price":5000},{"title":"Second","people":2,"price":6000}]',11000,'Запланировано',a.id);raise exception 'Stale full price accepted';exception when raise_exception then if sqlerrm<>'Price does not match the studio tariff' then raise;end if;end;
+ insert into public.voxi_bookings(client_name,phone,booking_date,booking_time,people_count,song_count,song_titles,price,base_price,discount_percent,status,user_id) values('Rollback offer','+70000000000','2098-12-27','13:00',3,2,'[{"title":"First","people":1,"price":4000},{"title":"Second","people":2,"price":4800}]',8800,1,90,'Запланировано',a.id) returning id into b;
+ insert into updates_test_booking values(b);
+ if not exists(select 1 from public.voxi_bookings where id=b and base_price=11000 and discount_percent=20 and price=8800 and discount_offer_id is not null) then raise exception 'Server did not freeze correct discount';end if;
+end $$;
+reset role;
+select set_config('request.jwt.claims','{}',true);
+update public.voxi_slot_offers set active=false where booking_date='2098-12-27' and booking_time='13:00';
+do $$begin
+ if (select price from public.voxi_bookings where id=(select id from updates_test_booking))<>8800 then raise exception 'Existing booking repriced';end if;
+ if (public.voxi_slot_offer('2098-12-27','13:00')->>'percent')::int<>0 then raise exception 'Inactive discount applied';end if;
+end $$;
+-- Server-confirmed R2 fixtures only. No object is uploaded; all proofs roll back.
+create temporary table updates_test_media(n int,item jsonb);
+insert into updates_test_media select n,public.voxi_r2_reserve((select user_id from public.voxi_staff where role='owner' limit 1),(select id from updates_test_actor),4,'Rollback offer song '||n,'test.mp3','audio/mpeg',(select id from updates_test_booking),n,null,0) from generate_series(1,2)n;
+select public.voxi_r2_claim((item->>'id')::uuid,(item->>'actor')::uuid) from updates_test_media;
+select public.voxi_r2_verify((item->>'id')::uuid,4) from updates_test_media;
+grant select on updates_test_media to authenticated;
+create temporary table updates_test_owner as select s.user_id id,(select id from auth.sessions where user_id=s.user_id order by created_at desc limit 1) sid from public.voxi_staff s where s.role='owner' limit 1;
+grant select on updates_test_owner to authenticated;
+set local role authenticated;
+do $$declare a record;before_amount numeric;begin
+ select * into strict a from updates_test_owner;
+ perform set_config('request.jwt.claims',jsonb_build_object('sub',a.id,'role','authenticated','session_id',a.sid)::text,true);
+ before_amount:=(public.voxi_income_month(current_date)->>'amount')::numeric;
+ perform public.voxi_r2_finalize((select (item->>'id')::uuid from updates_test_media where n=1));
+ if (public.voxi_income_month(current_date)->>'amount')::numeric<>before_amount then raise exception 'Partial delivery counted';end if;
+ perform public.voxi_r2_finalize((select (item->>'id')::uuid from updates_test_media where n=2));
+ if (public.voxi_income_month(current_date)->>'amount')::numeric<>before_amount+8800 then raise exception 'Income ignored discounted total';end if;
+end $$;
+reset role;
+rollback;
+select 'PASS: public visibility and privacy, owner-only writes, validated discount snapshot, no repricing, discounted income after full delivery; all fixtures rolled back' verification;

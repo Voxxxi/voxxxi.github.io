@@ -4,7 +4,7 @@
  const staff=()=>!!currentUser&&isAdmin(),directory=()=>['owner','admin'].includes(voxiStaffRole);
  const adminDocument=document.documentElement.hasAttribute('data-voxi-admin');
  const routeParams=new URLSearchParams(location.search),requested=routeParams.get('section')||'home';
- const routeKeys=['home','bookings','schedule','clients','upload','users','income','maintenance','videos','backup'];
+ const routeKeys=['home','bookings','schedule','clients','upload','users','income','maintenance','updates','videos','backup'];
  const route=requested==='users'?'clients':routeKeys.includes(requested)?requested:'home';
  const destination=key=>'./admin.html?section='+encodeURIComponent(key);
  if(!adminDocument){
@@ -27,7 +27,7 @@
  bookingSearch.type='search';bookingFilter.setAttribute('aria-label','Фильтр заявок');bookingSearch.setAttribute('aria-label','Поиск заявок');bookingRefresh.type='button';
  const filterLabels=[['all','Все заявки','Барлық өтінім'],['upcoming','Предстоящие','Алдағы'],['today','Сегодня','Бүгін'],['done','Готовые','Дайын'],['cancelled','Отменённые','Бас тартылған']];
  for(const [value]of filterLabels){const option=el('option');option.value=value;bookingFilter.append(option);}
- const toolLabels=()=>{const kk=document.documentElement.lang==='kk';bookingSearch.placeholder=kk?'Аты, телефон немесе ән':'Имя, телефон или песня';bookingRefresh.textContent=kk?'Тізімді жаңарту':'Обновить список';[...bookingFilter.options].forEach((o,i)=>o.textContent=filterLabels[i][kk?2:1]);};
+ const toolLabels=()=>{const kk=document.documentElement.lang==='kk';bookingSearch.setAttribute('aria-label',kk?'Өтінімдерді іздеу':'Поиск заявок');bookingFilter.setAttribute('aria-label',kk?'Өтінім сүзгісі':'Фильтр заявок');bookingSearch.placeholder=kk?'Аты, телефон немесе ән':'Имя, телефон или песня';bookingRefresh.textContent=kk?'Тізімді жаңарту':'Обновить список';[...bookingFilter.options].forEach((o,i)=>o.textContent=filterLabels[i][kk?2:1]);};
  bookingFilter.value='all';toolLabels();new MutationObserver(toolLabels).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
  bookingTools.append(bookingSearch,bookingFilter,bookingRefresh);by('bookings').before(bookingTools);
  bookingSearch.addEventListener('input',()=>renderBookings());bookingFilter.addEventListener('change',()=>renderBookings());
@@ -37,16 +37,16 @@
  (bookingFilter.value==='all'||bookingFilter.value==='today'&&b.booking_date===day||bookingFilter.value==='upcoming'&&b.booking_date>=day&&!['Отменено','Готово'].includes(b.status)||bookingFilter.value==='done'&&b.status==='Готово'||bookingFilter.value==='cancelled'&&b.status==='Отменено'));};
 
  let current='home',generation=0;
- const targets={home:null,bookings:bookingSection,schedule:by('schedulePanel'),clients:by('usersPanel'),upload:by('usersPanel'),income:by('incomePanel'),maintenance:by('maintenancePanel'),videos:by('videoModerationPanel'),backup:by('backupPanel')};
+ const targets={home:null,bookings:bookingSection,schedule:by('schedulePanel'),clients:by('usersPanel'),upload:by('usersPanel'),income:by('incomePanel'),maintenance:by('maintenancePanel'),updates:by('studioUpdatesPanel'),videos:by('videoModerationPanel'),backup:by('backupPanel')};
  const buttons=new Map();
- for(const [key,label] of [['home','Обзор'],['bookings','Заявки'],['schedule','Моё расписание'],['clients','Клиенты'],['upload','Загрузить песню'],['income','Доходы'],['maintenance','Состояние сайта'],['videos','Видео на проверке'],['backup','Резервная копия']]){
+ for(const [key,label] of [['home','Обзор'],['bookings','Заявки'],['schedule','Моё расписание'],['clients','Клиенты'],['upload','Загрузить песню'],['updates','Объявления и акции'],['income','Доходы'],['maintenance','Состояние сайта'],['videos','Видео на проверке'],['backup','Резервная копия']]){
   const b=el('a',label,'secondary');b.href=destination(key);buttons.set(key,b);nav.append(b);
  }
  function show(key){
-  if(!staff())return;if(['clients','upload'].includes(key)&&!directory()||['income','maintenance'].includes(key)&&voxiStaffRole!=='owner')key='home';current=key;quick.hidden=!directory();
+  if(!staff())return;if(['clients','upload'].includes(key)&&!directory()||['income','maintenance','updates'].includes(key)&&voxiStaffRole!=='owner')key='home';current=key;quick.hidden=!directory();
   for(const section of new Set(Object.values(targets).filter(Boolean))){section.classList.toggle('voxi-admin-off',section!==targets[key]);section.querySelectorAll('audio,video').forEach(v=>v.pause());}
   if(targets[key])targets[key].classList.remove('hidden');overview.hidden=key!=='home';
-  for(const [name,b]of buttons){b.classList.toggle('active',name===key);if(name===key)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');b.hidden=['clients','upload'].includes(name)&&!directory()||['income','maintenance'].includes(name)&&voxiStaffRole!=='owner';}
+  for(const [name,b]of buttons){b.classList.toggle('active',name===key);if(name===key)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');b.hidden=['clients','upload'].includes(name)&&!directory()||['income','maintenance','updates'].includes(name)&&voxiStaffRole!=='owner';}
   if(key==='home')void summary();
  }
  window.voxiAdminShow=key=>show(route==='upload'&&key==='clients'?'upload':key==='users'?'clients':key);
@@ -75,9 +75,10 @@
   const allowed=staff();workspace.classList.toggle('hidden',!allowed);document.body.classList.toggle('voxi-admin-mode',allowed);gate.hidden=allowed;
   if(!allowed){openedFor=null;generation++;overview.replaceChildren();const checking=currentUser&&typeof voxiStaffRole!=='undefined'&&voxiStaffRole===null;gate.textContent=checking?'Проверяем доступ к рабочему кабинету…':currentUser?'Рабочий кабинет доступен только сотрудникам студии.':'Для входа в рабочий кабинет войдите через Google.';return;}
   if(openedFor===currentUser.id)return;openedFor=currentUser.id;
-  const key=['clients','upload'].includes(route)&&!directory()||['income','maintenance'].includes(route)&&voxiStaffRole!=='owner'?'home':route;show(key);
+  const key=['clients','upload'].includes(route)&&!directory()||['income','maintenance','updates'].includes(route)&&voxiStaffRole!=='owner'?'home':route;show(key);
   document.title='VOXi — '+(buttons.get(key)?.textContent||'Рабочий кабинет');
   if(['clients','upload'].includes(key))void window.voxiOpenClients?.(routeParams.get('q')||'');
+  else if(key==='updates')void window.voxiLoadStudioUpdates?.();
   else if(key==='income')void window.voxiLoadIncome?.();
   else if(key==='maintenance')void window.voxiLoadMaintenance?.();
   else if(key==='videos')by('videoModerationEntry')?.click();
