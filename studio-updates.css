@@ -15,3 +15,5 @@
 @media(max-width:600px){.voxi-studio-updates{margin:30px auto;padding:0 18px}.voxi-news-card{padding:20px}.voxi-news-card h3{font-size:23px}.voxi-offer-forms form{padding:16px}}
 @media(max-width:799px){html[data-voxi-admin] .voxi-admin-nav a:last-child:nth-child(even){grid-column:auto}}
 @media(min-width:800px){html[data-voxi-admin] #adminWorkspace:has(.voxi-admin-overview:not([hidden])) .voxi-admin-nav a:last-child:nth-child(3n+1){grid-column:1/-1}}
+
+.voxi-offer-forms{grid-template-columns:minmax(0,1fr);align-items:start}.voxi-offer-forms form[hidden]{display:none}.voxi-editor-tabs{display:flex!important;justify-content:flex-start!important;flex-wrap:wrap;gap:10px;margin:18px 0}.voxi-editor-tabs button{width:auto!important;min-height:44px;margin:0!important}.voxi-editor-tabs button[aria-pressed=true]{background:#c6a256!important;color:#17120d!important;border-color:#dfc384!important}.voxi-offer-forms .voxi-news-card{padding:18px}
