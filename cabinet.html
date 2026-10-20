@@ -72,7 +72,7 @@ footer{text-align:center;color:#82766d;font-size:10px;padding:36px 0 55px;letter
 <script src="/cabinet-songs.js?v=r2-1"></script>
 <link rel="stylesheet" href="/videos.css?v=20261019-videos1"/>
 <script src="/video-client.js?v=20261019-videos1"></script>
-<link rel="stylesheet" href="site-polish.css?v=6"><link rel="stylesheet" href="chat.css?v=ai2"></head><body><div id="cabinetGate">Проверяем вход через Google...</div><div id="cabinetLoadError"></div>
+<link rel="stylesheet" href="site-polish.css?v=6"><link rel="stylesheet" href="chat.css?v=ai2"><link rel="stylesheet" href="service-ui.css?v=1"></head><body><div id="cabinetGate">Проверяем вход через Google...</div><div id="cabinetLoadError"></div>
 <div class="noir" aria-hidden="true"></div>
 <!-- Icons with layered metallic gradients and embossed highlights. -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
@@ -120,12 +120,13 @@ let language='ru',activeTab=null;const modal=document.getElementById('panel');fu
 function showTab(tab,open=true){activeTab=tab;const t=dict[language];document.getElementById('modalTitle').textContent=t[tab];document.getElementById('modalDesc').textContent=t[tab+'Desc'];document.getElementById('empty').textContent=t['empty'+tab[0].toUpperCase()+tab.slice(1)];document.getElementById('modalNote').textContent=t.note;if(open)modal.showModal();if(typeof hydrateCabinetTab==="function")hydrateCabinetTab(tab)}
 document.querySelectorAll('[data-tab]').forEach(x=>x.addEventListener('click',()=>showTab(x.dataset.tab)));
 document.getElementById('ru').onclick=()=>{language='ru';render()};document.getElementById('kk').onclick=()=>{language='kk';render()};document.getElementById('dismiss').onclick=()=>modal.close();document.getElementById('done').onclick=()=>modal.close();modal.addEventListener('close',()=>activeTab=null);render();
-</script><script src="booking-client.js?v=1"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</script><script src="ready-notifications.js?v=1"></script><script src="legal-ui.js?v=1"></script><script src="booking-client.js?v=1"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 (function(){
   const URL="https://vnykpjarjvacwhxvkxrk.supabase.co", KEY="sb_publishable_Jv-1ip1CSRKe2_cCjcGjmA_B333H-oC";
   let client=null,clientInitError=null;
   try{client=window.supabase?.createClient(URL,KEY)}catch(error){clientInitError=error}
+  const readyBell=client?window.voxiCreateReadyBell({client,host:document.querySelector(".topnav"),open:()=>showTab("notifications")}):null;let initialTabHandled=false;
 
   window.voxiCabinetClient=client;
   let signedUser=null, myBookings=[], profileData=null, firstProfile=false;
@@ -167,7 +168,7 @@ document.getElementById('ru').onclick=()=>{language='ru';render()};document.getE
     return !!(name.first&&name.last&&normalizePhone(profile?.phone));
   }
   function openContactProfile(first){
-    if(!signedUser)return;firstProfile=!!first;
+    if(!signedUser)return;firstProfile=!!first;window.voxiResetPrivacy?.();
     const t=ct(),recent=myBookings.find(x=>x.client_name||x.phone);
     el("contactProfileTitle").textContent=first?t.title:t.edit;
     el("contactProfileInfo").textContent=first?t.intro:t.editInfo;
@@ -196,15 +197,16 @@ document.getElementById('ru').onclick=()=>{language='ru';render()};document.getE
   el("contactProfileForm").addEventListener("submit",async e=>{
     e.preventDefault();if(!signedUser||savingProfile||!client)return;
     const t=ct(),firstName=el("contactNameInput").value.trim().replace(/\s+/g," "),lastName=el("contactSurnameInput").value.trim().replace(/\s+/g," "),phone=normalizePhone(el("contactPhoneInput").value);
-    const name=firstName+" "+lastName;
+    const name=firstName+" "+lastName,profileActor=signedUser.id;
     const errorBox=el("contactProfileError");
     if(!firstName||!lastName){errorBox.textContent=t.badName;return}
     if(name.length>150){errorBox.textContent=t.longName;return}
     if(!phone){errorBox.textContent=t.badPhone;return}
     savingProfile=true;const save=el("contactSaveButton");save.disabled=true;save.textContent=t.loading;errorBox.textContent="";
     try{
-      const {data,error}=await client.from("voxi_profiles").upsert({user_id:signedUser.id,full_name:name,phone},{onConflict:"user_id"}).select("user_id,full_name,phone").single();
-      if(error)throw error;profileData=data;profileError=null;firstProfile=false;contactDialog.close();updateLoadErrors();
+      await window.voxiAcceptPrivacy(client);if(signedUser?.id!==profileActor)return;
+      const {data,error}=await client.from("voxi_profiles").upsert({user_id:profileActor,full_name:name,phone},{onConflict:"user_id"}).select("user_id,full_name,phone").single();
+      if(signedUser?.id!==profileActor)return;if(error)throw error;profileData=data;profileError=null;firstProfile=false;contactDialog.close();updateLoadErrors();
       const registrationParams=new URLSearchParams(window.location.search);
       if(registrationParams.get("registration")==="1"){
         if(registrationParams.get("next")==="booking"){
@@ -246,11 +248,7 @@ document.getElementById('ru').onclick=()=>{language='ru';render()};document.getE
         box.appendChild(card);
       });
     }else if(tab==="notifications"){
-      const n=nextBooking(),ready=myBookings.filter(b=>b.status==="Готово");
-      if(n)box.appendChild(make("p",(ru?"Следующая запись: ":"Келесі жазылу: ")+date(n.booking_date)+" · "+time(n.booking_time)));
-      ready.forEach(b=>box.appendChild(make("p",ru?"Заявка от "+date(b.booking_date)+" отмечена как готовая. Проверьте раздел «Мои песни».":date(b.booking_date)+" күнгі тапсырыс дайын. «Менің әндерім» бөлімін тексеріңіз.")));
-      if(!n&&!ready.length)box.appendChild(make("p",ru?"Новых уведомлений пока нет.":"Жаңа хабарлама жоқ."));
-      box.appendChild(make("small",ru?"Напоминания за день и за час до записи пока не подключены.":"Бір күн және бір сағат бұрын еске салу әзірге қосылмаған."));
+      const account=signedUser.id;void window.voxiLoadReadyNotifications({client,box,make,ru,isCurrent:()=>request===songLoadVersion&&signedUser?.id===account&&activeTab==="notifications",refresh:()=>window.hydrateCabinetTab("notifications"),onSongs:()=>showTab("songs"),onRead:()=>readyBell?.refresh()});
     }else if(tab==="profile"){
       box.appendChild(make("p",(ru?"Имя: ":"Аты: ")+(profileData?.full_name||signedUser.user_metadata?.full_name||signedUser.user_metadata?.name||"—")));
       box.appendChild(make("p","Email: "+(signedUser.email||"—")));
@@ -286,13 +284,13 @@ document.getElementById('ru').onclick=()=>{language='ru';render()};document.getE
       if(error)throw error;
       if(authRequest!==authGeneration)return;
       if(!data?.session?.user){
-        signedUser=null;myBookings=[];profileData=null;
+        signedUser=null;readyBell?.setUser(null);myBookings=[];profileData=null;
         const gate=el("cabinetGate");
         if(gate){gate.replaceChildren();gate.appendChild(make("span",language==="ru"?"Для доступа войдите через Google на ":"Google арқылы кіру үшін "));const link=make("a",language==="ru"?"главной странице VOXi":"VOXi басты бетіне өтіңіз");link.href="./";gate.appendChild(link);}
         if(activeTab)window.hydrateCabinetTab(activeTab);
         return;
       }
-      signedUser=data.session.user;el("cabinetGate")?.remove();
+      signedUser=data.session.user;readyBell?.setUser(signedUser.id);el("cabinetGate")?.remove();
       dataLoading=true;profileError=null;bookingsError=null;
       if(activeTab)window.hydrateCabinetTab(activeTab);
       const [profile,bookings]=await Promise.allSettled([
@@ -309,6 +307,7 @@ document.getElementById('ru').onclick=()=>{language='ru';render()};document.getE
       dataLoading=false;updateLoadErrors();updateSummary();
       if(activeTab)window.hydrateCabinetTab(activeTab);
       if(!profileError&&!completeProfile(profileData))openContactProfile(true);
+      else if(!profileError&&!initialTabHandled){initialTabHandled=true;const tab=new URLSearchParams(location.search).get("tab");if(["songs","notifications"].includes(tab))showTab(tab);}
     }catch(error){
       if(authRequest!==authGeneration)return;
       dataLoading=false;
@@ -318,7 +317,7 @@ document.getElementById('ru').onclick=()=>{language='ru';render()};document.getE
       if(activeTab)window.hydrateCabinetTab(activeTab);
     }finally{if(authRequest===authGeneration)initializing=false;}
   }
-  client?.auth.onAuthStateChange((event,session)=>{if(event==="SIGNED_OUT"||(signedUser&&session?.user?.id&&signedUser.id!==session.user.id)){authGeneration++;initializing=false;signedUser=null;myBookings=[];profileData=null;profileError=bookingsError=null;dataLoading=false;songLoadVersion++;videoLoadVersion++;contactDialog.close();el("panel").close();updateSummary();el("cabinetLoadError").textContent=language==="ru"?"Аккаунт изменился. Обновите страницу для входа.":"Аккаунт өзгерді. Кіру үшін бетті жаңартыңыз.";}});
+  client?.auth.onAuthStateChange((event,session)=>{if(event==="SIGNED_OUT"||(signedUser&&session?.user?.id&&signedUser.id!==session.user.id)){authGeneration++;initializing=false;signedUser=null;readyBell?.setUser(null);myBookings=[];profileData=null;profileError=bookingsError=null;dataLoading=false;songLoadVersion++;videoLoadVersion++;contactDialog.close();el("panel").close();updateSummary();el("cabinetLoadError").textContent=language==="ru"?"Аккаунт изменился. Обновите страницу для входа.":"Аккаунт өзгерді. Кіру үшін бетті жаңартыңыз.";}});
   updateSummary();init();
 })();
 </script><script src="chat.js?v=ai5"></script><script src="ui-language.js?v=9"></script></body></html>
