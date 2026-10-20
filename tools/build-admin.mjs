@@ -7,5 +7,5 @@ html=html.replace('<html lang="ru">','<html lang="ru" data-voxi-admin="true">')
  .replace('<title>VOXi — Recording Studio</title>','<title>VOXi — Рабочий кабинет</title>')
  .replace('<head>','<head><meta name="robots" content="noindex,nofollow">')
  .replace('<a class="brand" href="#"','<a class="brand" href="./"')
- .replace(/<script src="\/public-videos\.js[^>]*><\/script>\s*/,'');
+ .replace(/<script src="\/(?:public-videos|concert-loop)\.js[^>]*><\/script>\s*/g,'');
 await writeFile(new URL('admin.html',root),html);

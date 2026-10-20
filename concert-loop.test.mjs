@@ -1,0 +1,17 @@
+import test from 'node:test';import assert from 'node:assert/strict';import vm from 'node:vm';import {readFile} from 'node:fs/promises';
+const source=await readFile(new URL('./concert-loop.js',import.meta.url),'utf8');
+function fixture({reduced=false,saveData=false,api=true}={}){
+ const calls=[],listeners={},timers=new Map(),host={append(){},replaceChildren(){calls.push('clear');}},frame={};let options;
+ const player={getIframe:()=>frame,mute:()=>calls.push('mute'),setVolume:n=>calls.push(['volume',n]),playVideo:()=>calls.push('play'),pauseVideo:()=>calls.push('pause'),seekTo:n=>calls.push(['seek',n]),destroy:()=>calls.push('destroy')};
+ const ctx={window:{matchMedia:()=>({matches:reduced})},navigator:{connection:{saveData}},location:{origin:'https://voxxxi.github.io'},document:{hidden:false,head:{append(){}},createElement:()=>({}),addEventListener:(k,f)=>listeners[k]=f,removeEventListener:k=>delete listeners[k]},setTimeout:f=>{timers.set(1,f);return 1;},clearTimeout:id=>timers.delete(id),Promise};
+ if(api)ctx.window.YT={Player:function(m,o){options=o;return player;}};
+ vm.runInNewContext(source,ctx);let fallback=0;const states=[];const control=ctx.window.voxiCreateConcert({host,onFallback:()=>fallback++,onState:p=>states.push(p)});
+ return{ctx,calls,timers,control,player,frame,listeners,get options(){return options;},get fallback(){return fallback;}};
+}
+const tick=()=>new Promise(r=>setImmediate(r));
+test('official concert is muted before play and configured to loop the same video',async()=>{const f=fixture();await tick();const o=f.options;assert.equal(o.videoId,'zMNBglg7-Vg');assert.equal(o.playerVars.playlist,o.videoId);assert.equal(o.playerVars.loop,1);assert.equal(o.playerVars.controls,0);o.events.onReady({target:f.player});assert.deepEqual(f.calls.slice(0,3),['mute',['volume',0],'mute']);assert.equal(f.calls.at(-1),'play');assert.equal(f.frame.referrerPolicy,'strict-origin-when-cross-origin');o.events.onStateChange({data:0,target:f.player});assert.ok(f.calls.some(c=>Array.isArray(c)&&c[0]==='seek'&&c[1]===0));});
+for(const flag of ['reduced','saveData'])test(flag+' prevents autoplay but permits an explicit silent start',async()=>{const f=fixture({[flag]:true});await tick();f.options.events.onReady({target:f.player});assert.ok(!f.calls.includes('play'));f.control.toggle();assert.equal(f.calls.at(-1),'play');});
+test('manual pause is preserved across background/foreground changes',async()=>{const f=fixture();await tick();f.options.events.onReady({target:f.player});f.options.events.onStateChange({data:1,target:f.player});f.control.toggle();f.ctx.document.hidden=true;f.listeners.visibilitychange();const count=f.calls.length;f.ctx.document.hidden=false;f.listeners.visibilitychange();assert.equal(f.calls.length,count);});
+test('unavailable YouTube falls back once and destroys its frame',async()=>{const f=fixture();await tick();f.options.events.onError();f.options.events.onError();assert.equal(f.fallback,1);assert.ok(f.calls.includes('destroy'));assert.equal(f.timers.size,0);assert.equal(f.listeners.visibilitychange,undefined);});
+test('switching to client videos cancels pending YouTube initialization',async()=>{const f=fixture();f.control.destroy();await tick();assert.equal(f.options,undefined);assert.equal(f.fallback,0);assert.equal(f.timers.size,0);});
+test('blocked API loading has a bounded fallback',()=>{const f=fixture({api:false});f.timers.get(1)();assert.equal(f.fallback,1);});
