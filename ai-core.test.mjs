@@ -11,3 +11,15 @@ test('new studio policies remain accurate in reference mode in both languages',(
  assert.match(referenceAnswer('На английском языке можно?','ru'),/любом языке/);
  assert.match(referenceAnswer('Онлайн жазу бола ма?','kk'),/мүмкін емес/);
 });
+test('payment, included work, preparation and delivery match the owner rules',()=>{
+ assert.match(referenceAnswer('Нужна предоплата?','ru'),/по желанию/);
+ assert.match(referenceAnswer('Что входит в цену?','ru'),/исправления уже включены/);
+ assert.match(referenceAnswer('Нужна минусовка?','ru'),/предоставляет студия/);
+ assert.match(referenceAnswer('Без опыта можно?','ru'),/2–3 дня/);
+ assert.match(referenceAnswer('Опоздаю на запись','ru'),/хотя бы за пару часов/);
+ assert.match(referenceAnswer('Как получить песню?','ru'),/личном кабинете/);
+ assert.match(referenceAnswer('В субботу можно?','ru'),/календаре/);
+ assert.match(referenceAnswer('Минусовка керек пе?','kk'),/студия береді/);
+ assert.equal(operatorLanguage('Минусовка керек пе?'),'kk');
+ assert.match(referenceAnswer('Можно читать текст с телефона на записи?','ru'),/Читать текст с листа или телефона можно/);
+});
