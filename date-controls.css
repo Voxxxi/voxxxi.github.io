@@ -1,0 +1,13 @@
+.voxi-date-control{display:flex;align-items:stretch;gap:10px;margin:6px 0 10px}
+.voxi-date-control input[type=date]{flex:1 1 auto;min-width:0;min-height:50px;color-scheme:dark}
+.voxi-functional .voxi-date-control .voxi-calendar-open,.voxi-user-dialog .voxi-date-control .voxi-calendar-open{display:inline-flex;flex:0 0 auto;align-items:center;justify-content:center;gap:8px;margin:0;padding:12px 16px;min-height:50px;border:1px solid #d2ae6d;border-radius:9px;background:#d2ae6d;color:#17110a;font:600 14px Manrope,Arial,sans-serif;cursor:pointer}
+.voxi-calendar-open>span:first-child{font-size:25px;line-height:1}
+.voxi-calendar-open:focus-visible{outline:3px solid #f4d99e;outline-offset:3px}
+.voxi-date-control input::-webkit-calendar-picker-indicator{width:25px;height:25px;opacity:1;cursor:pointer}
+.voxi-retention-preview{color:#dec38f;line-height:1.5;margin:9px 0;font-size:13px}
+.voxi-retention-custom[hidden]{display:none!important}
+.voxi-user-dialog .voxi-date-control input{width:auto;max-width:none}
+@media(max-width:420px){.voxi-date-control{flex-wrap:wrap}.voxi-date-control input[type=date]{flex-basis:100%}.voxi-functional .voxi-date-control .voxi-calendar-open,.voxi-user-dialog .voxi-date-control .voxi-calendar-open{width:100%}}
+.voxi-directory-filters{display:flex;flex-wrap:wrap;gap:7px;margin:14px 0}.voxi-functional .voxi-directory-filters button{margin:0;min-height:42px}.voxi-directory-filters button.active{background:#d2ae6d;color:#17110a;border-color:#e6c58c}
+.voxi-income-controls{display:flex;gap:8px;align-items:center;margin:16px 0;flex-wrap:wrap}.voxi-functional .voxi-income-controls select{width:auto;min-width:100px}.voxi-functional .voxi-income-controls button{margin:0}
+.voxi-income-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:20px 0}.voxi-income-stat{border:1px solid #c8a45b60;border-radius:12px;padding:16px;background:#191613}.voxi-income-stat small,.voxi-income-stat strong{display:block}.voxi-income-stat strong{font-size:26px;color:#e7c88e;margin-top:8px}.voxi-income-song{font-size:13px;color:#cfc1ac}

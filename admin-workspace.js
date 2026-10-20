@@ -4,8 +4,8 @@
  const staff=()=>!!currentUser&&isAdmin(),directory=()=>['owner','admin'].includes(voxiStaffRole);
  const adminDocument=document.documentElement.hasAttribute('data-voxi-admin');
  const routeParams=new URLSearchParams(location.search),requested=routeParams.get('section')||'home';
- const routeKeys=['home','bookings','schedule','clients','upload','users','videos','backup'];
- const route=routeKeys.includes(requested)?requested:'home';
+ const routeKeys=['home','bookings','schedule','clients','upload','users','income','videos','backup'];
+ const route=requested==='users'?'clients':routeKeys.includes(requested)?requested:'home';
  const destination=key=>'./admin.html?section='+encodeURIComponent(key);
  if(!adminDocument){
   const oldOpen=openVOXiSection;openVOXiSection=async function(target){if(staff()&&['admin','cabinet'].includes(target)){location.assign(destination('home'));return;}return oldOpen(target);};
@@ -21,20 +21,20 @@
  const quick=el('form',undefined,'voxi-users-search'),quickInput=el('input'),quickSubmit=el('button','Найти клиента','secondary');quickInput.type='search';quickInput.placeholder='Имя или телефон клиента';quickInput.setAttribute('aria-label','Быстрый поиск клиента');quickSubmit.type='submit';quick.append(quickInput,quickSubmit);head.append(quick);quick.addEventListener('submit',e=>{e.preventDefault();if(directory())location.assign(destination('clients')+'&q='+encodeURIComponent(quickInput.value.trim()));});
  const overview=el('div',undefined,'voxi-admin-overview');workspace.append(head,nav,overview);main.prepend(workspace);
  let current='home',generation=0;
- const targets={home:null,bookings:bookingSection,schedule:by('schedulePanel'),clients:by('usersPanel'),upload:by('usersPanel'),users:by('usersPanel'),videos:by('videoModerationPanel'),backup:by('backupPanel')};
+ const targets={home:null,bookings:bookingSection,schedule:by('schedulePanel'),clients:by('usersPanel'),upload:by('usersPanel'),income:by('incomePanel'),videos:by('videoModerationPanel'),backup:by('backupPanel')};
  const buttons=new Map();
- for(const [key,label] of [['home','Обзор'],['bookings','Заявки'],['schedule','Моё расписание'],['clients','Клиенты'],['upload','Загрузить песню'],['users','Пользователи'],['videos','Видео на проверке'],['backup','Резервная копия']]){
+ for(const [key,label] of [['home','Обзор'],['bookings','Заявки'],['schedule','Моё расписание'],['clients','Клиенты'],['upload','Загрузить песню'],['income','Доходы'],['videos','Видео на проверке'],['backup','Резервная копия']]){
   const b=el('a',label,'secondary');b.href=destination(key);buttons.set(key,b);nav.append(b);
  }
  function show(key){
-  if(!staff())return;if(['clients','upload','users'].includes(key)&&!directory())key='home';current=key;quick.hidden=!directory();
+  if(!staff())return;if(['clients','upload'].includes(key)&&!directory()||key==='income'&&voxiStaffRole!=='owner')key='home';current=key;quick.hidden=!directory();
   for(const section of new Set(Object.values(targets).filter(Boolean))){section.classList.toggle('voxi-admin-off',section!==targets[key]);section.querySelectorAll('audio,video').forEach(v=>v.pause());}
   if(targets[key])targets[key].classList.remove('hidden');overview.hidden=key!=='home';
-  for(const [name,b]of buttons){b.classList.toggle('active',name===key);if(name===key)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');b.hidden=['clients','upload','users'].includes(name)&&!directory();}
+  for(const [name,b]of buttons){b.classList.toggle('active',name===key);if(name===key)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');b.hidden=['clients','upload'].includes(name)&&!directory()||name==='income'&&voxiStaffRole!=='owner';}
   if(key==='home')void summary();
  }
- window.voxiAdminShow=key=>show(route==='upload'&&key==='clients'?'upload':key);
- const dateShortcuts=el('div',undefined,'voxi-admin-date-shortcuts');for(const [offset,label]of [[0,'Сегодня'],[1,'Завтра']]){const b=el('button',label,'secondary');b.type='button';b.addEventListener('click',()=>{const d=new Date();d.setDate(d.getDate()+offset);by('scheduleDate').value=new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10);by('scheduleDate').dispatchEvent(new Event('change'));});dateShortcuts.append(b);}by('scheduleDate').after(dateShortcuts);
+ window.voxiAdminShow=key=>show(route==='upload'&&key==='clients'?'upload':key==='users'?'clients':key);
+ const dateShortcuts=el('div',undefined,'voxi-admin-date-shortcuts');for(const [offset,label]of [[0,'Сегодня'],[1,'Завтра']]){const b=el('button',label,'secondary');b.type='button';b.addEventListener('click',()=>{const d=new Date();d.setDate(d.getDate()+offset);by('scheduleDate').value=new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10);by('scheduleDate').dispatchEvent(new Event('change'));});dateShortcuts.append(b);}(by('scheduleDate').closest('.voxi-date-control')||by('scheduleDate')).after(dateShortcuts);
  const legacy=by('scheduleList'),legacyTitle=legacy.previousElementSibling,legacyWrap=el('details',undefined,'voxi-admin-legacy');legacy.before(legacyWrap);legacyWrap.append(el('summary','Старые интервалы расписания'));if(legacyTitle?.tagName==='H3'){legacyTitle.hidden=true;legacyWrap.append(legacyTitle);}legacyWrap.append(legacy);
  async function summary(){
   if(!staff())return;const actor=currentUser.id,request=++generation;overview.replaceChildren();
@@ -59,10 +59,10 @@
   const allowed=staff();workspace.classList.toggle('hidden',!allowed);document.body.classList.toggle('voxi-admin-mode',allowed);gate.hidden=allowed;
   if(!allowed){openedFor=null;generation++;overview.replaceChildren();const checking=currentUser&&typeof voxiStaffRole!=='undefined'&&voxiStaffRole===null;gate.textContent=checking?'Проверяем доступ к рабочему кабинету…':currentUser?'Рабочий кабинет доступен только сотрудникам студии.':'Для входа в рабочий кабинет войдите через Google.';return;}
   if(openedFor===currentUser.id)return;openedFor=currentUser.id;
-  const key=['clients','upload','users'].includes(route)&&!directory()?'home':route;show(key);
+  const key=['clients','upload'].includes(route)&&!directory()||route==='income'&&voxiStaffRole!=='owner'?'home':route;show(key);
   document.title='VOXi — '+(buttons.get(key)?.textContent||'Рабочий кабинет');
   if(['clients','upload'].includes(key))void window.voxiOpenClients?.(routeParams.get('q')||'');
-  else if(key==='users')by('usersEntry')?.click();
+  else if(key==='income')void window.voxiLoadIncome?.();
   else if(key==='videos')by('videoModerationEntry')?.click();
  }
  const originalSigned=setSignedIn;setSignedIn=function(user){originalSigned(user);syncRoute();};
