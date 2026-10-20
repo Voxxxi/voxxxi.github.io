@@ -9,10 +9,12 @@ with n as(insert into public.voxi_announcements(title_ru,body_ru,published,start
 with n as(insert into public.voxi_announcements(title_ru,body_ru,published,ends_at) values('Rollback draft','Hidden text',false,now()+interval '1 day') returning id) insert into updates_test_ids select 'draft',id from n;
 insert into public.voxi_slot_offers(booking_date,booking_time,percent,active,ends_at) values('2098-12-27','13:00',20,true,now()+interval '1 day');
 insert into public.voxi_schedule_slots(booking_date,booking_time,is_open) values('2098-12-27','13:00',true);
+insert into public.voxi_schedule_slots(booking_date,booking_time,is_open) values((now() at time zone 'Asia/Oral')::date+30,'03:00',true) on conflict(booking_date,booking_time) do update set is_open=true;
 grant select on updates_test_actor,updates_test_ids to anon,authenticated;
 set local role anon;
 do $$declare result jsonb;begin
  result:=public.voxi_studio_updates();
+ if jsonb_array_length(result->'slots')=0 then raise exception 'Anonymous free slots missing';end if;
  if not exists(select 1 from jsonb_array_elements(result->'announcements') n where n->>'id'=(select id::text from updates_test_ids where kind='live')) then raise exception 'Published announcement missing';end if;
  if exists(select 1 from jsonb_array_elements(result->'announcements') n where n->>'id' in(select id::text from updates_test_ids where kind in('draft','expired'))) then raise exception 'Draft or expired announcement exposed';end if;
  if exists(select 1 from jsonb_array_elements(result->'slots') s where s ? 'client_name' or s ? 'phone' or s ? 'user_id') then raise exception 'Private slot fields exposed';end if;
