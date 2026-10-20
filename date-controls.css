@@ -6,6 +6,8 @@
 .voxi-date-control input::-webkit-calendar-picker-indicator{width:25px;height:25px;opacity:1;cursor:pointer}
 .voxi-retention-preview{color:#dec38f;line-height:1.5;margin:9px 0;font-size:13px}
 .voxi-retention-custom[hidden]{display:none!important}
+.voxi-user-dialog label[hidden]{display:none!important}
+.voxi-user-dialog audio{color-scheme:dark;max-width:100%}
 .voxi-user-dialog .voxi-date-control input{width:auto;max-width:none}
 @media(max-width:420px){.voxi-date-control{flex-wrap:wrap}.voxi-date-control input[type=date]{flex-basis:100%}.voxi-functional .voxi-date-control .voxi-calendar-open,.voxi-user-dialog .voxi-date-control .voxi-calendar-open{width:100%}}
 .voxi-directory-filters{display:flex;flex-wrap:wrap;gap:7px;margin:14px 0}.voxi-functional .voxi-directory-filters button{margin:0;min-height:42px}.voxi-directory-filters button.active{background:#d2ae6d;color:#17110a;border-color:#e6c58c}

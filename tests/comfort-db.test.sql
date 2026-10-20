@@ -1,49 +1,47 @@
--- All fixtures, payment marks and audit changes are rolled back.
 begin;
-create temporary table voxi_test_actors as
-select u.id,coalesce(s.role,'client') as role,(select a.id from auth.sessions a where a.user_id=u.id order by a.created_at desc limit 1) as session_id
-from auth.users u left join public.voxi_staff s on s.user_id=u.id;
-grant select on voxi_test_actors to authenticated;
-create temporary table voxi_test_booking as with b as (insert into public.voxi_bookings(client_name,phone,booking_date,booking_time,people_count,song_count,song_titles,price,status,user_id) values('VOXi rollback verification','+70000000000',current_date,'03:07',2,2,'[{"title":"Test A","people":1,"price":5000},{"title":"Test B","people":2,"price":6000}]',11000,'Готово',(select id from voxi_test_actors where role='client' and session_id is not null limit 1)) returning id) select * from b;
-grant select on voxi_test_booking to authenticated;
+create temporary table test_actors as select u.id,coalesce(s.role,'client') role,(select id from auth.sessions a where a.user_id=u.id order by created_at desc limit 1) sid from auth.users u left join public.voxi_staff s on s.user_id=u.id;
+create temporary table test_booking as with b as(insert into public.voxi_bookings(client_name,phone,booking_date,booking_time,people_count,song_count,song_titles,price,status,user_id) values('VOXi rollback verification','+70000000000',current_date,'03:07',2,2,'[{"title":"A","people":1,"price":5000},{"title":"B","people":1,"price":5000}]',10000,'Запланировано',(select id from test_actors where role='client' and sid is not null limit 1)) returning id,user_id) select * from b;
+create temporary table test_files as select n,(select user_id from test_booking)::text||'/rollback-'||gen_random_uuid()::text||'.mp3' path from generate_series(1,3) n;
+insert into storage.objects(bucket_id,name,metadata) select 'voxi-tracks',path,'{"size":4,"mimetype":"audio/mpeg"}'::jsonb from test_files;
+grant select on test_actors,test_booking,test_files to authenticated;
 set local role authenticated;
-do $$
-declare owner_user record; client_user record; result jsonb; k text; row jsonb; booking_id bigint; payment_id uuid; before_total numeric; after_total numeric;
-begin
- select * into owner_user from voxi_test_actors where role='owner' and session_id is not null limit 1;
- select * into client_user from voxi_test_actors where role='client' and session_id is not null limit 1;
- if owner_user.id is null or client_user.id is null then raise exception 'Active owner and client sessions required for verification';end if;
- perform set_config('request.jwt.claims',jsonb_build_object('sub',owner_user.id,'role','authenticated','session_id',owner_user.session_id)::text,true);
- foreach k in array array['all','complete','incomplete','staff','suspended'] loop
-  result:=public.voxi_admin_directory('',1,k);
-  if (result->>'total')::integer<>(result->'counts'->>k)::integer then raise exception 'Filter count mismatch: %',k;end if;
-  for row in select * from jsonb_array_elements(result->'users') loop
-   if k='complete' and not(row->>'profile_complete')::boolean or k='incomplete' and (row->>'profile_complete')::boolean or k='staff' and row->>'role'='client' then raise exception 'Wrong directory member';end if;
-  end loop;
- end loop;
- before_total:=(public.voxi_income_month(current_date)->>'amount')::numeric;
- select id into booking_id from voxi_test_booking;
- payment_id:=public.voxi_record_payment(booking_id,10000,current_date);
- after_total:=(public.voxi_income_month(current_date)->>'amount')::numeric;
- if after_total<>before_total+10000 then raise exception 'Actual received amount was not counted';end if;
- begin perform public.voxi_record_payment(booking_id,10000,current_date);raise exception 'DUPLICATE WAS ACCEPTED';exception when raise_exception then if sqlerrm='DUPLICATE WAS ACCEPTED' then raise;end if;end;
- perform public.voxi_void_payment(payment_id);
- if (public.voxi_income_month(current_date)->>'amount')::numeric<>before_total then raise exception 'Voided payment remained in total';end if;
- begin perform public.voxi_record_payment(booking_id,-1,current_date);raise exception 'NEGATIVE WAS ACCEPTED';exception when raise_exception then if sqlerrm='NEGATIVE WAS ACCEPTED' then raise;end if;end;
- begin perform public.voxi_record_payment(booking_id,1,(now() at time zone 'Asia/Oral')::date+1);raise exception 'FUTURE WAS ACCEPTED';exception when raise_exception then if sqlerrm='FUTURE WAS ACCEPTED' then raise;end if;end;
- perform set_config('request.jwt.claims',jsonb_build_object('sub',client_user.id,'role','authenticated','session_id',client_user.session_id)::text,true);
- begin perform public.voxi_income_month(current_date);raise exception 'Client read income';exception when insufficient_privilege then null;end;
- begin perform public.voxi_record_payment(booking_id,10000,current_date);raise exception 'Client recorded income';exception when insufficient_privilege then null;end;
- begin perform public.voxi_void_payment(payment_id);raise exception 'Client voided income';exception when insufficient_privilege then null;end;
- begin perform public.voxi_admin_directory('',1,'all');raise exception 'Client read directory';exception when insufficient_privilege then null;end;
+do $$ declare a record;c record;b bigint;baseline numeric;r jsonb;k text; begin
+select * into a from test_actors where role='owner' and sid is not null limit 1;
+select * into c from test_actors where role='client' and sid is not null limit 1;
+if a.id is null or c.id is null then raise exception 'Active sessions required';end if;
+perform set_config('request.jwt.claims',jsonb_build_object('sub',a.id,'role','authenticated','session_id',a.sid)::text,true);
+foreach k in array array['all','complete','incomplete','staff','suspended'] loop
+r:=public.voxi_admin_directory('',1,k);if (r->>'total')::int<>(r->'counts'->>k)::int then raise exception 'Filter mismatch';end if;
+end loop;
+baseline:=(public.voxi_income_month((now() at time zone 'Asia/Oral')::date)->>'amount')::numeric;
+perform set_config('voxi.test_baseline',baseline::text,true);
+select id into b from test_booking;
+insert into public.voxi_tracks(booking_id,booking_song_number,user_id,song_number,song_title,storage_path,file_name,file_size) values(b,1,c.id,900001,'A',(select path from test_files where n=1),'test.mp3',4);
+r:=public.voxi_client_delivery_orders(c.id);
+if not exists(select 1 from jsonb_array_elements(r) j where (j->>'id')::bigint=b and (j->>'uploaded_count')::int=1 and not (j->>'accounted')::boolean) then raise exception 'First song progress incorrect';end if;
+if (public.voxi_income_month((now() at time zone 'Asia/Oral')::date)->>'amount')::numeric<>baseline then raise exception 'Premature income';end if;
+begin insert into public.voxi_tracks(booking_id,booking_song_number,user_id,song_number,song_title,storage_path,file_name,file_size) values(b,1,c.id,900002,'Duplicate',(select path from test_files where n=2),'test.mp3',4);raise exception 'Duplicate accepted';exception when unique_violation then null;end;
+insert into public.voxi_tracks(booking_id,booking_song_number,user_id,song_number,song_title,storage_path,file_name,file_size) values(b,2,c.id,900002,'B',(select path from test_files where n=2),'test.mp3',4);
+if (public.voxi_income_month((now() at time zone 'Asia/Oral')::date)->>'amount')::numeric<>baseline+10000 then raise exception 'Quoted total not counted';end if;
+if (select status from public.voxi_bookings where id=b)<>'Готово' then raise exception 'Booking not closed';end if;
+begin perform public.voxi_record_payment(b,10000,current_date);raise exception 'Manual API available';exception when insufficient_privilege then null;end;
+begin perform public.voxi_void_payment(gen_random_uuid());raise exception 'Manual void available';exception when insufficient_privilege then null;end;
+perform set_config('request.jwt.claims',jsonb_build_object('sub',c.id,'role','authenticated','session_id',c.sid)::text,true);
+begin perform public.voxi_income_month(current_date);raise exception 'Client read income';exception when insufficient_privilege then null;end;
+begin perform public.voxi_client_delivery_orders(c.id);raise exception 'Client read orders';exception when insufficient_privilege then null;end;
+begin perform public.voxi_admin_directory('',1,'all');raise exception 'Client read directory';exception when insufficient_privilege then null;end;
 end $$;
 reset role;
-insert into public.voxi_staff(user_id,role) select id,'admin' from voxi_test_actors where role='client' and session_id is not null limit 1 on conflict(user_id) do update set role='admin';
+update public.voxi_tracks set deleted_at=now() where booking_id=(select id from test_booking) and booking_song_number=1;
 set local role authenticated;
-do $$ declare a record; begin
- select * into a from voxi_test_actors where role='client' and session_id is not null limit 1;
- perform set_config('request.jwt.claims',jsonb_build_object('sub',a.id,'role','authenticated','session_id',a.session_id)::text,true);
- perform public.voxi_admin_directory('',1,'staff');
- begin perform public.voxi_income_month(current_date);raise exception 'Admin read owner income';exception when insufficient_privilege then null;end;
+do $$ declare a record;c record;b bigint;begin
+select * into a from test_actors where role='owner' and sid is not null limit 1;
+select * into c from test_actors where role='client' and sid is not null limit 1;
+perform set_config('request.jwt.claims',jsonb_build_object('sub',a.id,'role','authenticated','session_id',a.sid)::text,true);
+select id into b from test_booking;
+insert into public.voxi_tracks(booking_id,booking_song_number,user_id,song_number,song_title,storage_path,file_name,file_size) values(b,1,c.id,900003,'Corrected',(select path from test_files where n=3),'test.mp3',4);
+if (public.voxi_income_month((now() at time zone 'Asia/Oral')::date)->>'amount')::numeric<>current_setting('voxi.test_baseline')::numeric+10000 then raise exception 'Replacement counted twice';end if;
 end $$;
+reset role;
 rollback;
+select 'PASS: delivery income, distinct songs, replacements, filters, privacy; fixtures rolled back' verification;

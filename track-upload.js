@@ -13,10 +13,12 @@ async function voxiTrackFileInfo(file){
  if(!valid)throw Error('Содержимое файла не соответствует формату аудио.');
  return {extension,contentType:types[extension]};
 }
-async function voxiUploadPrivateTrack({client,userId,file,title,expiresAt=null,actorStillCurrent}){
+async function voxiUploadPrivateTrack({client,userId,file,title,expiresAt=null,bookingId=null,bookingSongNumber=null,actorStillCurrent}){
  const info=await voxiTrackFileInfo(file);
  title=String(title||'').trim();if(!title||title.length>200)throw Error('Укажите название песни длиной до 200 символов.');
  if(!/^[0-9a-f-]{36}$/i.test(userId))throw Error('Не выбран аккаунт клиента.');
+ if(bookingId!==null&&(!Number.isSafeInteger(bookingId)||bookingId<1))throw Error('Выберите корректную заявку клиента.');
+ if(bookingId!==null&&(!Number.isInteger(bookingSongNumber)||bookingSongNumber<1||bookingSongNumber>100)||bookingId===null&&bookingSongNumber!==null)throw Error('Выберите песню из заявки.');
  if(!actorStillCurrent())throw Error('Аккаунт изменился. Откройте загрузку заново.');
  const path=userId+'/'+crypto.randomUUID()+'.'+info.extension;
  const bucket=client.storage.from('voxi-tracks');let stored=false,metadataAttempted=false,insertRejected=false;
@@ -29,7 +31,7 @@ async function voxiUploadPrivateTrack({client,userId,file,title,expiresAt=null,a
   const songNumber=Number(latest.data?.[0]?.song_number||0)+1;
   if(!actorStillCurrent())throw Error('Аккаунт изменился во время загрузки.');
   metadataAttempted=true;
-  const result=await client.from('voxi_tracks').insert({user_id:userId,song_number:songNumber,song_title:title,storage_path:path,file_name:file.name.slice(0,255),file_size:file.size,expires_at:expiresAt});
+  const result=await client.from('voxi_tracks').insert({user_id:userId,booking_id:bookingId,booking_song_number:bookingSongNumber,song_number:songNumber,song_title:title,storage_path:path,file_name:file.name.slice(0,255),file_size:file.size,expires_at:expiresAt});
   if(result.error){insertRejected=/^[0-9A-Z]{5}$/.test(result.error.code||'');throw result.error;}
   return {path,title};
  }catch(error){
