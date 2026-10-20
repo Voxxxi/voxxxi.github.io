@@ -14,4 +14,5 @@ test('calendar ignores a late response for the old date and after account change
  vm.createContext(ctx);vm.runInContext('let availableGeneration=0;'+fn,ctx);
  const first=ctx.loadAvailableTimes();date.value='2098-01-02';const second=ctx.loadAvailableTimes();pending[1]({data:[{booking_time:'16:00'}]});await second;pending[0]({data:[{booking_time:'10:00'}]});await first;assert.equal(time.options[1].value,'16:00');
  const third=ctx.loadAvailableTimes();ctx.currentUser={id:'two'};pending[2]({data:[{booking_time:'12:00'}]});await third;assert.equal(time.options.length,0);
+ ctx.currentUser={id:'one'};date.value='2020-01-01';const past=ctx.loadAvailableTimes();pending[3]({data:[{booking_time:'12:00'}]});await past;assert.equal(time.options.length,1);assert.equal(time.disabled,true);
 });
