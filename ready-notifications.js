@@ -31,7 +31,7 @@
     if(!item.read_at){const read=make('button',ru?'Прочитано':'Оқылды','cabinetExit');read.type='button';read.addEventListener('click',async()=>{if(!isCurrent())return;read.disabled=true;try{const {error}=await bounded(client.rpc('voxi_read_ready_notification',{p_track:item.track_id}));if(!isCurrent())return;if(error)throw error;onRead?.();refresh();}catch{if(isCurrent()){read.disabled=false;card.append(make('p',ru?'Не удалось отметить. Повторите попытку.':'Белгілеу мүмкін болмады. Қайта көріңіз.'));}}});card.append(read);}
     box.append(card);
    }
-   box.append(make('small',ru?'Показаны последние 50 уведомлений о доступных песнях. Внешние push-уведомления не подключены.':'Қолжетімді әндер туралы соңғы 50 хабарлама көрсетілген. Сыртқы push-хабарламалар қосылмаған.'));
+   box.append(make('small',ru?'Показаны последние 50 уведомлений о доступных песнях. Проверяйте готовность в кабинете.':'Қолжетімді әндер туралы соңғы 50 хабарлама көрсетілген. Дайындықты кабинеттен тексеріңіз.'));
   }catch{if(isCurrent()){box.replaceChildren();box.append(make('p',ru?'Не удалось загрузить уведомления. Обновите список.':'Хабарламалар жүктелмеді. Тізімді жаңартыңыз.'));}}
   if(isCurrent()){const retry=make('button',ru?'Обновить уведомления':'Хабарламаларды жаңарту','cabinetExit');retry.type='button';retry.addEventListener('click',refresh);box.append(retry);}
  };
