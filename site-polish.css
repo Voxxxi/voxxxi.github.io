@@ -2,6 +2,8 @@
 .brand-big i::after{display:none!important}
 .brand-dot{display:none!important}
 body{padding-bottom:80px}
+@media(min-width:800px){html[data-voxi-admin] #adminWorkspace:has(.voxi-admin-overview:not([hidden])) .voxi-admin-nav{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:799px){html[data-voxi-admin] .voxi-admin-nav a:last-child{grid-column:1/-1}}
 .voxi-directory-filters{justify-content:flex-start!important}
 .voxi-portfolio-nav{display:flex;align-items:center;justify-content:center;gap:18px;margin-top:15px}
 .voxi-portfolio-nav[hidden]{display:none}
