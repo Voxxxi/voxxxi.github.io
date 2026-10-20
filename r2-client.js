@@ -1,6 +1,8 @@
 // Keys stay in Edge Function secrets. No direct R2 write URL is issued.
 window.voxiR2Call=async function(client,body,uploadId){
- const {data,error}=await client.functions.invoke('voxi-r2',{body,headers:uploadId?{'x-voxi-upload':uploadId}:undefined});
+ let timer,result;
+ try{result=await Promise.race([client.functions.invoke('voxi-r2',{body,headers:uploadId?{'x-voxi-upload':uploadId}:undefined}),new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('Нет ответа R2. Проверьте список песен перед повторной загрузкой.')),uploadId?120000:30000);})]);}finally{clearTimeout(timer);}
+ const {data,error}=result;
  if(error||data?.error)throw Error(data?.error||'Не удалось выполнить действие в R2. Проверьте список песен перед повторной загрузкой.');
  return data;
 };
