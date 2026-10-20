@@ -1,7 +1,7 @@
 (()=>{
  const by=id=>document.getElementById(id),ru=()=>document.documentElement.lang!=='kk';
  const say=(r,k)=>ru()?r:k;
- let clientRequest=0,adminRequest=0,ready=false,closed=false,stateDate='',saving=false;
+ let clientRequest=0,adminRequest=0,ready=false,closed=false,stateDate='',saving=false,adminError=false;
  const panel=by('schedulePanel'),date=by('scheduleDate'),status=document.createElement('p'),toggle=document.createElement('button');
  status.id='scheduleDayStatus';status.className='notice';status.setAttribute('role','status');
  toggle.id='dayOffButton';toggle.type='button';toggle.className='secondary full';toggle.disabled=true;
@@ -27,17 +27,17 @@
  };
  function paint(){
   toggle.textContent=closed?say('Сделать рабочим днём','Жұмыс күні ету'):say('Нерабочий день','Демалыс күні');toggle.setAttribute('aria-pressed',String(closed));toggle.disabled=saving||!ready||!date?.value||!isAdmin();
-  status.textContent=!date?.value?say('Сначала выберите дату.','Алдымен күнді таңдаңыз.'):!ready?say('Проверяем статус дня…','Күннің күйі тексерілуде…'):closed?say('Нерабочий день — клиентам запись недоступна. Существующие записи сохранены.','Демалыс күні — клиенттер жазыла алмайды. Бұрынғы жазылулар сақталады.'):say('Рабочий день. Откройте часы, в которые готовы принимать клиентов.','Жұмыс күні. Клиенттерді қабылдайтын уақытты ашыңыз.');
+  status.textContent=!date?.value?say('Сначала выберите дату.','Алдымен күнді таңдаңыз.'):!ready?(adminError?say('Не удалось проверить статус дня. Выберите дату ещё раз.','Күннің күйін тексеру мүмкін болмады. Күнді қайта таңдаңыз.'):say('Проверяем статус дня…','Күннің күйі тексерілуде…')):closed?say('Нерабочий день — клиентам запись недоступна. Существующие записи сохранены.','Демалыс күні — клиенттер жазыла алмайды. Бұрынғы жазылулар сақталады.'):say('Рабочий день. Откройте часы, в которые готовы принимать клиентов.','Жұмыс күні. Клиенттерді қабылдайтын уақытты ашыңыз.');
   if(!ready||closed||saving){for(const id of ['scheduleChoices','scheduleList'])by(id)?.querySelectorAll('button,input[type="checkbox"]').forEach(n=>n.disabled=true);}
   if(by('openSlotsButton'))by('openSlotsButton').disabled=!ready||closed||saving;
  }
  const originalRender=renderScheduleChoices;
  renderScheduleChoices=function(){originalRender();paint();};
  async function loadDay(){
-  const day=date?.value,actor=currentUser?.id,request=++adminRequest;ready=false;closed=false;stateDate=day;paint();
+  const day=date?.value,actor=currentUser?.id,request=++adminRequest;ready=false;closed=false;adminError=false;stateDate=day;paint();
   if(!day||!isAdmin())return;
   try{const result=await read(day);if(request!==adminRequest||currentUser?.id!==actor||date.value!==day||!isAdmin())return;if(result.error)throw result.error;closed=!!result.data?.is_closed;ready=true;renderScheduleChoices();paint();}
-  catch{if(request===adminRequest&&currentUser?.id===actor&&date.value===day){status.textContent=say('Не удалось проверить статус дня. Выберите дату ещё раз.','Күннің күйін тексеру мүмкін болмады. Күнді қайта таңдаңыз.');}}
+  catch{if(request===adminRequest&&currentUser?.id===actor&&date.value===day){adminError=true;paint();}}
  }
  const originalSchedule=loadScheduleSlots;
  loadScheduleSlots=async function(){await Promise.all([loadDay(),originalSchedule()]);paint();};
