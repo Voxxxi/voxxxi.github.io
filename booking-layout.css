@@ -11,3 +11,4 @@ html[data-voxi-home] #bookingPanel .booking-panel-heading h2{font:500 26px/1.2 '
 html[data-voxi-home] #bookingPanel #closeBookingButton{width:auto;min-height:34px;padding:7px 10px;font-size:11px;flex:none}
 @media(max-width:600px){html[data-voxi-home] #bookingPanel .booking-panel-heading h2{font-size:23px}.voxi-booking-compact input[type=date]::-webkit-datetime-edit{font-size:12px}.voxi-booking-compact input[type=date]::-webkit-calendar-picker-indicator{width:17px;height:17px}}
 
+.voxi-booking-compact .voxi-price-disclaimer{grid-column:1/-1;margin:10px 0 0;padding:12px 14px;border-left:3px solid #e1b866;border-radius:5px;background:#c99c3620;color:#f0dfbd;font:400 13px/1.65 Manrope,Arial,sans-serif}.voxi-price-disclaimer strong{display:block;margin-bottom:3px;color:#ffe1a1;font-weight:700}
