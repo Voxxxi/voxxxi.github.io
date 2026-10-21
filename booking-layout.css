@@ -37,3 +37,12 @@ html[data-voxi-home] #bookingPanel #closeBookingButton{width:auto;min-height:34p
  .voxi-booking-compact #submitButton{min-height:42px;font-size:13px}
  .voxi-booking-compact .voxi-preparation{margin-top:10px;padding:10px}
 }
+
+.voxi-booking-compact .song-card[hidden],.voxi-song-tabs[hidden]{display:none!important}
+.voxi-song-tabs{display:flex;gap:6px;overflow-x:auto;margin:8px 0 4px;padding:2px 0 5px;max-width:100%;scrollbar-width:thin}
+.voxi-booking-compact .voxi-song-tabs button{flex:0 0 auto;min-height:36px;margin:0;padding:7px 13px;border:1px solid #b999604a;border-radius:8px;background:#191715;color:#ccbfa8;font:500 12px/1.4 Manrope,Arial,sans-serif;box-shadow:none}
+.voxi-booking-compact .voxi-song-tabs button[aria-selected=true]{background:#d7b879;color:#19150f;border-color:#e1bd78}
+.voxi-booking-compact .voxi-song-tabs button:focus-visible{outline:2px solid #ffe1a1;outline-offset:2px}
+.voxi-booking-compact .voxi-booking-field input{width:100%;min-width:0;box-sizing:border-box}
+@media(max-width:600px){.voxi-booking-contacts{grid-template-columns:1fr;gap:7px}.voxi-booking-compact .voxi-booking-contacts input{padding:8px 10px;font-size:16px!important}.voxi-booking-compact .voxi-booking-contacts label{min-height:0}}
+@media(prefers-reduced-motion:no-preference){.voxi-booking-compact .song-card:not([hidden]){animation:voxiSongReveal .18s ease-out}@keyframes voxiSongReveal{from{opacity:.4;transform:translateX(8px)}to{opacity:1;transform:translateX(0)}}}
