@@ -4,7 +4,7 @@
  const staff=()=>!!currentUser&&isAdmin(),directory=()=>['owner','admin'].includes(voxiStaffRole);
  const adminDocument=document.documentElement.hasAttribute('data-voxi-admin');
  const routeParams=new URLSearchParams(location.search),requested=routeParams.get('section')||'home';
- const routeKeys=['home','bookings','schedule','clients','upload','users','income','maintenance','updates','statistics','videos','backup'];
+ const routeKeys=['home','bookings','schedule','clients','upload','users','income','maintenance','updates','statistics','videos','backup','audio'];
  const route=requested==='users'?'clients':routeKeys.includes(requested)?requested:'home';
  const destination=key=>'./admin.html?section='+encodeURIComponent(key);
  if(!adminDocument){
@@ -37,9 +37,9 @@
  (bookingFilter.value==='all'||bookingFilter.value==='today'&&b.booking_date===day||bookingFilter.value==='upcoming'&&b.booking_date>=day&&!['Отменено','Готово'].includes(b.status)||bookingFilter.value==='done'&&b.status==='Готово'||bookingFilter.value==='cancelled'&&b.status==='Отменено'));};
 
  let current='home',generation=0;
- const targets={home:null,bookings:bookingSection,schedule:by('schedulePanel'),clients:by('usersPanel'),upload:by('usersPanel'),income:by('incomePanel'),maintenance:by('maintenancePanel'),updates:by('studioUpdatesPanel'),statistics:by('statisticsPanel'),videos:by('videoModerationPanel'),backup:by('backupPanel')};
+ const targets={home:null,bookings:bookingSection,schedule:by('schedulePanel'),clients:by('usersPanel'),upload:by('usersPanel'),income:by('incomePanel'),maintenance:by('maintenancePanel'),updates:by('studioUpdatesPanel'),statistics:by('statisticsPanel'),videos:by('videoModerationPanel'),backup:by('backupPanel'),audio:by('audioToolsPanel')};
  const buttons=new Map();
- for(const [key,label] of [['home','Обзор'],['bookings','Заявки'],['schedule','Моё расписание'],['clients','Клиенты'],['upload','Загрузить песню'],['updates','Объявления и акции'],['statistics','Статистика'],['income','Доходы'],['maintenance','Состояние сайта'],['videos','Видео на проверке'],['backup','Резервная копия']]){
+ for(const [key,label] of [['home','Обзор'],['bookings','Заявки'],['schedule','Моё расписание'],['audio','Аудиомастерская'],['clients','Клиенты'],['upload','Загрузить песню'],['updates','Объявления и акции'],['statistics','Статистика'],['income','Доходы'],['maintenance','Состояние сайта'],['videos','Видео на проверке'],['backup','Резервная копия']]){
   const b=el('a',label,'secondary');b.href=destination(key);buttons.set(key,b);nav.append(b);
  }
  function show(key){
