@@ -7,15 +7,15 @@ class El{
 }
 const tick=()=>new Promise(setImmediate);
 async function fixture({user={id:'a'},allowed=true,tracks=[],download}={}){
- const audio=new El(),play=new El(),root=new El();root.name=new El();const calls=[],revoked=[];let authChange;
+ const audio=new El(),play=new El(),root=new El();root.name=new El();const calls=[],revoked=[],documentEvents={};let authChange;
  const client={rpc:async name=>{calls.push(name);return {data:name==='voxi_listening_allowed'?allowed:tracks};},
  storage:{from:bucket=>({download:async path=>{calls.push({bucket,path});return download?download(path):{data:{audio:true}};}})},
  auth:{getSession:async()=>({data:{session:user?{user}:null}}),onAuthStateChange:f=>authChange=f}};
  class Url extends URL{};Url.createObjectURL=()=> 'blob:test';Url.revokeObjectURL=x=>revoked.push(x);
  const ctx={URL:Url,setTimeout,location:{assign:x=>calls.push(x)},window:{addEventListener(){}},supabaseClient:client,startGoogleLogin:()=>calls.push('login'),
- document:{hidden:false,documentElement:{lang:'ru'},getElementById:id=>id==='audio'?audio:play,querySelector:()=>root,createElement:()=>new El(),addEventListener(){}},MutationObserver:class{observe(){}}};
+ document:{hidden:false,documentElement:{lang:'ru'},getElementById:id=>id==='audio'?audio:play,querySelector:()=>root,createElement:()=>new El(),addEventListener:(name,fn)=>documentEvents[name]=fn},MutationObserver:class{observe(){}}};
  vm.createContext(ctx);vm.runInContext(source,ctx);await tick();await tick();
- return {audio,play,root,nav:root.children[0],status:root.children[1],login:root.children[2],calls,revoked,change:authChange};
+ return {audio,play,root,nav:root.children[0],status:root.children[1],login:root.children[2],calls,revoked,change:authChange,documentEvents};
 }
 test('guest is invited to sign in and receives neither playlist nor audio',async()=>{
  const f=await fixture({user:null});assert.equal(f.calls.length,0);assert.match(f.status.textContent,/регистрации/);assert.equal(f.nav.hidden,true);
@@ -42,5 +42,9 @@ test('random playlist cycles once through each track without immediately repeati
 });
 test('empty private portfolio stays honest and never requests demo audio',async()=>{
  const f=await fixture();assert.match(f.status.textContent,/скоро/);assert.equal(f.play.disabled,true);assert.equal(f.nav.hidden,true);assert.equal(f.audio.src,undefined);
+});
+test('returning to the page rechecks access without resetting an active song',async()=>{
+ const f=await fixture({tracks:[{id:'1',title:'Запись 1',path:'track-01.mp3'}]});await f.play.onclick();f.audio.currentTime=42;
+ f.documentEvents.visibilitychange();await tick();await tick();assert.equal(f.audio.src,'blob:test');assert.equal(f.audio.paused,false);assert.equal(f.audio.currentTime,42);assert.equal(f.revoked.length,0);
 });
 

@@ -32,6 +32,10 @@ header nav button:focus-visible{outline:2px solid #f1ce8c;outline-offset:4px}
 #adminBookingsSection .voxi-users-search{display:grid;grid-template-columns:minmax(0,1fr) minmax(150px,.5fr) auto;gap:10px;align-items:center;margin-bottom:18px}#adminBookingsSection .voxi-users-search>*{width:100%;margin:0;min-height:44px;min-width:0}@media(max-width:650px){#adminBookingsSection .voxi-users-search{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}#adminBookingsSection .voxi-users-search input{grid-column:1/-1}}
 
 /* Readable messages and consistent keyboard focus, including the client cabinet. */
+#portfolio .bars.live-wave i{animation:none!important;transform:none!important;transition:height 75ms ease-out,filter 100ms ease-out;filter:brightness(var(--wave-light,1))}
+#portfolio.voxi-sounding .play{box-shadow:0 0 0 8px #c6893e22,0 0 38px #f8ac4888!important}
+#portfolio .bars:not(.playing) i{animation-play-state:paused!important}
+@media(prefers-reduced-motion:reduce){#portfolio .bars i{animation:none!important;transition:none!important}#portfolio.voxi-sounding .play{box-shadow:none!important}}
 .voxi-portfolio-login{display:block;margin:12px auto 0;min-height:44px;max-width:100%;padding:10px 18px;border:1px solid #b99159;border-radius:24px;background:#211a14;color:#f0d49f;font:600 13px/1.5 Manrope,Arial,sans-serif;cursor:pointer}
 .voxi-portfolio-login[hidden],.voxi-registration-badge[hidden],.voxi-registration-list[hidden]{display:none!important}
 .voxi-registration-badge.has-unread{border-color:#f1ce8c!important;background:#48331f!important}
