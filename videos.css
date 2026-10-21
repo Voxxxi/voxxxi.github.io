@@ -12,3 +12,7 @@
 @media(max-width:560px){.voxi-video-player{padding:0;margin-bottom:30px}.voxi-video-player .voxi-video-head h2{font-size:25px}.voxi-video-player button{padding:8px 12px}}
 .voxi-concert-source[hidden]{display:none!important}
 
+/* The studio portrait blends into the page; client videos retain a visible frame. */
+.voxi-video-player .voxi-concert{border:0;border-radius:0;background:transparent;box-shadow:none;overflow:visible}
+.voxi-video-player .voxi-concert video{border:0;border-radius:0;background:transparent;object-fit:contain;mask-image:radial-gradient(ellipse 65% 74% at 50% 48%,#000 53%,transparent 100%);-webkit-mask-image:radial-gradient(ellipse 65% 74% at 50% 48%,#000 53%,transparent 100%)}
+.voxi-video-player--client>video{border:1px solid #c59b6670;border-radius:10px;background:#050505;box-shadow:0 12px 32px #0005}

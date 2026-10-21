@@ -6,8 +6,8 @@
   let wantsPlay=autoplay;
   const video=document.createElement('video');
   video.muted=true;video.defaultMuted=true;video.volume=0;video.loop=true;video.playsInline=true;video.controls=false;
-  video.setAttribute('muted','');video.setAttribute('playsinline','');video.setAttribute('aria-label','Лесная река · фоновое видео без звука');
-  video.preload=autoplay?'metadata':'none';video.autoplay=autoplay;video.poster='media/forest-river.jpg';video.src='media/forest-river.mp4';
+  video.setAttribute('muted','');video.setAttribute('playsinline','');video.setAttribute('aria-label','Певица VOXi · студийное видео без звука');
+  video.preload=autoplay?'metadata':'none';video.autoplay=autoplay;video.poster='media/singer-poster.jpg';video.src='media/singer-loop.mp4';
   host.append(video);
   const timer=setTimeout(()=>{if(active&&video.readyState<2)fail();},25000);
   function fail(){if(!active)return;stop();onFallback();}
@@ -26,4 +26,3 @@
   return {destroy:stop,toggle(){if(playing||wantsPlay){manuallyPaused=true;wantsPlay=false;video.pause();playing=false;onState(false);}else play();}};
  };
 })();
-

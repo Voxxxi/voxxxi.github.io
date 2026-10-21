@@ -1,3 +1,10 @@
+## 2026-10-21: обработанные песни и локальный ролик девушки
+- Владелец одобрил естественную обработку всех 10 песен. Загружены Recording-01-natural.mp3 ... Recording-10-natural.mp3 в приватный voxi-portfolio; portfolio_tracks переключены на эти файлы. Размеры проверены, названия Запись 1–10, bucket private. Исходные track-*.mp3 сохранены как резерв.
+- Runway оказался недоступен без оплаты; владелец разрешил бесплатную локальную генерацию на RTX 4060 Ti 8GB. Установлен отдельный ComfyUI в new-chat/work/voxi-video, Python venv, Wan2.2 TI2V5B + fp8 UMT5 + VAE; SHA256 всех моделей проверены.
+- Из точного существующего фона девушки с красными губами создан 81-кадровый ролик (seed850021,640x448,20steps). Итог media/singer-loop.mp4 H264800x45016fps30.1875sec2.54MB без аудио, мягкий циклический переход, media/singer-poster.jpg. Генерация локальная, для просмотра внешние API не нужны.
+- Ролик заменяет реку, сохраняет размер680px, без рамки/скруглений, с radial mask по краям. Клиентским видео добавлена тонкая золотистая рамка. Native muted loop playsinline, reduced motion/saveData и ручная пауза сохранены.
+- Локальные копии и экспорт: C:/Users/user/Documents/Codex/2026-10-21/new-chat/outputs/VOXi-singer-loop.mp4 и VOXi-singer-poster.jpg. Все197тестов пройдены. Реальный деплой ещё проверить после этого коммита.
+
 ## 21 октября 2026 — подтверждённый итог и новая идея видеоролика
 
 5474728 / Pages39564596754success: самохостинг forest-river.mp4 подтверждён в живом браузере:duration60.041667,mutedtrue,pausedfalse,looptrue,currentTimeрастёт,YouTubeiframe0,консольбезошибок. Музыкаостаётсянапаузе. Видеоблок компактный680px,безвнешнейрамки/карточки. Screenshot outputs/VOXi-ambient-final.png.
