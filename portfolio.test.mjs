@@ -7,15 +7,15 @@ class El{
 }
 const tick=()=>new Promise(setImmediate);
 async function fixture({user={id:'a'},allowed=true,tracks=[],download}={}){
- const audio=new El(),play=new El(),root=new El();root.name=new El();const calls=[],revoked=[],documentEvents={};let authChange;
+ const audio=new El(),play=new El(),root=new El();root.name=new El();const calls=[],revoked=[],documentEvents={};let authChange,languageChange;
  const client={rpc:async name=>{calls.push(name);return {data:name==='voxi_listening_allowed'?allowed:tracks};},
  storage:{from:bucket=>({download:async path=>{calls.push({bucket,path});return download?download(path):{data:{audio:true}};}})},
  auth:{getSession:async()=>({data:{session:user?{user}:null}}),onAuthStateChange:f=>authChange=f}};
  class Url extends URL{};Url.createObjectURL=()=> 'blob:test';Url.revokeObjectURL=x=>revoked.push(x);
  const ctx={URL:Url,setTimeout,location:{assign:x=>calls.push(x)},window:{addEventListener(){}},supabaseClient:client,startGoogleLogin:()=>calls.push('login'),
- document:{hidden:false,documentElement:{lang:'ru'},getElementById:id=>id==='audio'?audio:play,querySelector:()=>root,createElement:()=>new El(),addEventListener:(name,fn)=>documentEvents[name]=fn},MutationObserver:class{observe(){}}};
+ document:{hidden:false,documentElement:{lang:'ru'},getElementById:id=>id==='audio'?audio:play,querySelector:()=>root,createElement:()=>new El(),addEventListener:(name,fn)=>documentEvents[name]=fn},MutationObserver:class{constructor(fn){languageChange=fn;}observe(){}}};
  vm.createContext(ctx);vm.runInContext(source,ctx);await tick();await tick();
- return {audio,play,root,nav:root.children[0],status:root.children[1],login:root.children[2],calls,revoked,change:authChange,documentEvents};
+ return {audio,play,root,nav:root.children[0],status:root.children[1],login:root.children[2],calls,revoked,change:authChange,documentEvents,language(lang){ctx.document.documentElement.lang=lang;languageChange();}};
 }
 test('guest is invited to sign in and receives neither playlist nor audio',async()=>{
  const f=await fixture({user:null});assert.equal(f.calls.length,0);assert.match(f.status.textContent,/регистрации/);assert.equal(f.nav.hidden,true);
@@ -53,4 +53,10 @@ test('a failed audio transfer leaves playback and track navigation available for
  const f=await fixture({tracks:['a','b'].map(id=>({id,title:id,path:id+'.mp3'})),download:async()=>++attempts===1?{error:new Error('offline')}:{data:{audio:true}}});
  await f.play.onclick();assert.match(f.status.textContent,/Не удалось/);assert.equal(f.play.disabled,false);assert.equal(f.nav.children[0].disabled,false);assert.equal(f.nav.children[2].disabled,false);
  await f.play.onclick();assert.equal(attempts,2);assert.equal(f.audio.plays,1);assert.equal(f.play.disabled,false);
+});
+
+test('playlist status and transfer errors follow a language switch without starting audio',async()=>{
+ const f=await fixture({tracks:[{id:'1',title:'Запись 1',path:'a.mp3'}],download:async()=>({error:Error('offline')})});
+ f.language('kk');assert.match(f.status.textContent,/Кездейсоқ/);assert.equal(f.root.name.textContent,'Жазба 1');assert.equal(f.audio.plays,0);
+ await f.play.onclick();assert.match(f.status.textContent,/ойнатылмады/);f.language('ru');assert.match(f.status.textContent,/Не удалось/);assert.equal(f.play.disabled,false);
 });

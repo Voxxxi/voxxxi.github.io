@@ -7,7 +7,7 @@
  const name=root.querySelector('.track-name'),nav=document.createElement('div'),status=document.createElement('p'),login=document.createElement('button');
  nav.className='voxi-portfolio-nav';status.className='voxi-portfolio-status';status.setAttribute('role','status');login.className='voxi-portfolio-login';login.type='button';
  const prev=document.createElement('button'),next=document.createElement('button'),position=document.createElement('span');prev.type=next.type='button';nav.append(prev,position,next);root.append(nav,status,login);
- let actor=null,tracks=[],queue=[],index=0,generation=0,refreshGeneration=0,downloadGeneration=0,state='checking',objectURL=null,pending=false;
+ let actor=null,tracks=[],queue=[],index=0,generation=0,refreshGeneration=0,downloadGeneration=0,state='checking',objectURL=null,pending=false,playbackMessage='order';
  const ru=()=>document.documentElement.lang!=='kk',text=(r,k)=>ru()?r:k;
  const shuffled=items=>{const a=[...items];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
  function release(){downloadGeneration++;audio.pause();audio.removeAttribute('src');audio.preload='none';audio.load();if(objectURL)URL.revokeObjectURL(objectURL);objectURL=null;pending=false;}
@@ -23,8 +23,9 @@
   else if(state==='profile')status.textContent=text('Заполните имя, фамилию и телефон в профиле, чтобы слушать работы студии.','Студия жұмыстарын тыңдау үшін профильде атыңызды, тегіңізді және телефоныңызды толтырыңыз.');
   else if(state==='error')status.textContent=text('Не удалось проверить доступ. Повторите попытку.','Рұқсатты тексеру мүмкін болмады. Қайта көріңіз.');
   else if(!queue.length)status.textContent=text('Здесь скоро зазвучат наши лучшие записи.','Жақында мұнда үздік жазбаларымызды тыңдай аласыз.');
+  else{const messages={order:['Случайный порядок · работы студии VOXi','Кездейсоқ ретпен · VOXi студиясының жұмыстары'],loading:['Загружаем запись…','Жазба жүктелуде…'],transfer:['Не удалось воспроизвести запись. Проверьте вход или выберите следующую.','Жазба ойнатылмады. Кіруді тексеріңіз немесе келесісін таңдаңыз.'],format:['Формат записи не поддерживается этим браузером. Выберите следующую.','Бұл браузер жазба пішімін қолдамайды. Келесісін таңдаңыз.']};status.textContent=messages[playbackMessage]?text(...messages[playbackMessage]):'';}
  }
- function select(at){release();index=at;name.textContent=queue[index].title;position.textContent=(index+1)+' / '+queue.length;status.textContent=text('Случайный порядок · работы студии VOXi','Кездейсоқ ретпен · VOXi студиясының жұмыстары');labels();}
+ function select(at){release();index=at;name.textContent=queue[index].title;position.textContent=(index+1)+' / '+queue.length;playbackMessage='order';labels();}
  async function check(user){
   const request=++generation;actor=user?.id||null;release();tracks=[];queue=[];index=0;
   if(!actor||!client){state='guest';labels();return;}
@@ -40,8 +41,7 @@
  }
  async function start(){
   if(state!=='ready'||!queue.length||pending)return;
-  const request=++downloadGeneration,authRequest=generation,selected=queue[index];pending=true;labels();
-  status.textContent=text('Загружаем запись…','Жазба жүктелуде…');
+  const request=++downloadGeneration,authRequest=generation,selected=queue[index];pending=true;playbackMessage='loading';labels();
   try{
    await window.voxiPlayerVisual?.prepare();
    if(request!==downloadGeneration||authRequest!==generation)return;
@@ -54,9 +54,9 @@
    if(request!==downloadGeneration||authRequest!==generation)return;
    await audio.play();
    if(request!==downloadGeneration||authRequest!==generation)return;
-   status.textContent='';
+   playbackMessage='';status.textContent='';
   }catch{
-   if(request===downloadGeneration&&authRequest===generation){release();labels();status.textContent=text('Не удалось воспроизвести запись. Проверьте вход или выберите следующую.','Жазба ойнатылмады. Кіруді тексеріңіз немесе келесісін таңдаңыз.');}
+   if(request===downloadGeneration&&authRequest===generation){release();playbackMessage='transfer';labels();}
   }finally{if(authRequest===generation&&request===downloadGeneration){pending=false;labels();}}
  }
  async function advance(step,autoplay=!audio.paused){if(state!=='ready'||!queue.length||pending)return;let at=index+step;if(at>=queue.length){const last=queue[index];queue=shuffled(tracks);if(queue.length>1&&queue[0].id===last.id)[queue[0],queue[1]]=[queue[1],queue[0]];at=0;}if(at<0)at=queue.length-1;select(at);if(autoplay)await start();}
@@ -64,7 +64,7 @@
  login.addEventListener('click',enter);prev.addEventListener('click',()=>void advance(-1));next.addEventListener('click',()=>void advance(1));
  play.onclick=()=>{if(['guest','profile'].includes(state)){enter();return;}if(!audio.paused){audio.pause();return;}return start();};
  audio.addEventListener('ended',()=>void advance(1,true));audio.addEventListener('play',labels);audio.addEventListener('pause',labels);
- audio.addEventListener('error',()=>{if(state==='ready'&&objectURL)status.textContent=text('Формат записи не поддерживается этим браузером. Выберите следующую.','Бұл браузер жазба пішімін қолдамайды. Келесісін таңдаңыз.');});
+ audio.addEventListener('error',()=>{if(state==='ready'&&objectURL){playbackMessage='format';labels();}});
  new MutationObserver(labels).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
  async function refresh(){
   if(!client){await check(null);return;}
