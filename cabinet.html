@@ -316,6 +316,5 @@ document.getElementById('ru').onclick=()=>{language='ru';render()};document.getE
   client?.auth.onAuthStateChange((event,session)=>{if(event==="SIGNED_OUT"||(signedUser&&session?.user?.id&&signedUser.id!==session.user.id)){authGeneration++;initializing=false;signedUser=null;document.body.classList.remove("voxi-cabinet-ready");readyBell?.setUser(null);myBookings=[];profileData=null;profileError=bookingsError=null;dataLoading=false;songLoadVersion++;videoLoadVersion++;contactDialog.close();el("panel").close();updateSummary();el("cabinetLoadError").textContent=language==="ru"?"Аккаунт изменился. Обновите страницу для входа.":"Аккаунт өзгерді. Кіру үшін бетті жаңартыңыз.";}});
   updateSummary();init();
 })();
-</script><script src="chat.js?v=ai5"></script><script src="ui-language.js?v=10"></script></body></html>
-
+</script><script src="chat.js?v=learn1"></script><script src="ui-language.js?v=10"></script></body></html>
 

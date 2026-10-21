@@ -2,3 +2,27 @@
 .voxi-admin-mode #scheduleChoices .admin-hour [data-manual-time]{grid-column:2/-1;width:100%;margin:0}
 .voxi-audio-drop{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;min-height:125px;padding:18px;margin:8px 0 10px;border:1px dashed #cda86388;border-radius:12px;background:#b18c4010;text-align:center;cursor:pointer;transition:background .18s,border-color .18s,transform .18s}
 .voxi-audio-drop strong{font:600 15px/1.5 Manrope,Arial,sans-serif;color:#edd3a0}.voxi-audio-drop span{font:400 11px/1.6 Manrope,Arial,sans-serif;color:#b5a78f}.voxi-audio-drop small{max-width:100%;overflow-wrap:anywhere;color:#e6c98f}.voxi-audio-drop:hover,.voxi-audio-drop.is-dragging{border-color:#f3d492;background:#cda86326;transform:translateY(-2px)}.voxi-audio-drop:focus-visible{outline:2px solid #edce92;outline-offset:3px}.voxi-admin-overview #audioToolsPanel{margin:20px 0 28px;padding:0;border:0;background:none;box-shadow:none}.voxi-admin-overview #audioToolsPanel>h2{font-size:28px}.voxi-admin-overview #audioToolsPanel .voxi-audio-card{margin:12px 0}.voxi-audio-card input[type=file]{font-size:11px}@media(prefers-reduced-motion:reduce){.voxi-audio-drop{transition:none;transform:none!important}}
+
+/* Workbench: clear steps, controls and results, only on admin documents. */
+#audioToolsPanel .voxi-audio-grid{align-items:start;gap:18px}
+#audioToolsPanel .voxi-audio-card{margin:0;padding:20px;background:#171617;border-color:#a78b5b45;border-radius:12px;box-shadow:none}
+#audioToolsPanel .voxi-audio-card h3{font:600 19px/1.4 Manrope,Arial,sans-serif;margin:0 0 8px}
+#audioToolsPanel .voxi-audio-card h4{font:600 13px/1.4 Manrope,Arial,sans-serif;margin:12px 0 5px;color:#e5d2ac}
+#audioToolsPanel .voxi-audio-card>.muted{min-height:38px;font-size:12px;line-height:1.6;margin:0 0 14px}
+#audioToolsPanel label{display:block;margin:12px 0 7px;font:500 12px/1.5 Manrope,Arial,sans-serif;color:#c8bfae}
+#audioToolsPanel select{display:block;box-sizing:border-box;width:100%;padding:10px;margin-top:6px;border:1px solid #a9916a4a;border-radius:8px;background:#242226;color:#f3e8d5;font-size:14px}
+#audioToolsPanel .voxi-file-input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+#audioToolsPanel .voxi-audio-actions{gap:7px;margin:12px 0}
+#audioToolsPanel button{font-size:13px;min-height:40px;padding:9px 13px;border-radius:8px;white-space:normal}
+#audioToolsPanel .primary{background:linear-gradient(120deg,#e5c68d,#be9a5e);color:#21190f}
+#audioToolsPanel .voxi-audio-drop{min-height:100px;padding:16px;background:#d6b16d08;margin-bottom:12px}
+#audioToolsPanel .voxi-audio-status{font-size:12px;line-height:1.6;padding:10px 12px;background:#ffffff05;border-radius:8px;margin:10px 0}
+#audioToolsPanel .voxi-stem{padding:10px 0;border-top:1px solid #a68a573b}
+#audioToolsPanel audio{height:40px;margin:8px 0;width:100%}
+#audioToolsPanel details{font-size:12px;color:#c0b6a3;margin:10px 0}
+#audioToolsPanel summary{cursor:pointer;min-height:28px}
+#audioToolsPanel .voxi-audio-wide{grid-column:1/-1}
+#audioToolsPanel .voxi-audio-wide>audio{max-width:620px}
+#audioToolsPanel .voxi-audio-value{float:right}
+#audioToolsPanel input[type=range]{display:block;width:100%;min-height:30px;margin:6px 0}
+#audioToolsPanel>p{max-width:800px;line-height:1.6}

@@ -1,5 +1,6 @@
 import {createClient} from 'npm:@supabase/supabase-js@2.49.8';
 import {operatorLanguage,operatorFacts,referenceAnswer,cleanModelAnswer,safeHealthFacts} from './ai-core.mjs';
+import {approvedKnowledge} from './ai-knowledge.mjs';
 import {readJsonBody} from './r2-core.mjs';
 const url=Deno.env.get('SUPABASE_URL')!,service=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,anon=Deno.env.get('SUPABASE_ANON_KEY')!;
 const db=createClient(url,service,{auth:{persistSession:false,autoRefreshToken:false}});
@@ -49,10 +50,12 @@ Deno.serve(async(req:Request)=>{
    question=parent.body;
   }else if(body.action!=='chat')return reply(400,{error:'Неизвестное действие'});
   if(!question)return reply(400,{error:'Напишите вопрос'});
-  const lang=operatorLanguage(question,body.language),fallback=referenceAnswer(question,lang);let answer=fallback,kind='reference';
-  if(configured()&&checked(await caller.rpc('voxi_ai_claim')))try{
+  const lang=operatorLanguage(question,body.language),fallback=referenceAnswer(question,lang);
+  const knowledgeRows=checked(await db.from('voxi_ai_knowledge').select('question,answer,language,active').eq('active',true).eq('language',lang).order('created_at',{ascending:false}).limit(100));
+  const knowledge=approvedKnowledge(knowledgeRows,question,lang);let answer=knowledge.exact||fallback,kind='reference';
+  if(!knowledge.exact&&configured()&&checked(await caller.rpc('voxi_ai_claim')))try{
    const history=body.action==='chat'&&Array.isArray(body.history)?body.history.slice(-4).filter((m:any)=>m&&['user','assistant'].includes(m.role)&&typeof m.content==='string').map((m:any)=>({role:m.role,content:m.content.slice(0,700)})):[];
-   const generated=await model([{role:'system',content:operatorFacts+'\nЯзык ответа: '+(lang==='kk'?'казахский':'русский')},...history,{role:'user',content:question+' /no_think'}]);if(generated){answer=generated;kind='ai';}
+   const generated=await model([{role:'system',content:operatorFacts+knowledge.context+'\nЯзык ответа: '+(lang==='kk'?'казахский':'русский')},...history,{role:'user',content:question+' /no_think'}]);if(generated){answer=generated;kind='ai';}
   }catch{}
   if(parent){
    // No profile data or other messages are sent to the model. The answer is

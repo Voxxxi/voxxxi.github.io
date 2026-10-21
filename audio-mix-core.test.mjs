@@ -1,0 +1,3 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {mixStems} from './audio-mix-core.mjs';
+test('stem balance preserves stereo and requested relative gain',()=>{const music=[Float32Array.of(.2,.4),Float32Array.of(.3,.5)],vocal=[Float32Array.of(.1,.1)];const mixed=mixStems(music,vocal,0,-6.020599913);assert.ok(Math.abs(mixed[0][0]-.25)<1e-6);assert.ok(Math.abs(mixed[1][1]-.55)<1e-6);});
+test('unmatched stems and invalid gains cannot create misleading output',()=>{assert.throws(()=>mixStems([new Float32Array(1)],[new Float32Array(9000)]));assert.throws(()=>mixStems([Float32Array.of(1)],[Float32Array.of(1)],Infinity,0));});

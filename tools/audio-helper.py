@@ -4,7 +4,7 @@ from http.server import BaseHTTPRequestHandler,ThreadingHTTPServer
 
 SUPABASE='https://vnykpjarjvacwhxvkxrk.supabase.co'
 PUBLIC_KEY='sb_publishable_Jv-1ip1CSRKe2_cCjcGjmA_B333H-oC'
-ALLOWED_ORIGINS={'https://voxxxi.github.io','http://127.0.0.1:8766'}
+ALLOWED_ORIGINS={'https://voxxxi.github.io','http://127.0.0.1:8767'}
 MAX_BYTES=80*1024*1024
 
 def staff_identity(token):
@@ -26,19 +26,19 @@ class Helper(ThreadingHTTPServer):
         with self.lock:job.update(state='running',message='Отделяю голос от музыки. Это может занять несколько минут…')
         try:
             with open(job['folder']/'processing.log','wb') as log:
-                subprocess.run([sys.executable,str(pathlib.Path(__file__).with_name('audio-process.py')),str(job['folder']/'source.audio'),str(job['folder']),'--ffmpeg',self.ffmpeg],stdout=log,stderr=log,check=True,timeout=3600,creationflags=getattr(subprocess,'CREATE_NO_WINDOW',0))
+                subprocess.run([sys.executable,str(pathlib.Path(__file__).with_name('audio-process.py')),str(job['folder']/'source.audio'),str(job['folder']),'--ffmpeg',self.ffmpeg,'--mode',job.get('mode','clean')],stdout=log,stderr=log,check=True,timeout=3600,creationflags=getattr(subprocess,'CREATE_NO_WINDOW',0))
             with self.lock:job.update(state='done',message='Готово')
         except Exception:
             with self.lock:job.update(state='error',error='Не удалось создать минусовку. Проверьте формат файла и журнал помощника.')
         finally:job['folder'].joinpath('source.audio').unlink(missing_ok=True)
 
 class Handler(BaseHTTPRequestHandler):
-    server_version='VOXiAudio/1.0'
+    server_version='VOXiAudio/2.0'
     def log_message(self,*args):pass  # Never log access tokens, file names, or client data.
     def origin_allowed(self):return self.headers.get('Origin') in ALLOWED_ORIGINS
     def cors(self):
         if self.origin_allowed():
-            self.send_header('Access-Control-Allow-Origin',self.headers['Origin']);self.send_header('Vary','Origin');self.send_header('Access-Control-Allow-Methods','GET, POST, OPTIONS');self.send_header('Access-Control-Allow-Headers','Authorization, Content-Type, X-Audio-Name');self.send_header('Access-Control-Allow-Private-Network','true')
+            self.send_header('Access-Control-Allow-Origin',self.headers['Origin']);self.send_header('Vary','Origin');self.send_header('Access-Control-Allow-Methods','GET, POST, OPTIONS');self.send_header('Access-Control-Allow-Headers','Authorization, Content-Type, X-Audio-Name, X-VOXi-Mode');self.send_header('Access-Control-Allow-Private-Network','true')
     def reply(self,code,data):
         body=json.dumps(data,ensure_ascii=False).encode();self.send_response(code);self.cors();self.send_header('Content-Type','application/json; charset=utf-8');self.send_header('Cache-Control','no-store');self.send_header('Content-Length',str(len(body)));self.end_headers();self.wfile.write(body)
     def do_OPTIONS(self):
@@ -56,7 +56,7 @@ class Handler(BaseHTTPRequestHandler):
         try:actor=self.actor()
         except PermissionError as e:return self.reply(403,{'error':str(e)})
         if self.path=='/health':
-            return self.reply(200,{'ok':True,'device':self.server.device,'version':1})
+            return self.reply(200,{'ok':True,'device':self.server.device,'version':2,'modes':['clean','backing']})
         match=re.fullmatch(r'/jobs/([0-9a-f-]{36})(?:/(instrumental|vocals))?',self.path)
         if not match:return self.reply(404,{'error':'Not found'})
         with self.server.lock:job=self.server.jobs.get(match[1]);job=dict(job) if job else None
@@ -75,15 +75,10 @@ class Handler(BaseHTTPRequestHandler):
         if length<1 or length>MAX_BYTES:return self.reply(413,{'error':'Нужен аудиофайл до 80 МБ.'})
         with self.server.lock:
             if any(j['state'] in ('uploading','queued','running') for j in self.server.jobs.values()):return self.reply(409,{'error':'Другая песня уже обрабатывается. Дождитесь завершения.'})
-            # Bound retained results; remove only this application's UUID job directories.
-            old=[key for key,j in self.server.jobs.items() if time.time()-j['created']>86400]
-            for key in old:
-                j=self.server.jobs.pop(key)
-                for name in ('source.audio','decoded.wav','instrumental.wav','vocals.wav','processing.log'):j['folder'].joinpath(name).unlink(missing_ok=True)
-                try:j['folder'].rmdir()
-                except OSError:pass
-            if len(self.server.jobs)>=20:return self.reply(429,{'error':'Сохранено 20 результатов. Перезапустите помощник после сохранения нужных файлов.'})
-            id=str(uuid.uuid4());folder=self.server.root/id;folder.mkdir();job={'id':id,'folder':folder,'actor':actor,'state':'uploading','created':time.time()};self.server.jobs[id]=job
+            # Retain completed results; no daily job quota and no automatic archive deletion.
+            mode=self.headers.get('X-VOXi-Mode','clean')
+            if mode not in ('clean','backing'):return self.reply(400,{'error':'Неизвестный режим обработки'})
+            id=str(uuid.uuid4());folder=self.server.root/id;folder.mkdir();job={'id':id,'folder':folder,'actor':actor,'state':'uploading','mode':mode,'created':time.time()};self.server.jobs[id]=job
         try:
             self.connection.settimeout(120)
             with (folder/'source.audio').open('wb') as f:
@@ -92,14 +87,14 @@ class Handler(BaseHTTPRequestHandler):
                     chunk=self.rfile.read(min(1024*1024,remaining))
                     if not chunk:raise ValueError('Incomplete upload')
                     f.write(chunk);remaining-=len(chunk)
-            with self.server.lock:job.update(state='queued',message='Песня принята. Запускаю Demucs…')
+            with self.server.lock:job.update(state='queued',message='Песня принята. Запускаю выбранную модель…')
             self.server.pool.submit(self.server.run_job,job);self.reply(202,{'id':id})
         except Exception:
             with self.server.lock:job.update(state='error',error='Загрузка прервалась.')
             folder.joinpath('source.audio').unlink(missing_ok=True);self.reply(400,{'error':'Загрузка прервалась. Попробуйте снова.'})
 
 if __name__=='__main__':
-    p=argparse.ArgumentParser();p.add_argument('--ffmpeg',required=True);p.add_argument('--data',default=str(pathlib.Path(__file__).parent/'audio-jobs'));p.add_argument('--port',type=int,default=8766);args=p.parse_args()
+    p=argparse.ArgumentParser();p.add_argument('--ffmpeg',required=True);p.add_argument('--data',default=str(pathlib.Path(__file__).parent/'audio-jobs'));p.add_argument('--port',type=int,default=8767);args=p.parse_args()
     import torch
     server=Helper(('127.0.0.1',args.port),args.data,args.ffmpeg);server.device=torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'CPU';print('VOXi audio helper ready on loopback; '+server.device,flush=True)
     try:server.serve_forever()

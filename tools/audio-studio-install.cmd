@@ -18,6 +18,8 @@ if errorlevel 1 (
 )
 ".venv\Scripts\python.exe" -c "from demucs.pretrained import get_model;get_model('htdemucs')"
 if errorlevel 1 exit /b 1
+".venv\Scripts\python.exe" -c "import pathlib,shutil,imageio_ffmpeg;from audio_separator.separator import Separator;p=pathlib.Path('audio-models');p.mkdir(exist_ok=True);Separator(model_file_dir=str(p),info_only=True).download_model_and_data('UVR_MDXNET_KARA_2.onnx')"
+if errorlevel 1 exit /b 1
 ".venv\Scripts\python.exe" audio-launch.py
 echo Готово. Откройте VOXi: Админка — Аудиомастерская — Проверить подключение.
 pause

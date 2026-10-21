@@ -5,9 +5,9 @@
 const studio='https://voxxxi.github.io';
 addEventListener('message',async e=>{
  if(e.origin!==studio||e.source!==(opener||parent)||e.data?.type!=='voxi-audio-request'||!e.ports[0])return;
- const port=e.ports[0],{path,method,token,body}=e.data;
+ const port=e.ports[0],{path,method,token,body,mode}=e.data;
  if(!/^\/(?:health|jobs(?:\/[0-9a-f-]{36}(?:\/(?:instrumental|vocals))?)?)$/.test(path)||!['GET','POST'].includes(method)){port.postMessage({error:'Invalid request'});return;}
- try{const r=await fetch(path,{method,body:method==='POST'?body:undefined,headers:{Authorization:'Bearer '+token,'X-VOXi-Bridge':'1','Content-Type':'application/octet-stream'},signal:AbortSignal.timeout(30000)});const data=await r.arrayBuffer();port.postMessage({status:r.status,contentType:r.headers.get('content-type'),body:data},[data]);}catch(error){port.postMessage({error:error.message});}finally{port.close();}
+ try{const r=await fetch(path,{method,body:method==='POST'?body:undefined,headers:{Authorization:'Bearer '+token,'X-VOXi-Bridge':'1','X-VOXi-Mode':mode==='backing'?'backing':'clean','Content-Type':'application/octet-stream'},signal:AbortSignal.timeout(30000)});const data=await r.arrayBuffer();port.postMessage({status:r.status,contentType:r.headers.get('content-type'),body:data},[data]);}catch(error){port.postMessage({error:error.message});}finally{port.close();}
 });
 (opener||parent).postMessage({type:'voxi-audio-ready'},studio);
 </script>

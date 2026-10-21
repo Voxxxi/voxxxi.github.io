@@ -1,0 +1,5 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {normalizeQuestion,approvedKnowledge} from './ai-knowledge.mjs';
+const row={question:'Как получить песню?',answer:'Через личный кабинет.',language:'ru',active:true};
+test('exact approved answer tolerates punctuation and an explicit bot mention',()=>{assert.equal(approvedKnowledge([row],'@VOXi Как получить песню?!','ru').exact,row.answer);assert.equal(normalizeQuestion('  СӘЛЕМ! '),'сәлем');});
+test('inactive, wrong-language and malformed knowledge cannot override replies',()=>{assert.equal(approvedKnowledge([{...row,active:false},{...row,language:'kk'},null,{...row,answer:'x'.repeat(1001)}],row.question,'ru').exact,null);});
+test('only relevant facts enter bounded model context',()=>{const result=approvedKnowledge([row,{...row,question:'Пароль администратора',answer:'Never included'}],'Как скачать песню?','ru');assert.match(result.context,/Через личный кабинет/);assert.doesNotMatch(result.context,/Never included/);});
