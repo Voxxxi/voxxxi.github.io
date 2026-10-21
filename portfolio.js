@@ -1,19 +1,74 @@
 (()=>{
  'use strict';
- const audio=document.getElementById('audio'),play=document.getElementById('play'),root=document.querySelector('[aria-label="Музыкальный плеер"]');if(!audio||!play||!root)return;
- audio.removeAttribute('src');audio.preload='none';
- const name=root.querySelector('.track-name'),nav=document.createElement('div'),status=document.createElement('p');nav.className='voxi-portfolio-nav';status.className='voxi-portfolio-status';status.setAttribute('role','status');root.append(nav,status);
- const prev=document.createElement('button'),next=document.createElement('button'),position=document.createElement('span');prev.type=next.type='button';nav.append(prev,position,next);
- let tracks=[],queue=[],index=0,loading=true,failed=false;
- const ru=()=>document.documentElement.lang!=='kk';
- function shuffled(items){const copy=[...items];for(let i=copy.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[copy[i],copy[j]]=[copy[j],copy[i]];}return copy;}
- function labels(){prev.textContent=ru()?'← Предыдущая':'← Алдыңғы';next.textContent=ru()?'Следующая →':'Келесі →';prev.disabled=next.disabled=tracks.length<2;nav.hidden=!tracks.length;play.disabled=loading||!tracks.length;play.setAttribute('aria-label',audio.paused?(ru()?'Воспроизвести':'Ойнату'):(ru()?'Пауза':'Кідірту'));if(!tracks.length){name.textContent=ru()?'ЛУЧШИЕ РАБОТЫ СТУДИИ':'СТУДИЯНЫҢ ҮЗДІК ЖҰМЫСТАРЫ';status.textContent=loading?(ru()?'Загружаем подборку…':'Жинақ жүктелуде…'):failed?(ru()?'Подборка временно недоступна. Обновите страницу.':'Жинақ уақытша қолжетімсіз. Бетті жаңартыңыз.'):(ru()?'Здесь скоро зазвучат наши лучшие записи.':'Жақында мұнда үздік жазбаларымызды тыңдай аласыз.');}}
- function select(at){index=at;const track=queue[index];audio.src=track.src;name.textContent=track.title;position.textContent=(index+1)+' / '+queue.length;status.textContent=ru()?'Случайный порядок · работы студии VOXi':'Кездейсоқ ретпен · VOXi студиясының жұмыстары';labels();}
- async function advance(step){if(!tracks.length)return;const wasPlaying=!audio.paused;audio.pause();let at=index+step;if(at>=queue.length){const last=queue[index];queue=shuffled(tracks);if(queue.length>1&&queue[0].src===last.src)[queue[0],queue[1]]=[queue[1],queue[0]];at=0;}if(at<0)at=queue.length-1;select(at);if(wasPlaying)try{await audio.play();}catch{playbackError();}}
- function playbackError(){status.textContent=ru()?'Не удалось воспроизвести запись. Выберите следующую или попробуйте ещё раз.':'Жазба ойнатылмады. Келесісін таңдаңыз немесе қайта көріңіз.';}
- prev.addEventListener('click',()=>void advance(-1));next.addEventListener('click',()=>void advance(1));
- play.onclick=async()=>{if(!tracks.length)return;if(!audio.paused){audio.pause();return;}try{await audio.play();status.textContent='';}catch{playbackError();}};
- audio.addEventListener('ended',async()=>{await advance(1);try{await audio.play();}catch{playbackError();}});audio.addEventListener('error',()=>{if(tracks.length)playbackError();});audio.addEventListener('play',labels);audio.addEventListener('pause',labels);
+ const audio=document.getElementById('audio'),play=document.getElementById('play'),root=document.querySelector('[aria-label="Музыкальный плеер"]');
+ if(!audio||!play||!root)return;
+ root.id='portfolio';
+ const client=typeof supabaseClient!=='undefined'?supabaseClient:null;
+ const name=root.querySelector('.track-name'),nav=document.createElement('div'),status=document.createElement('p'),login=document.createElement('button');
+ nav.className='voxi-portfolio-nav';status.className='voxi-portfolio-status';status.setAttribute('role','status');login.className='voxi-portfolio-login';login.type='button';
+ const prev=document.createElement('button'),next=document.createElement('button'),position=document.createElement('span');prev.type=next.type='button';nav.append(prev,position,next);root.append(nav,status,login);
+ let actor=null,tracks=[],queue=[],index=0,generation=0,downloadGeneration=0,state='checking',objectURL=null,pending=false;
+ const ru=()=>document.documentElement.lang!=='kk',text=(r,k)=>ru()?r:k;
+ const shuffled=items=>{const a=[...items];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+ function release(){downloadGeneration++;audio.pause();audio.removeAttribute('src');audio.preload='none';audio.load();if(objectURL)URL.revokeObjectURL(objectURL);objectURL=null;pending=false;}
+ function labels(){
+  prev.textContent=text('← Предыдущая','← Алдыңғы');next.textContent=text('Следующая →','Келесі →');
+  nav.hidden=state!=='ready'||!queue.length;prev.disabled=next.disabled=pending||queue.length<2;play.disabled=state==='checking'||state==='error'||(state==='ready'&&!queue.length)||pending;
+  play.setAttribute('aria-label',state==='guest'?text('Войти, чтобы слушать','Тыңдау үшін кіру'):audio.paused?text('Воспроизвести','Ойнату'):text('Пауза','Кідірту'));
+  login.hidden=!['guest','profile','error'].includes(state);login.textContent=state==='guest'?text('Войти через Google, чтобы слушать','Тыңдау үшін Google арқылы кіріңіз'):state==='profile'?text('Завершить регистрацию','Тіркеуді аяқтау'):text('Повторить проверку','Қайта тексеру');
+  if(state!=='ready'||!queue.length)name.textContent=text('ЛУЧШИЕ РАБОТЫ СТУДИИ','СТУДИЯНЫҢ ҮЗДІК ЖҰМЫСТАРЫ');
+  if(state==='checking')status.textContent=text('Проверяем доступ к прослушиванию…','Тыңдауға рұқсат тексерілуде…');
+  else if(state==='guest')status.textContent=text('Работы студии доступны после входа и регистрации.','Студия жұмыстарын кіру және тіркелу аяқталғаннан кейін тыңдауға болады.');
+  else if(state==='profile')status.textContent=text('Заполните имя, фамилию и телефон в профиле, чтобы слушать работы студии.','Студия жұмыстарын тыңдау үшін профильде атыңызды, тегіңізді және телефоныңызды толтырыңыз.');
+  else if(state==='error')status.textContent=text('Не удалось проверить доступ. Повторите попытку.','Рұқсатты тексеру мүмкін болмады. Қайта көріңіз.');
+  else if(!queue.length)status.textContent=text('Здесь скоро зазвучат наши лучшие записи.','Жақында мұнда үздік жазбаларымызды тыңдай аласыз.');
+ }
+ function select(at){release();index=at;name.textContent=queue[index].title;position.textContent=(index+1)+' / '+queue.length;status.textContent=text('Случайный порядок · работы студии VOXi','Кездейсоқ ретпен · VOXi студиясының жұмыстары');labels();}
+ async function check(user){
+  const request=++generation;actor=user?.id||null;release();tracks=[];queue=[];index=0;
+  if(!actor||!client){state='guest';labels();return;}
+  state='checking';labels();
+  try{
+   const permission=await client.rpc('voxi_listening_allowed');if(request!==generation)return;if(permission.error)throw permission.error;
+   if(!permission.data){state='profile';labels();return;}
+   const result=await client.rpc('voxi_portfolio_tracks');if(request!==generation)return;if(result.error)throw result.error;
+   if(!Array.isArray(result.data))throw Error('Invalid playlist');
+   const seen=new Set();tracks=result.data.filter(t=>{if(!t||typeof t.id!=='string'||typeof t.title!=='string'||!t.title.trim()||typeof t.path!=='string'||!t.path||t.path.startsWith('/')||t.path.split('/').some(x=>!x||x==='.'||x==='..')||seen.has(t.id))return false;seen.add(t.id);return true;});
+   queue=shuffled(tracks);state='ready';if(queue.length)select(0);else labels();
+  }catch{if(request===generation){state='error';labels();}}
+ }
+ async function start(){
+  if(state!=='ready'||!queue.length||pending)return;
+  const request=++downloadGeneration,authRequest=generation,selected=queue[index];pending=true;labels();
+  try{
+   if(!objectURL){
+    const response=await client.storage.from('voxi-portfolio').download(selected.path);
+    if(request!==downloadGeneration||authRequest!==generation)return;
+    if(response.error||!response.data)throw response.error||Error('No audio');
+    objectURL=URL.createObjectURL(response.data);audio.src=objectURL;
+   }
+   if(request!==downloadGeneration||authRequest!==generation)return;
+   await audio.play();
+   if(request!==downloadGeneration||authRequest!==generation)return;
+   status.textContent='';
+  }catch{
+   if(request===downloadGeneration&&authRequest===generation){release();status.textContent=text('Не удалось воспроизвести запись. Проверьте вход или выберите следующую.','Жазба ойнатылмады. Кіруді тексеріңіз немесе келесісін таңдаңыз.');}
+  }finally{if(authRequest===generation&&request===downloadGeneration){pending=false;labels();}}
+ }
+ async function advance(step,autoplay=!audio.paused){if(state!=='ready'||!queue.length||pending)return;let at=index+step;if(at>=queue.length){const last=queue[index];queue=shuffled(tracks);if(queue.length>1&&queue[0].id===last.id)[queue[0],queue[1]]=[queue[1],queue[0]];at=0;}if(at<0)at=queue.length-1;select(at);if(autoplay)await start();}
+ function enter(){if(state==='error'){void refresh();return;}if(state==='guest'){if(typeof startGoogleLogin==='function')void startGoogleLogin(false,'portfolio');return;}if(state==='profile')location.assign('./cabinet.html?registration=1&next=portfolio');}
+ login.addEventListener('click',enter);prev.addEventListener('click',()=>void advance(-1));next.addEventListener('click',()=>void advance(1));
+ play.onclick=()=>{if(['guest','profile'].includes(state)){enter();return;}if(!audio.paused){audio.pause();return;}return start();};
+ audio.addEventListener('ended',()=>void advance(1,true));audio.addEventListener('play',labels);audio.addEventListener('pause',labels);
+ audio.addEventListener('error',()=>{if(state==='ready'&&objectURL)status.textContent=text('Формат записи не поддерживается этим браузером. Выберите следующую.','Бұл браузер жазба пішімін қолдамайды. Келесісін таңдаңыз.');});
  new MutationObserver(labels).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
- labels();fetch('portfolio.json',{cache:'no-cache'}).then(r=>{if(!r.ok)throw Error();return r.json();}).then(data=>{if(!Array.isArray(data.tracks))throw Error();const seen=new Set();tracks=data.tracks.filter(t=>{if(!t||typeof t.title!=='string'||!t.title.trim()||typeof t.src!=='string')return false;const url=new URL(t.src,location.href);if(url.origin!==location.origin||!/^\/portfolio\/[\w./% -]+\.(mp3|wav|m4a|ogg|flac)$/i.test(url.pathname)||seen.has(url.href))return false;seen.add(url.href);return true;});queue=shuffled(tracks);loading=false;if(queue.length)select(0);else labels();}).catch(()=>{loading=false;failed=true;labels();});
+ async function refresh(){if(!client){await check(null);return;}const request=++generation;try{const result=await client.auth.getSession();if(request!==generation)return;if(result.error)throw result.error;await check(result.data?.session?.user);}catch{if(request===generation){release();state='error';labels();}}}
+ client?.auth.onAuthStateChange((event,session)=>{
+  const id=session?.user?.id||null;
+  if(event==='SIGNED_OUT'||id!==actor){generation++;actor=id;release();tracks=[];queue=[];state=id?'checking':'guest';labels();setTimeout(()=>void check(session?.user),0);}
+ });
+ document.addEventListener('visibilitychange',()=>{if(!document.hidden)void refresh();});
+ window.addEventListener('pagehide',()=>{generation++;release();});
+ labels();void refresh();
 })();
+

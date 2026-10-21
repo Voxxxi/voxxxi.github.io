@@ -32,6 +32,12 @@ header nav button:focus-visible{outline:2px solid #f1ce8c;outline-offset:4px}
 #adminBookingsSection .voxi-users-search{display:grid;grid-template-columns:minmax(0,1fr) minmax(150px,.5fr) auto;gap:10px;align-items:center;margin-bottom:18px}#adminBookingsSection .voxi-users-search>*{width:100%;margin:0;min-height:44px;min-width:0}@media(max-width:650px){#adminBookingsSection .voxi-users-search{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}#adminBookingsSection .voxi-users-search input{grid-column:1/-1}}
 
 /* Readable messages and consistent keyboard focus, including the client cabinet. */
+.voxi-portfolio-login{display:block;margin:12px auto 0;min-height:44px;max-width:100%;padding:10px 18px;border:1px solid #b99159;border-radius:24px;background:#211a14;color:#f0d49f;font:600 13px/1.5 Manrope,Arial,sans-serif;cursor:pointer}
+.voxi-portfolio-login[hidden],.voxi-registration-badge[hidden],.voxi-registration-list[hidden]{display:none!important}
+.voxi-registration-badge.has-unread{border-color:#f1ce8c!important;background:#48331f!important}
+.voxi-registration-list{margin-top:26px;border-top:1px solid #b9915955;padding-top:12px;scroll-margin-top:24px}
+.voxi-registration-row{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;padding:14px 0;border-bottom:1px solid #b9915930}
+.voxi-registration-row strong{overflow-wrap:anywhere}.voxi-registration-row small{color:#c2b39d}.voxi-registration-row a{color:#f0d49f;text-underline-offset:4px}.voxi-registration-row button{min-height:44px}
 .voxi-chat .voxi-chat-message p{font-family:Manrope,Arial,sans-serif;font-size:14px;line-height:1.65}
 .voxi-chat .voxi-chat-compose textarea{font-family:Manrope,Arial,sans-serif;font-size:16px;line-height:1.5}
 .voxi-chat .voxi-chat-compose button{min-height:44px}
@@ -41,3 +47,4 @@ header nav button:focus-visible{outline:2px solid #f1ce8c;outline-offset:4px}
   .voxi-contact-wrap input,.voxi-users-search input,.voxi-user-dialog input,
   .voxi-user-dialog select{font-size:16px!important}
 }
+
