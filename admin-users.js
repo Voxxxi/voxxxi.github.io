@@ -53,10 +53,10 @@
  async function details(user){
   if(mutating||!canSee())return;dialog.querySelectorAll('audio').forEach(a=>a.pause());dialog.replaceChildren();const actor=currentUser.id;
   const card=node('article',undefined,'voxi-user-detail');dialog.append(card);
-  card.append(node('h3',user.full_name||'Анкета ещё не заполнена'));
+  const closeCard=button('×',()=>dialog.close(),'voxi-user-close');closeCard.setAttribute('aria-label','Закрыть карточку клиента');card.append(closeCard,node('h3',user.full_name||'Анкета ещё не заполнена'));
   for(const [label,value] of [['Телефон',user.phone||'Не указан'],['Email',user.email||'Не указан'],['ID',user.user_id],['Роль',roles[user.role]||'Клиент']]){const p=node('p');p.append(node('strong',label+': '),node(label==='ID'?'code':'span',value));card.append(p);}
   const copyStatus=node('p','','notice');copyStatus.setAttribute('role','status');for(const [label,value]of [['Скопировать телефон',user.phone],['Скопировать ID',user.user_id]])if(value)card.append(button(label,async()=>{try{await navigator.clipboard.writeText(value);copyStatus.textContent='Скопировано.';}catch{copyStatus.textContent='Не удалось скопировать автоматически. Выделите значение в карточке.';}}));card.append(copyStatus);
-  card.append(button('Загрузить песню',()=>uploadTrack(user),'primary'),button('Закрыть',()=>dialog.close()));
+  card.append(button('Загрузить песню',()=>uploadTrack(user),'primary'));
   const blocked=user.banned_until&&Date.parse(user.banned_until)>Date.now();card.append(node('p',blocked?'Доступ приостановлен':'Доступ активен','notice'));
   const history=node('div');history.hidden=true;card.append(button('История записей',async()=>{history.hidden=!history.hidden;if(!history.hidden)await loadHistory(user,history,actor);}),history);
   const songs=node('div');card.append(node('h3','Песни клиента'),songs);dialog.showModal();songs.textContent='Загружаю песни…';
@@ -150,6 +150,9 @@
   });dialog.showModal();title.focus();void loadOrders();
  }
  window.addEventListener('beforeunload',e=>{if(mutating){e.preventDefault();e.returnValue='';}});
+ let backdropStart=false;
+ dialog.addEventListener('pointerdown',e=>{const r=dialog.getBoundingClientRect();backdropStart=e.target===dialog&&(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom);});
+ dialog.addEventListener('click',e=>{const r=dialog.getBoundingClientRect();if(backdropStart&&e.target===dialog&&!mutating&&(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)){pending=null;dialog.close();}backdropStart=false;});
  dialog.addEventListener('cancel',e=>{if(mutating)e.preventDefault();else pending=null;});
  dialog.addEventListener('close',()=>dialog.querySelectorAll('audio').forEach(a=>a.pause()));
 })();
