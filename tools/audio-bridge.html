@@ -1,0 +1,13 @@
+<!doctype html><meta charset="utf-8"><title>VOXi audio bridge</title>
+<script>
+// Navigation loads the local helper, then all HTTP traffic remains same-origin.
+// Only the configured VOXi parent can send a request; the server still validates every token.
+const studio='https://voxxxi.github.io';
+addEventListener('message',async e=>{
+ if(e.origin!==studio||e.source!==parent||e.data?.type!=='voxi-audio-request'||!e.ports[0])return;
+ const port=e.ports[0],{path,method,token,body}=e.data;
+ if(!/^\/(?:health|jobs(?:\/[0-9a-f-]{36}(?:\/(?:instrumental|vocals))?)?)$/.test(path)||!['GET','POST'].includes(method)){port.postMessage({error:'Invalid request'});return;}
+ try{const r=await fetch(path,{method,body:method==='POST'?body:undefined,headers:{Authorization:'Bearer '+token,'X-VOXi-Bridge':'1','Content-Type':'application/octet-stream'},signal:AbortSignal.timeout(30000)});const data=await r.arrayBuffer();port.postMessage({status:r.status,contentType:r.headers.get('content-type'),body:data},[data]);}catch(error){port.postMessage({error:error.message});}finally{port.close();}
+});
+parent.postMessage({type:'voxi-audio-ready'},studio);
+</script>

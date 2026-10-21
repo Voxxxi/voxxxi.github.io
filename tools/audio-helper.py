@@ -4,7 +4,7 @@ from http.server import BaseHTTPRequestHandler,ThreadingHTTPServer
 
 SUPABASE='https://vnykpjarjvacwhxvkxrk.supabase.co'
 PUBLIC_KEY='sb_publishable_Jv-1ip1CSRKe2_cCjcGjmA_B333H-oC'
-ALLOWED_ORIGINS={'https://voxxxi.github.io'}
+ALLOWED_ORIGINS={'https://voxxxi.github.io','http://127.0.0.1:8766'}
 MAX_BYTES=80*1024*1024
 
 def staff_identity(token):
@@ -42,13 +42,17 @@ class Handler(BaseHTTPRequestHandler):
     def reply(self,code,data):
         body=json.dumps(data,ensure_ascii=False).encode();self.send_response(code);self.cors();self.send_header('Content-Type','application/json; charset=utf-8');self.send_header('Cache-Control','no-store');self.send_header('Content-Length',str(len(body)));self.end_headers();self.wfile.write(body)
     def do_OPTIONS(self):
+        print('CORS preflight received',flush=True)
         if not self.origin_allowed():return self.reply(403,{'error':'Origin denied'})
         self.send_response(204);self.cors();self.send_header('Access-Control-Max-Age','600');self.end_headers()
     def actor(self):
-        if not self.origin_allowed():raise PermissionError('Origin denied')
+        same_origin_bridge=not self.headers.get('Origin') and self.headers.get('X-VOXi-Bridge')=='1' and self.headers.get('Sec-Fetch-Site')=='same-origin'
+        if not self.origin_allowed() and not same_origin_bridge:raise PermissionError('Origin denied')
         header=self.headers.get('Authorization','')
         return staff_identity(header[7:] if header.startswith('Bearer ') else '')
     def do_GET(self):
+        if self.path=='/bridge':
+            body=pathlib.Path(__file__).with_name('audio-bridge.html').read_bytes();self.send_response(200);self.send_header('Content-Type','text/html; charset=utf-8');self.send_header('Content-Length',str(len(body)));self.send_header('Cache-Control','no-store');self.send_header('Content-Security-Policy',"frame-ancestors https://voxxxi.github.io");self.end_headers();self.wfile.write(body);return
         try:actor=self.actor()
         except PermissionError as e:return self.reply(403,{'error':str(e)})
         if self.path=='/health':
