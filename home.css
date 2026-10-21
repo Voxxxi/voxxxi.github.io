@@ -102,3 +102,6 @@ html[data-voxi-home] #bookLabel{font:600 13px/1.4 Manrope,Arial,sans-serif!impor
 @keyframes voxi-mic-bounce{0%,100%{translate:0 0}35%{translate:0 -7px}65%{translate:0 2px}85%{translate:0 -2px}}
 @media(max-width:790px){html[data-voxi-home] .booking-area #book{width:113px!important;height:113px!important;min-height:113px}html[data-voxi-home] #book .mic-photo{width:78px!important;height:98px!important}html[data-voxi-home] #bookLabel{font-size:11px!important}}
 @media(prefers-reduced-motion:reduce){html[data-voxi-home] .booking-area #book:hover{animation:none!important;transform:none!important}}
+
+/* The booking group spans the whole hero, independently of the left copy column. */
+html[data-voxi-home] .hero{flex-direction:column;align-items:stretch}
