@@ -12,3 +12,4 @@ html=html.replace(/<link rel="stylesheet" href="\/home\.css[^>]*>/g,'').replace(
 html=html.replace('</head>','<link rel="stylesheet" href="audio-tools.css?v=2"></head>')
  .replace('<script src="admin-workspace.js?v=stats1"></script>','<script src="manual-booking.js?v=1"></script><script src="audio-tools.js?v=4"></script><script src="admin-workspace.js?v=audio1"></script>');
 await writeFile(new URL('admin.html',root),html);
+
