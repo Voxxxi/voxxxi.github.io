@@ -12,3 +12,28 @@ html[data-voxi-home] #bookingPanel #closeBookingButton{width:auto;min-height:34p
 @media(max-width:600px){html[data-voxi-home] #bookingPanel .booking-panel-heading h2{font-size:23px}.voxi-booking-compact input[type=date]::-webkit-datetime-edit{font-size:12px}.voxi-booking-compact input[type=date]::-webkit-calendar-picker-indicator{width:17px;height:17px}}
 
 .voxi-booking-compact .voxi-price-disclaimer{grid-column:1/-1;margin:10px 0 0;padding:12px 14px;border-left:3px solid #e1b866;border-radius:5px;background:#c99c3620;color:#f0dfbd;font:400 13px/1.65 Manrope,Arial,sans-serif}.voxi-price-disclaimer strong{display:block;margin-bottom:3px;color:#ffe1a1;font-weight:700}
+
+/* Keep the booking draft in one compact card, including narrow phone screens. */
+.voxi-booking-compact .total-box>button[hidden],.voxi-booking-compact .total-box>.notice:empty{display:none!important}
+.voxi-booking-compact .total-box>.notice{grid-column:1/-1;margin:2px 0;font-size:11px}
+.voxi-booking-compact .song-card{padding:10px 12px;gap:5px 12px}
+.voxi-booking-compact .song-card h3{font-size:11px;line-height:1.3}
+.voxi-booking-compact .song-card .voxi-booking-field label{font-size:11px;line-height:1.25}
+.voxi-booking-compact .song-price{padding:0;font-size:12px;line-height:1.3}
+.voxi-booking-compact .total-box{padding:10px 12px;margin:10px 0;gap:3px 10px}
+.voxi-booking-compact .voxi-price-disclaimer{margin-top:6px;padding:9px 10px;font-size:12px;line-height:1.5}
+@media(max-width:600px){
+ html[data-voxi-home] #bookingPanel{padding:13px;margin:14px auto}
+ .voxi-booking-contacts{gap:8px}
+ .voxi-booking-options{margin-top:9px;gap:7px}
+ .voxi-booking-compact .voxi-booking-field label{font-size:10px;line-height:1.3;min-height:26px;margin-bottom:3px}
+ .voxi-booking-compact .voxi-booking-contacts label{min-height:13px}
+ .voxi-booking-compact .voxi-booking-field input,.voxi-booking-compact .voxi-booking-field select{min-height:40px;padding:8px 6px}
+ .voxi-booking-compact #timeHelp{margin:5px 0 7px;font-size:10px}
+ .voxi-booking-compact .song-card{padding:8px 9px;margin:7px 0;gap:4px 8px;grid-template-columns:minmax(0,1fr) 86px}
+ .voxi-booking-compact .song-price{font-size:11px;line-height:1.4}
+ .voxi-booking-compact .total-box>.muted:first-child{font-size:12px;line-height:1.35}
+ .voxi-booking-compact #priceBreakdown{font-size:10px;line-height:1.4}
+ .voxi-booking-compact #submitButton{min-height:42px;font-size:13px}
+ .voxi-booking-compact .voxi-preparation{margin-top:10px;padding:10px}
+}
