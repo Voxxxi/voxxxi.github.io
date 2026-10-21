@@ -121,7 +121,7 @@ let language='ru',activeTab=null;const modal=document.getElementById('panel');fu
 function showTab(tab,open=true){activeTab=tab;const t=dict[language];document.getElementById('modalTitle').textContent=t[tab];document.getElementById('modalDesc').textContent=t[tab+'Desc'];document.getElementById('empty').textContent=t['empty'+tab[0].toUpperCase()+tab.slice(1)];document.getElementById('modalNote').textContent=t.note;if(open)modal.showModal();if(typeof hydrateCabinetTab==="function")hydrateCabinetTab(tab)}
 document.querySelectorAll('[data-tab]').forEach(x=>x.addEventListener('click',()=>showTab(x.dataset.tab)));
 document.getElementById('ru').onclick=()=>{language='ru';render()};document.getElementById('kk').onclick=()=>{language='kk';render()};document.getElementById('dismiss').onclick=()=>modal.close();document.getElementById('done').onclick=()=>modal.close();modal.addEventListener('close',()=>activeTab=null);render();
-</script><script src="profile-validation.js?v=1"></script><script src="ready-notifications.js?v=3"></script><script src="legal-ui.js?v=1"></script><script src="booking-client.js?v=1"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</script><script src="profile-validation.js?v=1"></script><script src="phone-input.js?v=1"></script><script src="ready-notifications.js?v=3"></script><script src="legal-ui.js?v=1"></script><script src="booking-client.js?v=1"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 (function(){
   const URL="https://vnykpjarjvacwhxvkxrk.supabase.co", KEY="sb_publishable_Jv-1ip1CSRKe2_cCjcGjmA_B333H-oC";
@@ -171,7 +171,7 @@ document.getElementById('ru').onclick=()=>{language='ru';render()};document.getE
     const name=splitFullName(profileData?.full_name||recent?.client_name||signedUser.user_metadata?.full_name||signedUser.user_metadata?.name||"");
     el("contactNameInput").value=name.first||signedUser.user_metadata?.given_name||"";
     el("contactSurnameInput").value=name.last||signedUser.user_metadata?.family_name||"";
-    el("contactPhoneInput").value=profileData?.phone||recent?.phone||"";
+    window.voxiPhoneInput.set(el("contactPhoneInput"),profileData?.phone||recent?.phone||"");
     el("contactProfileError").textContent="";
     if(!contactDialog.open)contactDialog.showModal();
   }
@@ -317,4 +317,5 @@ document.getElementById('ru').onclick=()=>{language='ru';render()};document.getE
   updateSummary();init();
 })();
 </script><script src="chat.js?v=ai5"></script><script src="ui-language.js?v=10"></script></body></html>
+
 
