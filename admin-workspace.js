@@ -44,6 +44,7 @@
  }
  function show(key){
   if(!staff())return;if(['clients','upload'].includes(key)&&!directory()||['income','maintenance','updates','statistics'].includes(key)&&voxiStaffRole!=='owner')key='home';current=key;quick.hidden=!directory();
+  if(key==='audio'&&targets.audio)main.append(targets.audio);
   for(const section of new Set(Object.values(targets).filter(Boolean))){section.classList.toggle('voxi-admin-off',section!==targets[key]);section.querySelectorAll('audio,video').forEach(v=>v.pause());}
   if(targets[key])targets[key].classList.remove('hidden');overview.hidden=key!=='home';
   for(const [name,b]of buttons){b.classList.toggle('active',name===key);if(name===key)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');b.hidden=['clients','upload'].includes(name)&&!directory()||['income','maintenance','updates','statistics'].includes(name)&&voxiStaffRole!=='owner';}
@@ -54,6 +55,7 @@
  const legacy=by('scheduleList'),legacyTitle=legacy.previousElementSibling,legacyWrap=el('details',undefined,'voxi-admin-legacy');legacy.before(legacyWrap);legacyWrap.append(el('summary','Старые интервалы расписания'));if(legacyTitle?.tagName==='H3'){legacyTitle.hidden=true;legacyWrap.append(legacyTitle);}legacyWrap.append(legacy);
  async function summary(){
   if(!staff())return;const actor=currentUser.id,request=++generation;overview.replaceChildren();
+  if(targets.audio){targets.audio.classList.remove('voxi-admin-off');targets.audio.classList.remove('hidden');overview.append(targets.audio);}
   const today=new Date(),date=new Date(today.getTime()-today.getTimezoneOffset()*60000).toISOString().slice(0,10);
   const upcoming=currentBookings.filter(x=>x.booking_date>=date&&!['Отменено','Готово'].includes(x.status));
   const title=el('h3','Ближайшие записи');overview.append(title);
