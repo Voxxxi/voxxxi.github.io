@@ -69,3 +69,20 @@ header nav button:focus-visible{outline:2px solid #f1ce8c;outline-offset:4px}
 }
 @keyframes voxi-metal-light{0%,68%{background-position:150% 0}96%,100%{background-position:-100% 0}}
 @media(prefers-reduced-motion:reduce){.brand-big,.brand-word,.brand-big i,.brand-word i,html[data-voxi-home] h1 .gold,html[data-voxi-home] .section-heading,html[data-voxi-home] .voxi-studio-updates>h2,html[data-voxi-admin] .voxi-functional h2{animation:none!important;background-image:none!important;color:#d9b77e!important}.brand-big i,.brand-word i{color:#b72235!important}}
+/* Polished metal wordmarks: fixed X/i spacing, reflective gold and red enamel. */
+.brand-big,.brand-word{letter-spacing:-.045em!important;isolation:isolate;filter:drop-shadow(0 1px 0 #6b4019) drop-shadow(0 2px 1px #000b);text-shadow:none!important}
+.brand-big i,.brand-word i{display:inline-block;margin-left:.09em;letter-spacing:0!important;position:relative;vertical-align:baseline;text-shadow:none!important;filter:drop-shadow(0 1px 0 #590d1a)}
+@supports (background-clip:text){
+ .brand-big,.brand-word{
+  background-image:linear-gradient(110deg,transparent 33%,#fff8d880 46%,#fffdf4 49%,#fff3be70 52%,transparent 63%),linear-gradient(180deg,#fff3bb 0%,#eac76b 20%,#b87a23 43%,#fff0a2 49%,#ffe7a0 54%,#bd842d 62%,#f1c764 80%,#fff2b5 100%);
+  background-size:260% 100%,100% 100%;background-position:150% 0,0 0;background-repeat:no-repeat;
+  animation:voxi-brand-polish 9s ease-in-out infinite;
+ }
+ .brand-big i,.brand-word i{
+  background-image:linear-gradient(110deg,transparent 33%,#ffd7db99 46%,#fff0ee 49%,#ffb5bc80 52%,transparent 63%),linear-gradient(180deg,#ffb4b8 0%,#ee5362 22%,#a3122b 43%,#ff9da6 49%,#ef5166 56%,#8f0e27 67%,#e82e49 86%,#ff8390 100%);
+  background-size:260% 100%,100% 100%;background-position:150% 0,0 0;background-repeat:no-repeat;animation:voxi-brand-polish 9s ease-in-out infinite;
+ }
+}
+@keyframes voxi-brand-polish{0%,30%{background-position:150% 0,0 0}80%,100%{background-position:-100% 0,0 0}}
+@media(prefers-reduced-motion:reduce){.brand-big,.brand-word,.brand-big i,.brand-word i{animation:none!important}}
+
