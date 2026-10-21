@@ -56,7 +56,7 @@
    if(request!==downloadGeneration||authRequest!==generation)return;
    status.textContent='';
   }catch{
-   if(request===downloadGeneration&&authRequest===generation){release();status.textContent=text('Не удалось воспроизвести запись. Проверьте вход или выберите следующую.','Жазба ойнатылмады. Кіруді тексеріңіз немесе келесісін таңдаңыз.');}
+   if(request===downloadGeneration&&authRequest===generation){release();labels();status.textContent=text('Не удалось воспроизвести запись. Проверьте вход или выберите следующую.','Жазба ойнатылмады. Кіруді тексеріңіз немесе келесісін таңдаңыз.');}
   }finally{if(authRequest===generation&&request===downloadGeneration){pending=false;labels();}}
  }
  async function advance(step,autoplay=!audio.paused){if(state!=='ready'||!queue.length||pending)return;let at=index+step;if(at>=queue.length){const last=queue[index];queue=shuffled(tracks);if(queue.length>1&&queue[0].id===last.id)[queue[0],queue[1]]=[queue[1],queue[0]];at=0;}if(at<0)at=queue.length-1;select(at);if(autoplay)await start();}
@@ -87,4 +87,3 @@
  window.addEventListener('pagehide',()=>{generation++;release();});
  labels();void refresh();
 })();
-

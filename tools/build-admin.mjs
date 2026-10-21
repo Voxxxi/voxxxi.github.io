@@ -3,9 +3,10 @@
 import {readFile,writeFile} from 'node:fs/promises';
 const root=new URL('../',import.meta.url);
 let html=await readFile(new URL('index.html',root),'utf8');
-html=html.replace('<html lang="ru">','<html lang="ru" data-voxi-admin="true">')
+html=html.replace(/<html lang="ru"(?: data-voxi-home)?>/,'<html lang="ru" data-voxi-admin="true">')
  .replace('<title>VOXi — Recording Studio</title>','<title>VOXi — Рабочий кабинет</title>')
  .replace('<head>','<head><meta name="robots" content="noindex,nofollow">')
  .replace('<a class="brand" href="#"','<a class="brand" href="./"')
  .replace(/<script src="\/(?:public-videos|concert-loop)\.js[^>]*><\/script>\s*/g,'');
+html=html.replace(/<link rel="stylesheet" href="\/home\.css[^>]*>/g,'').replace(/<script src="\/home\.js[^>]*><\/script>/g,'');
 await writeFile(new URL('admin.html',root),html);

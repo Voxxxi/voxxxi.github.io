@@ -48,3 +48,9 @@ test('returning to the page rechecks access without resetting an active song',as
  f.documentEvents.visibilitychange();await tick();await tick();assert.equal(f.audio.src,'blob:test');assert.equal(f.audio.paused,false);assert.equal(f.audio.currentTime,42);assert.equal(f.revoked.length,0);
 });
 
+test('a failed audio transfer leaves playback and track navigation available for retry',async()=>{
+ let attempts=0;
+ const f=await fixture({tracks:['a','b'].map(id=>({id,title:id,path:id+'.mp3'})),download:async()=>++attempts===1?{error:new Error('offline')}:{data:{audio:true}}});
+ await f.play.onclick();assert.match(f.status.textContent,/Не удалось/);assert.equal(f.play.disabled,false);assert.equal(f.nav.children[0].disabled,false);assert.equal(f.nav.children[2].disabled,false);
+ await f.play.onclick();assert.equal(attempts,2);assert.equal(f.audio.plays,1);assert.equal(f.play.disabled,false);
+});

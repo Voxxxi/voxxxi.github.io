@@ -52,3 +52,20 @@ header nav button:focus-visible{outline:2px solid #f1ce8c;outline-offset:4px}
   .voxi-user-dialog select{font-size:16px!important}
 }
 
+/* Restrained metal highlights. Brand colours stay gold VOX and lipstick-red i. */
+.brand-big,.brand-word{color:#d9b77e!important}
+.brand-big i,.brand-word i,.player-art .art-i{color:#b72235!important;font-style:normal}
+@supports (background-clip:text){
+ .brand-big,.brand-word,
+ html[data-voxi-home] h1 .gold,
+ html[data-voxi-home] .section-heading,
+ html[data-voxi-home] .voxi-studio-updates>h2,
+ html[data-voxi-admin] .voxi-functional h2{
+  background-image:linear-gradient(108deg,#aa814b 0%,#d9b77e 37%,#f6e9ca 47%,#fff5dd 49%,#d9b77e 58%,#b48d56 100%);
+  background-size:250% 100%;background-position:150% 0;background-clip:text;-webkit-background-clip:text;color:transparent!important;
+  animation:voxi-metal-light 14s ease-in-out infinite;
+ }
+ .brand-big i,.brand-word i{background-image:linear-gradient(108deg,#801525,#bc263a 40%,#ef7980 49%,#bc263a 58%,#8d1b2b);background-size:250% 100%;background-position:150% 0;background-clip:text;-webkit-background-clip:text;color:transparent!important;animation:voxi-metal-light 14s ease-in-out infinite}
+}
+@keyframes voxi-metal-light{0%,68%{background-position:150% 0}96%,100%{background-position:-100% 0}}
+@media(prefers-reduced-motion:reduce){.brand-big,.brand-word,.brand-big i,.brand-word i,html[data-voxi-home] h1 .gold,html[data-voxi-home] .section-heading,html[data-voxi-home] .voxi-studio-updates>h2,html[data-voxi-admin] .voxi-functional h2{animation:none!important;background-image:none!important;color:#d9b77e!important}.brand-big i,.brand-word i{color:#b72235!important}}

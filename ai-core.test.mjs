@@ -15,7 +15,8 @@ test('payment, included work, preparation and delivery match the owner rules',()
  assert.match(referenceAnswer('Нужна предоплата?','ru'),/по желанию/);
  assert.match(referenceAnswer('Что входит в цену?','ru'),/исправления уже включены/);
  assert.match(referenceAnswer('Нужна минусовка?','ru'),/предоставляет студия/);
- assert.match(referenceAnswer('Без опыта можно?','ru'),/2–3 дня/);
+ assert.match(referenceAnswer('Без опыта можно?','ru'),/порепетируйте/i);
+ assert.doesNotMatch(referenceAnswer('Без опыта можно?','ru'),/2[–-]3/);
  assert.match(referenceAnswer('Опоздаю на запись','ru'),/хотя бы за пару часов/);
  assert.match(referenceAnswer('Как получить песню?','ru'),/личном кабинете/);
  assert.match(referenceAnswer('В субботу можно?','ru'),/календаре/);
